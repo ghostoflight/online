@@ -1,110 +1,195 @@
+
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Online">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pharaoh Pro">
 <link rel="manifest" href="manifest.json">
-<title>ONLINE</title>
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>PHARAOH PRO v17.0</title>
 <style>
 :root {
   --bg:#0a0a14; --surface:#11111e; --card:#191928; --border:#252540;
-  --accent:#e8b86d; --accent2:#7c6af5; --green:#5de8a0; --red:#e85d5d;
-  --blue:#5db8e8; --text:#e8e8f0; --muted:#6666aa; --radius:12px;
+  --accent:#e8b86d; --accent2:#7c6af5; --accent3:#5de8a0;
+  --red:#e85d5d; --green:#5de8a0; --blue:#5db8e8;
+  --text:#e8e8f0; --muted:#6666aa; --radius:12px;
   --py:#3572A5; --py2:#FFD43B;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
+
+/* ═══ LOGIN ═══ */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 24px;width:100%;max-width:340px}
-.login-logo{text-align:center;font-size:28px;font-weight:bold;color:var(--accent);letter-spacing:4px;margin-bottom:6px}
-.login-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:28px;letter-spacing:2px}
-.login-field{margin-bottom:14px}
-.login-label{font-size:10px;color:var(--muted);margin-bottom:5px;display:block;letter-spacing:1px}
-.login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.login-logo{text-align:center;font-size:26px;font-weight:bold;color:var(--accent);letter-spacing:3px;margin-bottom:4px}
+.login-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:24px;letter-spacing:2px}
+.login-field{margin-bottom:12px}
+.login-label{font-size:10px;color:var(--muted);margin-bottom:4px;display:block;letter-spacing:1px}
+.login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;direction:ltr;text-align:left}
 .login-input:focus{border-color:var(--accent2)}
-.login-error{color:var(--red);font-size:11px;text-align:center;min-height:18px;margin-bottom:10px}
+.login-error{color:var(--red);font-size:11px;text-align:center;min-height:18px;margin-bottom:8px}
 .login-btn{width:100%;background:var(--accent2);border:none;border-radius:10px;padding:13px;color:#fff;font-size:13px;font-weight:bold;font-family:inherit;cursor:pointer;letter-spacing:1px;transition:all .15s}
 .login-btn:active{transform:scale(.97)}
 .login-btn:disabled{opacity:.5;cursor:not-allowed}
-.login-uses{text-align:center;font-size:10px;color:var(--muted);margin-top:14px}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 13px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between}
-.header-title{font-size:15px;font-weight:bold;color:var(--accent);letter-spacing:3px}
-.header-right{display:flex;gap:8px;align-items:center}
-.badge{font-size:9px;padding:3px 8px;border-radius:20px;letter-spacing:1px}
-.badge-purple{background:var(--accent2);color:#fff}
+.login-status{text-align:center;font-size:10px;color:var(--muted);margin-top:12px}
+
+/* ═══ HEADER ═══ */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 14px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:14px;font-weight:bold;color:var(--accent);letter-spacing:2px}
+.header-right{display:flex;gap:6px;align-items:center}
+.header-badge{background:var(--accent2);color:white;font-size:9px;padding:3px 7px;border-radius:20px;letter-spacing:1px}
+.py-badge{background:var(--py);color:var(--py2);font-size:9px;padding:3px 7px;border-radius:20px;letter-spacing:1px;font-weight:bold}
 .badge-green{background:#1a3020;color:var(--green)}
 .badge-gold{background:#2a1a00;color:var(--accent)}
-.user-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--muted);font-size:10px;cursor:pointer;font-family:inherit}
+.user-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 9px;color:var(--muted);font-size:10px;cursor:pointer;font-family:inherit}
 .user-btn:active{border-color:var(--red);color:var(--red)}
+
+/* ═══ NAV BAR ═══ */
 .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:200}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;cursor:pointer;color:var(--muted);font-size:9px;letter-spacing:.5px;border-top:2px solid transparent;gap:3px;transition:color .2s}
 .nav-item.active{color:var(--accent);border-top-color:var(--accent)}
 .nav-item svg{width:19px;height:19px}
-.page{display:none;padding-bottom:72px}
+
+/* ═══ PAGES ═══ */
+.page{display:none;padding-bottom:70px}
 .page.active{display:block}
-.page-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 13px;font-size:10px;color:var(--muted);letter-spacing:2px}
-.section-pad{padding:12px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
-.card+.card{margin-top:10px}
-.card-title{font-size:11px;color:var(--accent);font-weight:bold;margin-bottom:10px;letter-spacing:1px}
-.field-label{font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px}
-.field-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px}
-.field-input:focus{border-color:var(--accent2)}
-.field-input[dir="ltr"]{direction:ltr;text-align:left}
-select.field-input{cursor:pointer}
-.btn{padding:11px 16px;border:none;border-radius:9px;font-family:inherit;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s}
-.btn:active{transform:scale(.96)}
-.btn-primary{background:var(--accent2);color:#fff}
-.btn-green{background:#1a4a2a;border:1px solid var(--green);color:var(--green)}
-.btn-red{background:#3a1020;border:1px solid var(--red);color:var(--red)}
-.btn-gold{background:#2a1800;border:1px solid var(--accent);color:var(--accent)}
-.btn-gray{background:var(--card);border:1px solid var(--border);color:var(--muted)}
-.btn-full{width:100%}
+.view{display:none}
+.view.active{display:block}
+.page-titlebar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 14px;font-size:10px;color:var(--muted);letter-spacing:2px}
+
+/* ═══ IDS BAR ═══ */
+.ids-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:6px;align-items:center}
+.id-chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:9px;color:var(--muted);cursor:pointer;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:border-color .2s}
+.id-chip:active{border-color:var(--accent)}
+.id-label{color:var(--accent);font-size:8px;display:block;margin-bottom:1px}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 6px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;text-align:center;padding:10px 10px;font-size:10px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ═══ SEARCH ═══ */
+.search-bar{padding:10px 12px;background:var(--bg);position:sticky;top:49px;z-index:100}
+.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;direction:rtl}
+.search-input:focus{border-color:var(--accent2)}
+.search-input::placeholder{color:var(--muted)}
+
+/* ═══ GAMES GRID ═══ */
+.games-grid{padding:0 10px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2);opacity:0;transition:opacity .2s}
+.game-card:active{transform:scale(.97);border-color:var(--accent2)}
+.game-card:active::before{opacity:1}
+.game-num{font-size:8px;color:var(--accent);margin-bottom:3px;letter-spacing:1px}
+.game-name{font-size:11px;color:var(--text);font-weight:bold;line-height:1.3;margin-bottom:4px}
+.game-pkg{font-size:8px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px;display:none}
+
+/* ═══ GAME DETAIL ═══ */
+.back-btn{display:flex;align-items:center;gap:6px;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer;color:var(--accent);font-size:12px}
+.detail-header{padding:16px 14px;background:var(--card);border-bottom:1px solid var(--border)}
+.detail-game-name{font-size:16px;font-weight:bold;color:var(--accent);margin-bottom:4px}
+.detail-pkg{font-size:10px;color:var(--muted)}
+.detail-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+.field-label{font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px}
+.template-display{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--accent2);font-family:inherit}
+.level-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;text-align:center}
+.level-input:focus{border-color:var(--accent)}
+.preview-text{font-size:11px;color:var(--accent3);min-height:18px;text-align:center}
 .btn-row{display:flex;gap:8px}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.divider{height:1px;background:var(--border);margin:12px 0}
+.btn{flex:1;padding:13px;border:none;border-radius:10px;font-family:inherit;font-size:12px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s}
+.btn-primary{background:var(--accent2);color:white}
+.btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+.btn:active{transform:scale(.96)}
+.log-section-title{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
+.log-list{display:flex;flex-direction:column;gap:6px}
+.log-entry{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px}
+.log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.log-dot.success{background:var(--green)}
+.log-dot.error{background:var(--red)}
+.log-time{font-size:9px;color:var(--muted);flex-shrink:0}
+.log-text{font-size:10px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log-status{font-size:9px;color:var(--muted);flex-shrink:0}
+.log-empty{text-align:center;padding:20px;color:var(--muted);font-size:11px}
+
+/* ═══ PYTHON ═══ */
 .py-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .py-status{font-size:10px;padding:3px 9px;border-radius:20px;letter-spacing:1px;font-weight:bold}
 .py-status.loading{background:#3a3020;color:var(--py2)}
 .py-status.ready{background:#1a3020;color:var(--green)}
 .py-status.error{background:#3a1020;color:var(--red)}
 .py-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-size:10px;font-family:inherit;cursor:pointer;transition:all .15s}
-.py-btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.py-btn.primary{background:var(--accent2);border-color:var(--accent2);color:white}
 .py-btn.green{background:#1a4a2a;border-color:var(--green);color:var(--green)}
 .py-btn:active{transform:scale(.95)}
 .py-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .server-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:7px;align-items:center}
 .server-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:10px;font-family:inherit;outline:none;direction:ltr;transition:border-color .2s}
 .server-input:focus{border-color:var(--accent)}
-.connect-btn{background:var(--accent);border:none;border-radius:7px;padding:6px 11px;color:#000;font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
+.server-input::placeholder{color:var(--muted)}
+.server-connect-btn{background:var(--accent);border:none;border-radius:7px;padding:6px 11px;color:#000;font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
 .server-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
 .server-dot.ok{background:var(--green)}
 .server-dot.err{background:var(--red)}
 .pip-bar{background:var(--card);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;gap:7px;align-items:center}
-.pip-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;font-family:inherit;outline:none;transition:border-color .2s;direction:ltr}
+.pip-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;font-family:inherit;outline:none;transition:border-color .2s}
 .pip-input:focus{border-color:var(--py2)}
+.pip-input::placeholder{color:var(--muted)}
 .pip-btn{background:var(--py);border:none;border-radius:7px;padding:6px 13px;color:var(--py2);font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
 .pip-btn:disabled{opacity:.4;cursor:not-allowed}
 .pkg-chips{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 12px;display:flex;gap:5px;flex-wrap:wrap;min-height:34px}
-.pkg-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:9px;color:var(--green);display:flex;align-items:center;gap:4px}
-.pkg-chip-x{color:var(--muted);cursor:pointer;font-size:11px}
+.pkg-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:9px;color:var(--accent3);display:flex;align-items:center;gap:4px}
+.pkg-chip-remove{color:var(--muted);cursor:pointer;font-size:11px}
 .pkg-empty{font-size:9px;color:var(--muted);padding:5px 0}
-.code-editor{width:100%;min-height:180px;background:#0d0d18;border:none;border-bottom:1px solid var(--border);color:#e8e8f0;font-size:12px;font-family:'Courier New',monospace;padding:11px;outline:none;resize:vertical;direction:ltr;text-align:left;line-height:1.5;tab-size:2}
+.editor-container{position:relative;background:var(--card)}
+.code-editor{width:100%;min-height:200px;background:#0d0d18;border:none;border-bottom:1px solid var(--border);color:#e8e8f0;font-size:12px;font-family:'Courier New',monospace;padding:12px;outline:none;resize:vertical;direction:ltr;text-align:left;line-height:1.5;tab-size:2}
 .code-editor::placeholder{color:var(--muted)}
-.output-area{background:#050510;min-height:140px;padding:9px 12px;font-size:11px;font-family:'Courier New',monospace;line-height:1.6;direction:ltr;text-align:left;overflow-y:auto;max-height:280px;white-space:pre-wrap;word-break:break-all}
-.out-stdout{color:#c8f0c8}.out-stderr{color:#f0a0a0}.out-success{color:var(--green)}.out-error{color:var(--red)}.out-sys{color:var(--muted);font-style:italic}
-.job-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:9px;position:relative}
+.output-area{background:#050510;min-height:160px;padding:10px 12px;font-size:11px;font-family:'Courier New',monospace;line-height:1.6;direction:ltr;text-align:left;overflow-y:auto;max-height:300px;white-space:pre-wrap;word-break:break-all}
+.out-line-stdout{color:#c8f0c8}
+.out-line-stderr{color:#f0a0a0}
+.out-line-info{color:#a0c0f0}
+.out-line-success{color:var(--green)}
+.out-line-error{color:var(--red)}
+.out-line-sys{color:var(--muted);font-style:italic}
+
+/* ═══ SNIPPETS ═══ */
+.snippet-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.snippet-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color .2s}
+.snippet-card:active{border-color:var(--accent2)}
+.snippet-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.snippet-title{font-size:12px;color:var(--accent);font-weight:bold}
+.snippet-tag{font-size:8px;padding:2px 7px;border-radius:20px;background:var(--surface);color:var(--muted);letter-spacing:.5px}
+.snippet-desc{padding:0 12px 10px;font-size:10px;color:var(--muted);line-height:1.4}
+.snippet-preview{background:#050510;padding:8px 12px;font-size:10px;color:var(--muted);font-family:'Courier New',monospace;direction:ltr;text-align:left;line-height:1.4;overflow:hidden;max-height:60px;border-top:1px solid var(--border)}
+
+/* ═══ SETTINGS ═══ */
+.settings-list{padding:12px;display:flex;flex-direction:column;gap:10px}
+.settings-section{font-size:9px;color:var(--muted);letter-spacing:2px;padding:8px 0 4px}
+.settings-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.settings-label{font-size:12px;color:var(--text)}
+.settings-sublabel{font-size:10px;color:var(--muted);margin-top:2px}
+.toggle{width:42px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;border:none}
+.toggle.on{background:var(--accent2)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;left:3px;transition:left .3s}
+.toggle.on::after{left:21px}
+.settings-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text);font-size:11px;font-family:inherit;outline:none;width:140px;text-align:center;direction:ltr}
+
+/* ═══ SCHEDULER ═══ */
+.section-pad{padding:12px}
+.job-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:9px}
 .job-card.disabled{opacity:.6}
 .job-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .job-name{font-size:13px;color:var(--accent);font-weight:bold}
-.job-status{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:bold}
-.job-status.success{background:#1a3020;color:var(--green)}
-.job-status.error{background:#3a1020;color:var(--red)}
-.job-status.pending{background:#252540;color:var(--muted)}
+.job-status-badge{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:bold}
+.job-status-badge.success{background:#1a3020;color:var(--green)}
+.job-status-badge.error{background:#3a1020;color:var(--red)}
+.job-status-badge.pending{background:#252540;color:var(--muted)}
 .job-schedule{font-size:10px;color:var(--accent2);margin-bottom:4px}
 .job-lastrun{font-size:9px;color:var(--muted)}
 .job-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
@@ -115,24 +200,51 @@ select.field-input{cursor:pointer}
 .job-btn.toggle-off{background:#3a1020;border:1px solid var(--red);color:var(--red)}
 .job-btn.edit{background:var(--card);border:1px solid var(--border);color:var(--muted)}
 .job-btn.del{background:var(--card);border:1px solid var(--red);color:var(--red)}
-.job-output{background:#050510;border-radius:7px;padding:8px;font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;max-height:80px;overflow-y:auto;margin-top:8px;font-family:'Courier New',monospace}
+.job-output-preview{background:#050510;border-radius:7px;padding:8px;font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;max-height:80px;overflow-y:auto;margin-top:8px;font-family:'Courier New',monospace}
 .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
+
+/* ═══ ADMIN ═══ */
 .user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .user-info{flex:1}
-.user-name{font-size:13px;font-weight:bold;color:var(--text)}
+.user-name-admin{font-size:13px;font-weight:bold;color:var(--text)}
 .user-meta{font-size:9px;color:var(--muted);margin-top:2px}
 .uses-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
-.uses-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s}
+.uses-fill{height:100%;background:var(--accent2);border-radius:2px}
 .role-badge{font-size:8px;padding:2px 7px;border-radius:20px}
 .role-admin{background:#2a1a00;color:var(--accent)}
 .role-user{background:#1a1a35;color:var(--accent2)}
+.card-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.card-block+.card-block{margin-top:10px}
+.card-title{font-size:11px;color:var(--accent);font-weight:bold;margin-bottom:10px;letter-spacing:1px}
+.field-input-admin{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px;direction:ltr}
+.field-input-admin:focus{border-color:var(--accent2)}
+.btn-admin{padding:11px 16px;border:none;border-radius:9px;font-family:inherit;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s}
+.btn-admin:active{transform:scale(.96)}
+.btn-primary-admin{background:var(--accent2);color:#fff}
+.btn-red-admin{background:#3a1020;border:1px solid var(--red);color:var(--red)}
+.btn-gold-admin{background:#2a1800;border:1px solid var(--accent);color:var(--accent)}
+.btn-gray-admin{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+.btn-full{width:100%}
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* ═══ MODAL ═══ */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
+.modal-overlay.center{align-items:center}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));width:100%;max-height:90vh;overflow-y:auto}
-.modal-title{font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:16px;letter-spacing:1px}
+.modal-overlay.center .modal{border-radius:16px;max-width:380px;width:calc(100% - 40px);max-height:80vh}
+.modal-title{font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:14px;letter-spacing:1px}
+.modal-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+.modal-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:11px;font-family:inherit;outline:none;direction:ltr;text-align:left;margin-bottom:10px}
+.modal-input:focus{border-color:var(--accent)}
+.modal-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;margin-bottom:10px;cursor:pointer}
+
+/* ═══ TOAST ═══ */
 .toast{position:fixed;bottom:80px;left:12px;right:12px;z-index:600;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:9px;transform:translateY(20px);opacity:0;transition:all .25s;pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1}
-.toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}.toast.loading{border-color:var(--accent2)}
+.toast.success{border-color:var(--green)}
+.toast.error{border-color:var(--red)}
+.toast.loading{border-color:var(--accent2)}
 .toast-icon{font-size:17px;flex-shrink:0}
 .toast-body{flex:1;min-width:0}
 .toast-title{font-size:12px;font-weight:bold;color:var(--text)}
@@ -146,166 +258,303 @@ select.field-input{cursor:pointer}
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ════ LOGIN ════ -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">⚡ ONLINE</div>
-    <div class="login-sub">SECURE ACCESS REQUIRED</div>
+    <div class="login-logo">⚡ PHARAOH PRO</div>
+    <div class="login-sub">SECURE ACCESS — v17.0</div>
     <div class="login-field">
       <label class="login-label">USERNAME</label>
-      <input class="login-input" id="inp-user" type="text" autocomplete="username" placeholder="Enter username"
+      <input class="login-input" id="inp-user" type="text" autocomplete="username" placeholder="username"
         onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
     </div>
     <div class="login-field">
       <label class="login-label">PASSWORD</label>
-      <input class="login-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="Enter password"
+      <input class="login-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="password"
         onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="login-error" id="login-error"></div>
     <button class="login-btn" id="login-btn" onclick="doLogin()">SIGN IN →</button>
-    <div class="login-uses" id="login-server-status">Connecting to server...</div>
+    <div class="login-status" id="login-status">جاري الاتصال...</div>
   </div>
 </div>
 
-<!-- MAIN APP -->
+<!-- ════ MAIN APP ════ -->
 <div id="main-app" style="display:none">
+
   <div class="header">
-    <div class="header-title">⚡ ONLINE</div>
+    <div class="header-title">⚡ PHARAOH PRO</div>
     <div class="header-right">
-      <span class="badge badge-green" id="hdr-uses">-- uses</span>
-      <span class="badge badge-gold" id="hdr-user">--</span>
+      <span class="py-badge" id="py-badge">🐍 Loading...</span>
+      <span class="header-badge badge-green" id="hdr-uses" style="display:none">-- uses</span>
+      <span class="header-badge badge-gold" id="hdr-user">--</span>
       <button class="user-btn" onclick="doLogout()">EXIT</button>
     </div>
   </div>
 
-  <!-- PYTHON PAGE -->
-  <div class="page active" id="page-python">
+  <!-- ════ PAGE: GAMES ════ -->
+  <div class="page active" id="page-games">
+    <div class="ids-bar">
+      <div class="id-chip" onclick="openIdModal()">
+        <span class="id-label">GAID</span>
+        <span id="display-gaid">...</span>
+      </div>
+      <div class="id-chip" onclick="openIdModal()">
+        <span class="id-label">AF ID</span>
+        <span id="display-afid">...</span>
+      </div>
+    </div>
+
+    <div id="view-main" class="view active">
+      <div class="tabs">
+        <div class="tab active" onclick="filterGames('all',this)">الكل</div>
+        <div class="tab" onclick="filterGames('puzzle',this)">Puzzle</div>
+        <div class="tab" onclick="filterGames('farm',this)">Farm</div>
+        <div class="tab" onclick="filterGames('merge',this)">Merge</div>
+        <div class="tab" onclick="filterGames('other',this)">Other</div>
+      </div>
+      <div class="search-bar">
+        <input class="search-input" placeholder="ابحث باسم اللعبة أو Package..." oninput="searchGames(this.value)" dir="rtl">
+      </div>
+      <div class="games-grid" id="games-grid"></div>
+      <div class="no-results" id="no-results">لا توجد نتائج</div>
+    </div>
+
+    <div id="view-detail" class="view">
+      <div class="back-btn" onclick="goBack()">← رجوع</div>
+      <div class="detail-header">
+        <div class="detail-game-name" id="detail-game-name"></div>
+        <div class="detail-pkg" id="detail-pkg"></div>
+      </div>
+      <div class="detail-body">
+        <div>
+          <div class="field-label">EVENT TEMPLATE</div>
+          <div class="template-display" id="event-template-display"></div>
+        </div>
+        <div id="level-input-wrap">
+          <div class="field-label">LEVEL NUMBER</div>
+          <input class="level-input" id="level-input" type="number" min="1" placeholder="أدخل رقم المستوى..." oninput="updateEventPreview()">
+          <div class="preview-text" id="event-preview"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="sendLevelEvent()">📤 إرسال حدث</button>
+          <button class="btn btn-secondary" onclick="sendPurchase()">💰 شراء</button>
+        </div>
+        <div>
+          <div class="log-section-title">EVENT LOG</div>
+          <div class="log-list" id="event-log"><div class="log-empty">لا توجد أحداث بعد</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ PAGE: PYTHON ════ -->
+  <div class="page" id="page-python">
+    <div class="page-titlebar">🐍 PYTHON TERMINAL — Pyodide + Server</div>
     <div class="py-toolbar">
-      <span class="py-status loading" id="py-status">Loading Python...</span>
-      <button class="py-btn primary" id="btn-run" onclick="runPython()" disabled>▶ Run</button>
-      <button class="py-btn" onclick="clearEditor()">Clear</button>
-      <button class="py-btn" onclick="clearOutput()">Clear Output</button>
+      <span class="py-status loading" id="py-status">جاري تحميل Python...</span>
+      <button class="py-btn primary" id="btn-run" onclick="runPython()" disabled>▶ تشغيل</button>
+      <button class="py-btn" onclick="clearEditor()">مسح الكود</button>
+      <button class="py-btn" onclick="clearOutput()">مسح النتائج</button>
     </div>
     <div class="server-bar">
       <span style="font-size:10px;color:var(--accent);white-space:nowrap">🌐</span>
       <input class="server-input" id="server-url" placeholder="https://web-production-42c2c.up.railway.app">
-      <button class="connect-btn" onclick="connectServer()">Connect</button>
+      <button class="server-connect-btn" onclick="connectServer()">اتصال</button>
       <div class="server-dot" id="server-dot"></div>
     </div>
     <div class="pip-bar">
       <span style="font-size:10px;color:var(--py2);white-space:nowrap">pip install</span>
-      <input class="pip-input" id="pip-input" placeholder="package name...">
-      <button class="pip-btn" id="btn-pip" onclick="installPackage()" disabled>Install</button>
+      <input class="pip-input" id="pip-input" placeholder="اسم المكتبة (مثال: numpy, pandas...)" dir="ltr">
+      <button class="pip-btn" id="btn-pip" onclick="installPackage()" disabled>تثبيت</button>
     </div>
     <div class="pkg-chips" id="pkg-chips">
-      <span class="pkg-empty" id="pkg-empty">No packages installed</span>
+      <span class="pkg-empty" id="pkg-empty">لا توجد مكتبات مثبتة بعد</span>
     </div>
-    <textarea class="code-editor" id="code-editor" placeholder="# Write Python code here..."
-      spellcheck="false" onkeydown="handleTab(event)"></textarea>
-    <div class="py-toolbar" style="padding:7px 12px">
+    <div class="editor-container">
+      <textarea class="code-editor" id="code-editor"
+        placeholder="# اكتب كود Python هنا...&#10;print('مرحباً من Pharaoh Pro!')"
+        spellcheck="false" onkeydown="handleTab(event)"></textarea>
+    </div>
+    <div class="py-toolbar" style="padding:8px 12px">
       <span style="font-size:10px;color:var(--muted)">OUTPUT</span>
-      <button class="py-btn green" id="btn-run2" onclick="runPython()" disabled>▶ Run Code</button>
+      <button class="py-btn green" id="btn-run2" onclick="runPython()" disabled>▶ تشغيل الكود</button>
     </div>
-    <div class="output-area" id="output-area"><span class="out-sys">// Waiting for code...</span></div>
+    <div class="output-area" id="output-area"><span class="out-line-sys">// في انتظار تشغيل الكود...</span></div>
   </div>
 
-  <!-- SCHEDULER PAGE -->
+  <!-- ════ PAGE: SNIPPETS ════ -->
+  <div class="page" id="page-snippets">
+    <div class="page-titlebar">📦 SNIPPETS — أمثلة جاهزة</div>
+    <div class="snippet-list" id="snippet-list"></div>
+  </div>
+
+  <!-- ════ PAGE: SCHEDULER ════ -->
   <div class="page" id="page-scheduler">
-    <div class="page-bar">⏱ SCHEDULER — Auto Tasks</div>
+    <div class="page-titlebar">⏱ SCHEDULER — مهام تلقائية</div>
     <div class="section-pad">
-      <button class="btn btn-primary btn-full" onclick="openNewJobModal()" style="margin-bottom:14px">+ New Scheduled Task</button>
-      <div id="jobs-list"><div class="empty-state">No scheduled tasks yet</div></div>
+      <button class="btn-admin btn-primary-admin btn-full" onclick="openNewJobModal()" style="margin-bottom:14px">+ مهمة جديدة</button>
+      <div id="jobs-list"><div class="empty-state">لا توجد مهام مجدولة</div></div>
     </div>
   </div>
 
-  <!-- SETTINGS PAGE -->
+  <!-- ════ PAGE: SETTINGS ════ -->
   <div class="page" id="page-settings">
-    <div class="page-bar">⚙️ SETTINGS</div>
-    <div class="section-pad">
-      <div class="card">
-        <div class="card-title">🌐 SERVER</div>
-        <div class="field-label">Railway Backend URL</div>
-        <input class="field-input" id="cfg-server" dir="ltr" placeholder="https://web-production-42c2c.up.railway.app" oninput="syncServerInput(this.value)">
-        <button class="btn btn-primary" onclick="connectServer()">Connect & Save</button>
+    <div class="page-titlebar">⚙️ SETTINGS</div>
+    <div class="settings-list">
+      <div class="settings-section">SERVER</div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-label">رابط Railway</div>
+          <div class="settings-sublabel">خادم الباك أند والوسيط</div>
+        </div>
+        <input class="settings-input" id="settings-server" dir="ltr"
+          placeholder="https://..."
+          oninput="document.getElementById('server-url').value=this.value">
       </div>
-      <div class="card">
-        <div class="card-title">👤 ACCOUNT</div>
+      <div class="settings-section">DEVICE IDs</div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-label">GAID</div>
+          <div class="settings-sublabel">Google Advertising ID</div>
+        </div>
+        <input class="settings-input" id="settings-gaid" dir="ltr" oninput="autoSaveId('gaid')">
+      </div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-label">AppsFlyer ID</div>
+          <div class="settings-sublabel">AppsFlyer Identifier</div>
+        </div>
+        <input class="settings-input" id="settings-afid" dir="ltr" oninput="autoSaveId('afid')">
+      </div>
+      <div class="settings-section">ACCOUNT</div>
+      <div class="card-block" style="margin:0">
         <div id="account-info" style="font-size:12px;color:var(--muted)">Loading...</div>
         <div class="divider"></div>
-        <button class="btn btn-red" onclick="doLogout()">Logout</button>
+        <button class="btn-admin btn-red-admin" onclick="doLogout()">تسجيل الخروج</button>
       </div>
-      <div class="card">
-        <div class="card-title">💾 SYNC</div>
-        <button class="btn btn-gold btn-full" onclick="syncToServer()" style="margin-bottom:8px">↑ Upload Settings to Server</button>
-        <button class="btn btn-gray btn-full" onclick="syncFromServer()">↓ Download Settings from Server</button>
+      <div class="settings-section">SYNC</div>
+      <button class="btn-admin btn-gold-admin btn-full" onclick="syncToServer()" style="margin-bottom:8px">↑ رفع الإعدادات للسيرفر</button>
+      <button class="btn-admin btn-gray-admin btn-full" onclick="syncFromServer()">↓ تحميل الإعدادات من السيرفر</button>
+      <div class="settings-section">INFO</div>
+      <div class="settings-item">
+        <div class="settings-label">الإصدار</div>
+        <div style="font-size:11px;color:var(--muted)">v17.0 — Pharaoh Pro</div>
+      </div>
+      <div class="settings-item">
+        <div class="settings-label">محرك Python</div>
+        <div style="font-size:11px;color:var(--muted)">Pyodide 0.26 (WASM)</div>
+      </div>
+      <div class="settings-item" style="cursor:pointer" onclick="clearAllData()">
+        <div>
+          <div class="settings-label" style="color:var(--red)">مسح جميع البيانات</div>
+          <div class="settings-sublabel">إعادة ضبط التطبيق</div>
+        </div>
+        <span style="color:var(--red)">🗑</span>
       </div>
     </div>
   </div>
 
-  <!-- ADMIN PAGE -->
+  <!-- ════ PAGE: ADMIN ════ -->
   <div class="page" id="page-admin">
-    <div class="page-bar">🔑 ADMIN — User Management</div>
+    <div class="page-titlebar">🔑 ADMIN — إدارة المستخدمين</div>
     <div class="section-pad">
-      <button class="btn btn-gold btn-full" onclick="openAddUserModal()" style="margin-bottom:14px">+ Add New User</button>
+      <button class="btn-admin btn-gold-admin btn-full" onclick="openAddUserModal()" style="margin-bottom:14px">+ إضافة مستخدم</button>
       <div id="users-list"><div class="empty-state">Loading...</div></div>
     </div>
   </div>
 
+  <!-- NAV BAR -->
   <nav class="nav-bar">
-    <div class="nav-item active" id="nav-python" onclick="switchPage('python')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    <div class="nav-item active" id="nav-games" onclick="switchPage('games')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
+      </svg>
+      ألعاب
+    </div>
+    <div class="nav-item" id="nav-python" onclick="switchPage('python')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+      </svg>
       Python
     </div>
+    <div class="nav-item" id="nav-snippets" onclick="switchPage('snippets')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      Snippets
+    </div>
     <div class="nav-item" id="nav-scheduler" onclick="switchPage('scheduler');loadJobs()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
       Scheduler
     </div>
     <div class="nav-item" id="nav-settings" onclick="switchPage('settings');loadAccountInfo()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      إعدادات
     </div>
     <div class="nav-item" id="nav-admin" onclick="switchPage('admin');loadUsers()" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
       Admin
     </div>
   </nav>
 </div>
 
-<!-- MODALS -->
+<!-- ════ MODALS ════ -->
+
+<!-- IDs Modal -->
+<div class="modal-overlay center" id="id-modal">
+  <div class="modal">
+    <div class="modal-title">✏️ تعديل Device IDs</div>
+    <div class="modal-label">GAID (Google Advertising ID)</div>
+    <input class="modal-input" id="modal-gaid-input" dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+    <div class="modal-label">AppsFlyer ID</div>
+    <input class="modal-input" id="modal-afid-input" dir="ltr" placeholder="xxxxxxxxxx-xxxxxxxxxxxxxxxxxx">
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveIds()">💾 حفظ</button>
+      <button class="btn btn-secondary" onclick="closeIdModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
 <!-- Job Modal -->
 <div class="modal-overlay" id="job-modal">
   <div class="modal">
-    <div class="modal-title" id="job-modal-title">➕ New Scheduled Task</div>
+    <div class="modal-title" id="job-modal-title">➕ مهمة جديدة</div>
     <input type="hidden" id="job-modal-id">
-    <div class="field-label">TASK NAME</div>
-    <input class="field-input" id="job-name" placeholder="e.g. Daily Report">
-    <div class="field-label">SCHEDULE TYPE</div>
-    <select class="field-input" id="job-sched-type" onchange="updateSchedHelper()">
-      <option value="interval">Every X seconds (interval)</option>
-      <option value="daily">Every day at specific time</option>
-      <option value="cron">Custom cron expression</option>
+    <div class="modal-label">اسم المهمة</div>
+    <input class="modal-input" id="job-name" placeholder="مثال: تقرير يومي">
+    <div class="modal-label">نوع الجدول</div>
+    <select class="modal-select" id="job-sched-type" onchange="updateSchedHelper()">
+      <option value="interval">كل X ثانية</option>
+      <option value="daily">يومياً في وقت محدد</option>
+      <option value="cron">Cron مخصص</option>
     </select>
     <div id="sched-helper-interval">
-      <div class="field-label">INTERVAL (seconds)</div>
-      <input class="field-input" id="sched-seconds" type="number" min="10" placeholder="e.g. 3600 = every hour" dir="ltr">
+      <div class="modal-label">الفترة (ثانية)</div>
+      <input class="modal-input" id="sched-seconds" type="number" min="10" placeholder="مثال: 3600 = كل ساعة" dir="ltr">
     </div>
     <div id="sched-helper-daily" style="display:none">
-      <div class="field-label">TIME (UTC)</div>
-      <input class="field-input" id="sched-time" type="time" dir="ltr" value="08:00">
+      <div class="modal-label">الوقت (UTC)</div>
+      <input class="modal-input" id="sched-time" type="time" dir="ltr" value="08:00">
     </div>
     <div id="sched-helper-cron" style="display:none">
-      <div class="field-label">CRON EXPRESSION (min hour day month weekday)</div>
-      <input class="field-input" id="sched-cron" dir="ltr" placeholder="0 8 * * * (= every day at 8am)">
-      <div style="font-size:9px;color:var(--muted);margin-top:-8px;margin-bottom:10px">
-        Examples: "0 * * * *" = every hour | "0 9 * * 1" = every Monday 9am
-      </div>
+      <div class="modal-label">تعبير Cron (دقيقة ساعة يوم شهر أسبوع)</div>
+      <input class="modal-input" id="sched-cron" dir="ltr" placeholder="0 8 * * *">
     </div>
-    <div class="field-label">PYTHON CODE</div>
-    <textarea class="code-editor" id="job-code" style="min-height:140px;border-radius:9px;border:1px solid var(--border);margin-bottom:12px"
-      placeholder="# Python code to run automatically&#10;import datetime&#10;print('Task ran at:', datetime.datetime.now())"></textarea>
+    <div class="modal-label">كود Python</div>
+    <textarea class="code-editor" id="job-code"
+      style="min-height:130px;border-radius:9px;border:1px solid var(--border);margin-bottom:12px"
+      placeholder="# كود Python يعمل تلقائياً&#10;import datetime&#10;print('تم التشغيل:', datetime.datetime.now())"></textarea>
     <div class="btn-row">
-      <button class="btn btn-primary" style="flex:2" onclick="saveJob()">💾 Save Task</button>
-      <button class="btn btn-gray" onclick="closeJobModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">💾 حفظ</button>
+      <button class="btn btn-secondary" onclick="closeJobModal()">إلغاء</button>
     </div>
   </div>
 </div>
@@ -313,40 +562,40 @@ select.field-input{cursor:pointer}
 <!-- Logs Modal -->
 <div class="modal-overlay" id="logs-modal">
   <div class="modal">
-    <div class="modal-title">📋 Task Execution Logs</div>
+    <div class="modal-title">📋 سجل التنفيذ</div>
     <div id="logs-content" style="font-size:11px;color:var(--muted)">Loading...</div>
     <div style="margin-top:14px">
-      <button class="btn btn-gray btn-full" onclick="document.getElementById('logs-modal').classList.remove('open')">Close</button>
+      <button class="btn btn-secondary btn-full" onclick="document.getElementById('logs-modal').classList.remove('open')">إغلاق</button>
     </div>
   </div>
 </div>
 
-<!-- Add User Modal -->
+<!-- Add/Edit User Modal -->
 <div class="modal-overlay" id="adduser-modal">
   <div class="modal">
-    <div class="modal-title">➕ Add New User</div>
+    <div class="modal-title">➕ إضافة / تعديل مستخدم</div>
     <input type="hidden" id="edit-uid">
-    <div class="field-label">USERNAME</div>
-    <input class="field-input" id="new-username" dir="ltr" placeholder="username">
-    <div class="field-label">PASSWORD</div>
-    <input class="field-input" id="new-password" type="password" dir="ltr" placeholder="password (leave blank to keep current)">
-    <div class="field-label">ROLE</div>
-    <select class="field-input" id="new-role">
+    <div class="modal-label">اسم المستخدم</div>
+    <input class="modal-input" id="new-username" dir="ltr" placeholder="username">
+    <div class="modal-label">كلمة المرور</div>
+    <input class="modal-input" id="new-password" type="password" dir="ltr" placeholder="(اتركها فارغة للإبقاء على الحالية)">
+    <div class="modal-label">الدور</div>
+    <select class="modal-select" id="new-role">
       <option value="user">User</option>
       <option value="admin">Admin</option>
     </select>
-    <div class="field-label">MAX USES (number of allowed runs)</div>
-    <input class="field-input" id="new-maxuses" type="number" min="1" dir="ltr" placeholder="100">
-    <div class="field-label">USES LEFT (remaining)</div>
-    <input class="field-input" id="new-usesleft" type="number" min="0" dir="ltr" placeholder="100">
-    <div class="field-label">STATUS</div>
-    <select class="field-input" id="new-active">
-      <option value="1">Active</option>
-      <option value="0">Disabled</option>
+    <div class="modal-label">الحد الأقصى للاستخدام</div>
+    <input class="modal-input" id="new-maxuses" type="number" min="1" dir="ltr" placeholder="100">
+    <div class="modal-label">المتبقي من الاستخدام</div>
+    <input class="modal-input" id="new-usesleft" type="number" min="0" dir="ltr" placeholder="100">
+    <div class="modal-label">الحالة</div>
+    <select class="modal-select" id="new-active">
+      <option value="1">مفعّل</option>
+      <option value="0">معطّل</option>
     </select>
     <div class="btn-row">
-      <button class="btn btn-gold" style="flex:2" onclick="saveUser()">💾 Save User</button>
-      <button class="btn btn-gray" onclick="document.getElementById('adduser-modal').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">💾 حفظ</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('adduser-modal').classList.remove('open')">إلغاء</button>
     </div>
   </div>
 </div>
@@ -361,52 +610,86 @@ select.field-input{cursor:pointer}
 </div>
 
 <script>
-// ── STATE ──
+/* ════════════════════════════════════════
+   GAMES DATA
+════════════════════════════════════════ */
+const GAMES_DATA = [
+  {name:"Color Sort Woody Puzzle",package:"games.burny.color.sort.woody.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed"}],cat:"puzzle"},
+  {name:"Wooden Word Puzzle",package:"games.burny.wooden.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"puzzle"},
+  {name:"Associations Word Puzzle",package:"games.burny.associations.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"puzzle"},
+  {name:"Coin Master",package:"com.moonactive.coinmaster",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],cat:"other"},
+  {name:"Domino Dreams",package:"com.screenshake.dominodreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],cat:"other"},
+  {name:"Solitaire Grand Harvest",package:"net.supertreat.solitaire",dev_key:"X8aGgdWELNb5L96fCy44oL",level_events:[{display:"Level up",template:"level_up_{}"}],cat:"other"},
+  {name:"Cuisine Master",package:"com.FortuneMine.CuisineMaster",dev_key:"im6mgZbZJsHKGVowkkxkGm",level_events:[{display:"Level completed",template:"level{}_completed"}],cat:"other"},
+  {name:"Match Factory",package:"net.peakgames.match",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],cat:"puzzle"},
+  {name:"Toon Blast",package:"net.peakgames.toonblast",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],cat:"other"},
+  {name:"Toy Blast",package:"net.peakgames.amy",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],cat:"other"},
+  {name:"Box Jam",package:"com.playoneer.boxjam",dev_key:"cSJjCEwX2cCtJrNH92xM7n",level_events:[{display:"Level completed",template:"level_completed"}],cat:"puzzle"},
+  {name:"Gardenscapes",package:"com.playrix.gardenscapes",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Level achieved",template:"AchievedLevel{}"}],cat:"other"},
+  {name:"Dice Dreams",package:"com.superplaystudios.dicedreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Kingdom restored",template:"af_kingdom_{}_restored"}],cat:"other"},
+  {name:"Taylor's Secret",package:"com.mergegames.taylorsecret",dev_key:"qbKVyawAiwNX3b4D3Frijm",level_events:[{display:"Level achieved",template:"level_{}"}],cat:"merge"},
+  {name:"Big Farm Homestead",package:"com.newmoonproduction.bigfarmhomestead",dev_key:"FtaT5WH9rMJjJkMd4LfBCT",level_events:[{display:"Level achieved",template:"af_level{}_achieved"}],cat:"farm"},
+  {name:"Sunshine Island",package:"com.newmoonproduction.sunshineisland",dev_key:"FtaT5WH9rMJjJkMd4LfBCT",level_events:[{display:"Level achieved",template:"af_level{}_achieved"}],cat:"farm"},
+  {name:"Idle Bank Tycoon",package:"com.luckyskeletonstudios.idlebanktycoon",dev_key:"DwzgMQDkEVMy3ntcgz7utV",level_events:[{display:"Bank started",template:"af_bank{}_started"}],cat:"other"},
+  {name:"FarmVille 3",package:"com.zynga.farmville3",dev_key:"KVJuxDJVXQRPoqUVdyWJtj",level_events:[{display:"Player level",template:"Player_Level{}"}],cat:"farm"},
+  {name:"Township",package:"com.playrix.township",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Achieved level",template:"achievedlevel{}"}],cat:"farm"},
+  {name:"Merge Match",package:"com.futureplay.mergematch",dev_key:"nr8SibwpFjcKGBQNpDdttd",level_events:[{display:"Incent Level Up",template:"Incent_Player_Level_Up_{}"}],cat:"merge"},
+  {name:"FarmVille 2",package:"com.zynga.FarmVille2CountryEscape",dev_key:"438VCPmX2ZLYvsDPfGLZXb",level_events:[{display:"Level complete",template:"Level{}Complete"}],cat:"farm"},
+  {name:"Merge Studio",package:"com.paxiegames.mergestudio",dev_key:"mFaiXvTWy8votzp3UpsSfS",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"merge"},
+  {name:"Goods Master 3D",package:"com.goods.master3d.triple.puzzle",dev_key:"oUYXWsx5SVDbJwtSCCymUD",level_events:[{display:"Level achieved",template:"af_Level_{}"}],cat:"puzzle"},
+  {name:"Tiles Mosaic",package:"com.tripledot.tiles.mosaic",dev_key:"j7J8eEwxvuQbDDFo3agC9X",level_events:[{display:"Game complete",template:"GameComplete_{}"}],cat:"puzzle"},
+  {name:"Travel Town",package:"io.randomco.travel",dev_key:"wizhvjciCuaDbAaR8KpZLn",level_events:[{display:"Level achieved",template:"reachedLevel{}"}],cat:"other"},
+  {name:"Disney Solitaire Dreams",package:"com.superplaystudios.disneysolitairedreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],cat:"other"},
+  {name:"Match Masters",package:"com.funtomic.matchmasters",dev_key:"EJcrH2pxmBbsWKHJHdrs3c",level_events:[{display:"Trophies reached",template:"trophies_{}"}],cat:"other"},
+  {name:"Coin Master Board",package:"com.moonactive.cmboard",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],cat:"other"},
+  {name:"Empires & Puzzles",package:"com.smallgiantgames.empires",dev_key:"wStj8eCCuE84shUTkh7ZGc",level_events:[{display:"XP Level reached",template:"xp_level_{}"}],cat:"other"},
+  {name:"Merge Dragons",package:"com.gramgames.mergedragons",dev_key:"fyKVEgAYzuD6jBZocaq3yh",level_events:[{display:"Dragon Power reached",template:"event_{}_dragon_power"}],cat:"merge"},
+  {name:"Yarn Loop",package:"com.combo.yarnflow",dev_key:"TGm97uKTJF7qFCvREggWtf",level_events:[{display:"Level completed",template:"level_complete_{}"}],cat:"other"}
+];
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
 const DEFAULT_SERVER = 'https://web-production-42c2c.up.railway.app';
 let API = localStorage.getItem('ol_server') || DEFAULT_SERVER;
 let TOKEN = localStorage.getItem('ol_token') || '';
 let CURRENT_USER = null;
-let pyodide = null, pyReady = false;
 let serverConnected = false;
+let pyodide = null, pyReady = false;
+let isRunning = false;
 let installedPkgs = [];
-// FIX #2: Safe JSON parse with fallback
-try { installedPkgs = JSON.parse(localStorage.getItem('ol_pkgs') || '[]'); } catch { installedPkgs = []; }
+try { installedPkgs = JSON.parse(localStorage.getItem('pp_pkgs') || '[]'); } catch { installedPkgs = []; }
+let curGaid = localStorage.getItem('pp_gaid') || '70ebe327-e224-4b1e-adb0-b09a27f78a0f';
+let curAfid = localStorage.getItem('pp_afid') || '1779417828531-7129893952045055065';
+let activeGame = null;
+let eventLog = [];
+let activeFilter = 'all';
 let toastTimer = null;
-let isRunning = false; // FIX #3: Prevent double-submit on run
 
-// ── BOOT ──
+/* ════════════════════════════════════════
+   BOOT
+════════════════════════════════════════ */
 window.onload = async () => {
-  if (API) {
-    document.getElementById('server-url').value = API;
-    document.getElementById('cfg-server').value = API;
-  }
+  document.getElementById('login-status').textContent = '🟢 ' + API;
   if (TOKEN) {
     await restoreSession();
   } else {
-    showLogin();
+    document.getElementById('login-screen').style.display = 'flex';
   }
 };
 
 async function restoreSession() {
-  if (!API) { showLogin(); return; }
   try {
     const res = await apiFetch('/auth/me');
     if (res.ok) {
-      const data = await res.json();
-      CURRENT_USER = data;
+      CURRENT_USER = await res.json();
       enterApp();
     } else {
       localStorage.removeItem('ol_token');
       TOKEN = '';
-      showLogin();
+      document.getElementById('login-screen').style.display = 'flex';
     }
-  } catch { showLogin(); }
-}
-
-function showLogin() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('main-app').style.display = 'none';
-  document.getElementById('login-server-status').textContent = '🟢 ' + API;
+  } catch { document.getElementById('login-screen').style.display = 'flex'; }
 }
 
 function enterApp() {
@@ -414,28 +697,32 @@ function enterApp() {
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('hdr-user').textContent = CURRENT_USER.username;
   if (CURRENT_USER.role === 'admin') {
-    document.getElementById('hdr-uses').textContent = 'ADMIN';
+    document.getElementById('hdr-uses').style.display = 'none';
     document.getElementById('nav-admin').style.display = 'flex';
   } else {
+    document.getElementById('hdr-uses').style.display = 'inline-block';
     document.getElementById('hdr-uses').textContent = CURRENT_USER.uses_left + ' uses';
   }
+  document.getElementById('server-url').value = API;
+  document.getElementById('settings-server').value = API;
   connectServer(true);
+  updateIdDisplay();
+  renderGames(GAMES_DATA);
+  renderSnippets();
   renderInstalledPkgs();
   loadPyodideRuntime();
 }
 
-// ── AUTH ──
+/* ════════════════════════════════════════
+   AUTH
+════════════════════════════════════════ */
 async function doLogin() {
   const user = document.getElementById('inp-user').value.trim();
   const pass = document.getElementById('inp-pass').value;
   const btn = document.getElementById('login-btn');
   const err = document.getElementById('login-error');
-
-  if (!user || !pass) { err.textContent = '⚠ Enter username and password'; return; }
-  if (!API) { API = DEFAULT_SERVER; }
-
-  btn.disabled = true; btn.textContent = 'Signing in...'; err.textContent = '';
-
+  if (!user || !pass) { err.textContent = '⚠ أدخل اسم المستخدم وكلمة المرور'; return; }
+  btn.disabled = true; btn.textContent = 'جاري الدخول...'; err.textContent = '';
   try {
     const res = await fetch(API + '/auth/login', {
       method: 'POST',
@@ -449,113 +736,244 @@ async function doLogin() {
       localStorage.setItem('ol_token', TOKEN);
       enterApp();
     } else {
-      err.textContent = '❌ ' + (data.error || 'Login failed');
+      err.textContent = '❌ ' + (data.error || 'فشل تسجيل الدخول');
     }
-  } catch (e) {
-    err.textContent = '🔌 Cannot reach server — check URL';
-  } finally {
-    btn.disabled = false; btn.textContent = 'SIGN IN →';
-  }
+  } catch { err.textContent = '🔌 تعذر الوصول للسيرفر'; }
+  finally { btn.disabled = false; btn.textContent = 'SIGN IN →'; }
 }
 
 async function doLogout() {
-  if (API && TOKEN) {
-    try { await apiFetch('/auth/logout', 'POST', {}); } catch {}
-  }
+  if (API && TOKEN) { try { await apiFetch('/auth/logout', 'POST', {}); } catch {} }
   TOKEN = ''; CURRENT_USER = null;
   localStorage.removeItem('ol_token');
   document.getElementById('main-app').style.display = 'none';
-  document.getElementById('inp-pass').value = '';
-  // FIX #4: Also hide admin nav on logout
   document.getElementById('nav-admin').style.display = 'none';
-  showLogin();
+  document.getElementById('inp-pass').value = '';
+  document.getElementById('login-screen').style.display = 'flex';
 }
 
-// ── API HELPER ──
+/* ════════════════════════════════════════
+   API HELPER
+════════════════════════════════════════ */
 async function apiFetch(path, method = 'GET', body = null) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json', 'X-Token': TOKEN }
-  };
+  const opts = { method, headers: { 'Content-Type': 'application/json', 'X-Token': TOKEN } };
   if (body !== null) opts.body = JSON.stringify(body);
   return fetch(API + path, opts);
 }
 
-// ── NAVIGATION ──
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
 function switchPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'games' && !document.getElementById('view-main').classList.contains('active') && !document.getElementById('view-detail').classList.contains('active')) {
+    showView('view-main');
+  }
 }
 
-// ── SERVER CONNECTION ──
+/* ════════════════════════════════════════
+   SERVER CONNECTION
+════════════════════════════════════════ */
 async function connectServer(silent = false) {
-  let url = document.getElementById('server-url').value.trim() ||
-            document.getElementById('cfg-server').value.trim();
-  if (!url) return;
+  let url = document.getElementById('server-url').value.trim();
+  if (!url) url = DEFAULT_SERVER;
   if (!url.startsWith('http')) url = 'https://' + url;
   url = url.replace(/\/$/, '');
   API = url;
   localStorage.setItem('ol_server', url);
   document.getElementById('server-url').value = url;
-  document.getElementById('cfg-server').value = url;
-
-  if (!silent) showToast('loading', null, 'Connecting...', url);
+  document.getElementById('settings-server').value = url;
+  if (!silent) showToast('loading', null, 'جاري الاتصال...', url);
   try {
     const res = await fetch(url + '/', { signal: AbortSignal.timeout(8000) });
     if (res.ok) {
       serverConnected = true;
-      setDot('ok');
+      setServerDot('ok');
       document.getElementById('btn-run').disabled = false;
       document.getElementById('btn-run2').disabled = false;
       document.getElementById('btn-pip').disabled = false;
-      if (!silent) showToast('success', '✅', 'Connected!', 'Railway server ready');
-    } else {
-      setDot('err');
-      if (!silent) showToast('error', '❌', 'Server error', 'HTTP ' + res.status);
-    }
-  } catch {
-    setDot('err');
-    if (!silent) showToast('error', '❌', 'Connection failed', 'Check URL');
-  }
+      document.getElementById('py-badge').textContent = '🌐 Server';
+      document.getElementById('py-badge').style.background = '#1a3020';
+      document.getElementById('py-badge').style.color = '#5de8a0';
+      if (!silent) showToast('success', '✅', 'متصل بالخادم!', 'Railway جاهز');
+    } else { setServerDot('err'); }
+  } catch { setServerDot('err'); if (!silent) showToast('error', '❌', 'فشل الاتصال', 'تحقق من الرابط'); }
 }
 
-function setDot(cls) {
+function setServerDot(cls) {
   const d = document.getElementById('server-dot');
   d.className = 'server-dot' + (cls ? ' ' + cls : '');
 }
 
-function syncServerInput(val) {
-  document.getElementById('server-url').value = val;
+/* ════════════════════════════════════════
+   GAMES
+════════════════════════════════════════ */
+function updateIdDisplay() {
+  document.getElementById('display-gaid').textContent = curGaid.substring(0, 18) + '...';
+  document.getElementById('display-afid').textContent = curAfid.substring(0, 18) + '...';
+  document.getElementById('settings-gaid').value = curGaid;
+  document.getElementById('settings-afid').value = curAfid;
 }
 
-// ── SYNC SETTINGS ──
-async function syncToServer() {
-  if (!API || !TOKEN) { showToast('error', '⚠', 'Not connected', ''); return; }
-  const settings = {
-    server: API,
-    pkgs: localStorage.getItem('ol_pkgs') || '[]'
+function renderGames(list) {
+  const grid = document.getElementById('games-grid');
+  const noResults = document.getElementById('no-results');
+  if (!list.length) { grid.innerHTML = ''; noResults.style.display = 'block'; return; }
+  noResults.style.display = 'none';
+  grid.innerHTML = list.map(g => {
+    const i = GAMES_DATA.indexOf(g);
+    return `<div class="game-card" onclick="openGame(${i})">
+      <div class="game-num">#${String(i+1).padStart(2,'0')}</div>
+      <div class="game-name">${escHtml(g.name)}</div>
+      <div class="game-pkg">${escHtml(g.package)}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterGames(cat, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = cat;
+  applyFilters();
+}
+
+function searchGames(q) { applyFilters(q); }
+
+function applyFilters(q) {
+  q = q !== undefined ? q : document.querySelector('.search-input').value;
+  let list = GAMES_DATA;
+  if (activeFilter !== 'all') list = list.filter(g => g.cat === activeFilter);
+  if (q) list = list.filter(g => g.name.toLowerCase().includes(q.toLowerCase()) || g.package.toLowerCase().includes(q.toLowerCase()));
+  renderGames(list);
+}
+
+function openGame(idx) {
+  activeGame = GAMES_DATA[idx];
+  const hasNumber = activeGame.level_events[0].template.includes('{}');
+  document.getElementById('detail-game-name').textContent = activeGame.name;
+  document.getElementById('detail-pkg').textContent = activeGame.package;
+  document.getElementById('event-template-display').textContent = activeGame.level_events[0].template;
+  const lvlInput = document.getElementById('level-input');
+  lvlInput.style.display = hasNumber ? 'block' : 'none';
+  lvlInput.value = '';
+  document.getElementById('event-preview').textContent = hasNumber ? '' : activeGame.level_events[0].template;
+  document.getElementById('event-log').innerHTML = '<div class="log-empty">لا توجد أحداث بعد</div>';
+  eventLog = [];
+  showView('view-detail');
+}
+
+function goBack() { showView('view-main'); }
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function updateEventPreview() {
+  const tmpl = activeGame.level_events[0].template;
+  const val = document.getElementById('level-input').value;
+  document.getElementById('event-preview').textContent = (tmpl.includes('{}') && val) ? '→ ' + tmpl.replace('{}', val) : '';
+}
+
+async function sendLevelEvent() {
+  const tmpl = activeGame.level_events[0].template;
+  const hasNum = tmpl.includes('{}');
+  const val = document.getElementById('level-input').value;
+  if (hasNum && !val) { showToast('error', '⚠', 'خطأ', 'أدخل رقم المستوى أولاً'); return; }
+  await sendEvent('level', hasNum ? tmpl.replace('{}', val) : tmpl);
+}
+
+async function sendPurchase() { await sendEvent('purchase', 'af_purchase'); }
+
+async function sendEvent(type, evName) {
+  if (!activeGame) return;
+  if (!serverConnected) {
+    showToast('error', '🌐', 'غير متصل بالسيرفر', 'يرجى الاتصال بـ Railway أولاً');
+    addLog(evName, 'NO SERVER', false);
+    return;
+  }
+  showToast('loading', null, 'إرسال عبر Railway...', evName);
+  const body = {
+    package: activeGame.package,
+    dev_key: activeGame.dev_key,
+    body: {
+      appsflyer_id: curAfid,
+      advertising_id: curGaid,
+      eventName: evName,
+      eventTime: new Date().toISOString(),
+      eventValue: type === 'purchase' ? JSON.stringify({af_revenue:"4.99",af_currency:"USD"}) : "{}"
+    }
   };
   try {
-    const res = await apiFetch('/data', 'POST', settings);
-    if (res.ok) showToast('success', '✅', 'Synced to server', 'Settings saved online');
-    else showToast('error', '❌', 'Sync failed', '');
-  } catch { showToast('error', '🔌', 'Network error', ''); }
+    const res = await apiFetch('/api/send-event', 'POST', body);
+    const data = await res.json();
+    if (res.ok && data.success) {
+      addLog(evName, `${data.status_code}`, true);
+      showToast('success', '✅', `تم الإرسال (${data.status_code})`, evName);
+    } else {
+      addLog(evName, `ERR: ${res.status}`, false);
+      showToast('error', '❌', `فشل: ${data.error || res.status}`, evName);
+    }
+  } catch(e) {
+    addLog(evName, 'NET ERR', false);
+    showToast('error', '🔌', 'خطأ في الاتصال', e.message);
+  }
 }
 
-async function syncFromServer() {
-  if (!API || !TOKEN) { showToast('error', '⚠', 'Not connected', ''); return; }
-  try {
-    const res = await apiFetch('/data');
-    if (res.ok) {
-      const data = await res.json();
-      for (const [key, obj] of Object.entries(data)) {
-        localStorage.setItem('ol_' + key, obj.value);
-      }
-      showToast('success', '✅', 'Downloaded from server', 'Settings restored');
-    }
-  } catch { showToast('error', '🔌', 'Network error', ''); }
+function addLog(name, status, ok) {
+  const now = new Date();
+  const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
+  eventLog.unshift({name, status, ok, time});
+  document.getElementById('event-log').innerHTML = eventLog.map(e => `
+    <div class="log-entry">
+      <div class="log-dot ${e.ok ? 'success' : 'error'}"></div>
+      <div class="log-time">${e.time}</div>
+      <div class="log-text">${escHtml(e.name)}</div>
+      <div class="log-status">${escHtml(e.status)}</div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════
+   IDs MODAL
+════════════════════════════════════════ */
+function openIdModal() {
+  document.getElementById('modal-gaid-input').value = curGaid;
+  document.getElementById('modal-afid-input').value = curAfid;
+  document.getElementById('id-modal').classList.add('open');
+}
+function closeIdModal() { document.getElementById('id-modal').classList.remove('open'); }
+function saveIds() {
+  const g = document.getElementById('modal-gaid-input').value.trim();
+  const a = document.getElementById('modal-afid-input').value.trim();
+  if (g) { curGaid = g; localStorage.setItem('pp_gaid', g); }
+  if (a) { curAfid = a; localStorage.setItem('pp_afid', a); }
+  updateIdDisplay();
+  closeIdModal();
+  showToast('success', '✅', 'تم الحفظ', 'تم تحديث IDs');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('id-modal').addEventListener('click', function(e) { if (e.target === this) closeIdModal(); });
+});
+
+/* ════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════ */
+function autoSaveId(type) {
+  const val = document.getElementById('settings-' + type).value.trim();
+  if (type === 'gaid') { curGaid = val; localStorage.setItem('pp_gaid', val); }
+  else { curAfid = val; localStorage.setItem('pp_afid', val); }
+  updateIdDisplay();
+}
+
+function clearAllData() {
+  if (confirm('هل أنت متأكد؟ سيتم حذف جميع البيانات المحفوظة.')) {
+    localStorage.clear();
+    location.reload();
+  }
 }
 
 async function loadAccountInfo() {
@@ -568,70 +986,115 @@ async function loadAccountInfo() {
       const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses, 1)) * 100);
       document.getElementById('account-info').innerHTML = `
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="color:var(--text)">${escHtml(u.username)}</span>
-          <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${escHtml(u.role.toUpperCase())}</span>
+          <span>${escHtml(u.username)}</span>
+          <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span>
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Uses: ${u.role === 'admin' ? '∞ (unlimited)' : u.uses_left + ' / ' + u.max_uses}</div>
-        <div class="uses-bar"><div class="uses-fill" style="width:${pct}%"></div></div>
-      `;
-      if (u.role === 'admin') document.getElementById('hdr-uses').textContent = 'ADMIN';
-      else document.getElementById('hdr-uses').textContent = u.uses_left + ' uses';
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">
+          ${u.role === 'admin' ? '∞ غير محدود' : u.uses_left + ' / ' + u.max_uses + ' استخدام'}
+        </div>
+        <div class="uses-bar"><div class="uses-fill" style="width:${pct}%"></div></div>`;
+      if (u.role !== 'admin') document.getElementById('hdr-uses').textContent = u.uses_left + ' uses';
     }
   } catch {}
 }
 
-// ── PYTHON ──
+async function syncToServer() {
+  if (!API || !TOKEN) { showToast('error', '⚠', 'غير متصل', ''); return; }
+  try {
+    const res = await apiFetch('/data', 'POST', { server: API, pkgs: JSON.stringify(installedPkgs) });
+    if (res.ok) showToast('success', '✅', 'تم الرفع', 'الإعدادات محفوظة على السيرفر');
+    else showToast('error', '❌', 'فشل', '');
+  } catch { showToast('error', '🔌', 'خطأ في الشبكة', ''); }
+}
+
+async function syncFromServer() {
+  if (!API || !TOKEN) { showToast('error', '⚠', 'غير متصل', ''); return; }
+  try {
+    const res = await apiFetch('/data');
+    if (res.ok) {
+      const data = await res.json();
+      for (const [key, obj] of Object.entries(data)) localStorage.setItem('ol_' + key, obj.value);
+      showToast('success', '✅', 'تم التحميل', 'الإعدادات مُستعادة');
+    }
+  } catch { showToast('error', '🔌', 'خطأ في الشبكة', ''); }
+}
+
+/* ════════════════════════════════════════
+   PYTHON
+════════════════════════════════════════ */
+async function loadPyodideRuntime() {
+  setPyStatus('loading', '🐍 تحميل Python...');
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+  document.head.appendChild(script);
+  script.onload = async () => {
+    try {
+      setPyStatus('loading', '⚙️ تهيئة البيئة...');
+      pyodide = await loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/',
+        stdout: (t) => appendOutput(t + '\n', 'stdout'),
+        stderr: (t) => appendOutput(t + '\n', 'stderr'),
+      });
+      pyReady = true;
+      setPyStatus('ready', '✅ Python جاهز');
+      if (!serverConnected) {
+        document.getElementById('btn-run').disabled = false;
+        document.getElementById('btn-run2').disabled = false;
+        document.getElementById('btn-pip').disabled = false;
+        document.getElementById('py-badge').textContent = '🐍 Ready';
+        document.getElementById('py-badge').style.background = '#1a3020';
+        document.getElementById('py-badge').style.color = '#5de8a0';
+      }
+      for (const pkg of installedPkgs) {
+        try { await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`); } catch {}
+      }
+      clearOutput();
+      appendOutput('// Python ' + pyodide.runPython('import sys; sys.version') + '\n', 'sys');
+      appendOutput('// جاهز! اكتب كودك ثم اضغط ▶ تشغيل\n', 'sys');
+    } catch(e) {
+      setPyStatus('error', '❌ فشل التهيئة');
+    }
+  };
+  script.onerror = () => setPyStatus('error', '❌ فشل التحميل');
+}
+
+function setPyStatus(cls, text) {
+  const el = document.getElementById('py-status');
+  el.className = 'py-status ' + cls;
+  el.textContent = text;
+}
+
 async function runPython() {
-  // FIX #5: Prevent concurrent runs
   if (isRunning) return;
   const code = document.getElementById('code-editor').value.trim();
-  if (!code) { showToast('error', '⚠', 'Code is empty', ''); return; }
-
+  if (!code) { showToast('error', '⚠', 'الكود فارغ', ''); return; }
   clearOutput();
-  appendOutput('// ▶ Running...\n', 'sys');
+  appendOutput('// ▶ جاري التشغيل...\n', 'sys');
   isRunning = true;
   document.getElementById('btn-run').disabled = true;
   document.getElementById('btn-run2').disabled = true;
-
   try {
-    if (serverConnected && API) {
+    if (serverConnected) {
+      const start = Date.now();
       const res = await apiFetch('/run', 'POST', { code });
       const data = await res.json();
-      if (data.error) {
-        appendOutput('❌ ' + data.error + '\n', 'error');
-      } else {
+      const elapsed = ((Date.now() - start) / 1000).toFixed(2);
+      if (data.error) { appendOutput('❌ ' + data.error + '\n', 'error'); }
+      else {
         if (data.stdout) appendOutput(data.stdout, 'stdout');
         if (data.stderr) appendOutput(data.stderr, 'stderr');
-        appendOutput(
-          data.returncode === 0 ? '\n// ✅ Done\n' : '\n// ❌ Error\n',
-          data.returncode === 0 ? 'success' : 'error'
-        );
+        appendOutput(data.returncode === 0 ? `\n// ✅ اكتمل في ${elapsed}ث\n` : '\n// ❌ خطأ في الكود\n',
+          data.returncode === 0 ? 'success' : 'error');
         loadAccountInfo();
       }
     } else if (pyReady) {
-      // FIX #6: Capture stdout from pyodide properly
-      pyodide.runPython(`
-import sys, io
-_buf = io.StringIO()
-sys.stdout = _buf
-sys.stderr = _buf
-`);
-      try {
-        await pyodide.runPythonAsync(code);
-      } catch (pyErr) {
-        appendOutput(String(pyErr) + '\n', 'stderr');
-      }
-      const output = pyodide.runPython(`
-sys.stdout = sys.__stdout__
-sys.stderr = sys.__stderr__
-_buf.getvalue()
-`);
-      if (output) appendOutput(output, 'stdout');
-      appendOutput('\n// ✅ Done\n', 'success');
+      const result = await pyodide.runPythonAsync(code);
+      if (result !== undefined && result !== null) appendOutput(String(result) + '\n', 'stdout');
+      appendOutput('\n// ✅ اكتمل التشغيل\n', 'success');
     } else {
-      showToast('error', '⏳', 'Not ready', 'Wait for Python or connect server');
+      showToast('error', '⏳', 'غير جاهز', 'انتظر اكتمال تحميل Python');
     }
-  } catch (e) {
+  } catch(e) {
     appendOutput(e.message + '\n', 'error');
   } finally {
     isRunning = false;
@@ -643,47 +1106,29 @@ _buf.getvalue()
 async function installPackage() {
   const pkg = document.getElementById('pip-input').value.trim().toLowerCase();
   if (!pkg) return;
-
-  // FIX #7: Validate package name on client side too
-  if (!/^[a-zA-Z0-9_\-\.]+$/.test(pkg)) {
-    showToast('error', '⚠', 'Invalid package name', '');
-    return;
-  }
-
+  if (!/^[a-zA-Z0-9_\-\.]+$/.test(pkg)) { showToast('error', '⚠', 'اسم مكتبة غير صالح', ''); return; }
   const btn = document.getElementById('btn-pip');
   btn.disabled = true; btn.textContent = '⏳';
-  showToast('loading', null, 'pip install ' + pkg, 'Installing...');
-
+  showToast('loading', null, 'pip install ' + pkg, 'جاري التثبيت...');
   try {
-    if (serverConnected && API) {
+    if (serverConnected) {
       const res = await apiFetch('/pip', 'POST', { package: pkg });
       const data = await res.json();
       if (data.success) {
-        if (!installedPkgs.includes(pkg)) {
-          installedPkgs.push(pkg);
-          localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs));
-        }
+        if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('pp_pkgs', JSON.stringify(installedPkgs)); }
         renderInstalledPkgs();
         document.getElementById('pip-input').value = '';
-        showToast('success', '✅', 'Installed!', pkg + ' ready');
-      } else {
-        showToast('error', '❌', 'Failed', data.message || '');
-      }
+        showToast('success', '✅', 'تم التثبيت', pkg + ' جاهز!');
+      } else { showToast('error', '❌', 'فشل التثبيت', data.message || ''); }
     } else if (pyReady) {
       await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`);
-      if (!installedPkgs.includes(pkg)) {
-        installedPkgs.push(pkg);
-        localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs));
-      }
+      if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('pp_pkgs', JSON.stringify(installedPkgs)); }
       renderInstalledPkgs();
       document.getElementById('pip-input').value = '';
-      showToast('success', '✅', 'Installed!', pkg);
+      showToast('success', '✅', 'تم التثبيت', pkg);
     }
-  } catch (e) {
-    showToast('error', '❌', 'Failed', e.message.split('\n')[0]);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Install';
-  }
+  } catch(e) { showToast('error', '❌', 'فشل التثبيت', e.message.split('\n')[0]); }
+  finally { btn.disabled = false; btn.textContent = 'تثبيت'; }
 }
 
 function renderInstalledPkgs() {
@@ -695,37 +1140,25 @@ function renderInstalledPkgs() {
   installedPkgs.forEach(pkg => {
     const chip = document.createElement('div');
     chip.className = 'pkg-chip';
-    // FIX #8: Use textContent instead of innerHTML to prevent XSS in package names
-    const pkgSpan = document.createElement('span');
-    pkgSpan.textContent = pkg;
+    const s = document.createElement('span'); s.textContent = pkg;
     const x = document.createElement('span');
-    x.className = 'pkg-chip-x';
-    x.textContent = '×';
-    x.onclick = () => removePkg(pkg);
-    chip.appendChild(pkgSpan);
-    chip.appendChild(x);
+    x.className = 'pkg-chip-remove'; x.textContent = '×';
+    x.onclick = () => { installedPkgs = installedPkgs.filter(p => p !== pkg); localStorage.setItem('pp_pkgs', JSON.stringify(installedPkgs)); renderInstalledPkgs(); showToast('success','🗑','تمت الإزالة',pkg); };
+    chip.appendChild(s); chip.appendChild(x);
     c.appendChild(chip);
   });
-}
-
-function removePkg(pkg) {
-  installedPkgs = installedPkgs.filter(p => p !== pkg);
-  localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs));
-  renderInstalledPkgs();
 }
 
 function appendOutput(text, kind) {
   const area = document.getElementById('output-area');
   const span = document.createElement('span');
-  span.className = 'out-' + kind;
+  span.className = 'out-line-' + kind;
   span.textContent = text;
   area.appendChild(span);
   area.scrollTop = area.scrollHeight;
 }
-
 function clearOutput() { document.getElementById('output-area').innerHTML = ''; }
 function clearEditor() { document.getElementById('code-editor').value = ''; }
-
 function handleTab(e) {
   if (e.key === 'Tab') {
     e.preventDefault();
@@ -735,100 +1168,95 @@ function handleTab(e) {
   }
 }
 
-async function loadPyodideRuntime() {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
-  document.head.appendChild(script);
-  script.onload = async () => {
-    try {
-      document.getElementById('py-status').className = 'py-status loading';
-      document.getElementById('py-status').textContent = '⚙ Initializing...';
-      pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/' });
-      pyReady = true;
-      document.getElementById('py-status').className = 'py-status ready';
-      document.getElementById('py-status').textContent = '✅ Python Ready';
-      if (!serverConnected) {
-        document.getElementById('btn-run').disabled = false;
-        document.getElementById('btn-run2').disabled = false;
-        document.getElementById('btn-pip').disabled = false;
-      }
-    } catch (e) {
-      document.getElementById('py-status').className = 'py-status error';
-      document.getElementById('py-status').textContent = '❌ Load failed';
-    }
-  };
-  // FIX #9: Handle script load error
-  script.onerror = () => {
-    document.getElementById('py-status').className = 'py-status error';
-    document.getElementById('py-status').textContent = '❌ Load failed';
-  };
+/* ════════════════════════════════════════
+   SNIPPETS
+════════════════════════════════════════ */
+const SNIPPETS = [
+  {title:'مرحبا بالعالم',tag:'Python',desc:'أول كود Python — طباعة رسالة وتاريخ اليوم',
+   code:`from datetime import datetime\nprint("مرحباً من Pharaoh Pro! 🐍")\nprint(f"التاريخ الآن: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")`},
+  {title:'حساب إحصائي',tag:'math',desc:'حسابات رياضية بدون مكتبات خارجية',
+   code:`import math, statistics\nnums = [10,25,33,47,52,61,78,90]\nprint(f"المجموع: {sum(nums)}")\nprint(f"المتوسط: {statistics.mean(nums):.2f}")\nprint(f"الوسيط: {statistics.median(nums)}")\nprint(f"الانحراف: {statistics.stdev(nums):.2f}")`},
+  {title:'معالجة JSON',tag:'json',desc:'تحليل وبناء بيانات JSON',
+   code:`import json\ndata = {"game":"Coin Master","package":"com.moonactive.coinmaster","events":[{"name":"village_5_complete","status":200}]}\nprint(json.dumps(data, indent=2, ensure_ascii=False))`},
+  {title:'توليد IDs عشوائية',tag:'utils',desc:'توليد GAID و AppsFlyer IDs جديدة',
+   code:`import uuid, random, time\ndef gen_gaid(): return str(uuid.uuid4())\ndef gen_afid(): return f"{int(time.time()*1000)}-{random.randint(10**18,10**19-1)}"\nfor i in range(3):\n    print(f"--- مجموعة {i+1} ---")\n    print(f"GAID: {gen_gaid()}")\n    print(f"AFID: {gen_afid()}")`},
+  {title:'AppsFlyer Event Builder',tag:'AF',desc:'بناء بيانات الأحداث بصيغة JSON للإرسال',
+   code:`import json\nfrom datetime import datetime, timezone\ndef build_event(package, dev_key, afid, gaid, event_name):\n    return {"url":f"https://api2.appsflyer.com/inappevent/{package}","headers":{"authentication":dev_key},"body":{"appsflyer_id":afid,"advertising_id":gaid,"eventName":event_name,"eventTime":datetime.now(timezone.utc).isoformat()}}\nreq = build_event("com.moonactive.coinmaster","H3KjoCRVTiVgA5mWSAHtCe","1779417828531-7","70ebe327-e224","village_5_complete")\nprint(json.dumps(req, indent=2, ensure_ascii=False))`},
+  {title:'تحليل نصوص',tag:'re',desc:'استخراج بيانات من نصوص باستخدام Regex',
+   code:`import re\ntext = "GAID: 70ebe327-e224-4b1e-adb0-b09a27f78a0f\\nPackage: com.moonactive.coinmaster\\nStatus: 200 OK"\ngaid = re.search(r'GAID: ([0-9a-f-]{36})', text)\nprint(f"GAID: {gaid.group(1) if gaid else 'لم يُوجد'}")\nstatus = re.search(r'Status: (\\d+)', text)\nprint(f"Status: {status.group(1) if status else 'لم يُوجد'}")`},
+];
+
+function renderSnippets() {
+  const list = document.getElementById('snippet-list');
+  list.innerHTML = SNIPPETS.map((s, i) => `
+    <div class="snippet-card" onclick="loadSnippet(${i})">
+      <div class="snippet-header">
+        <div class="snippet-title">${escHtml(s.title)}</div>
+        <span class="snippet-tag">${escHtml(s.tag)}</span>
+      </div>
+      <div class="snippet-desc">${escHtml(s.desc)}</div>
+      <div class="snippet-preview">${escHtml(s.code.substring(0,120))}...</div>
+    </div>`).join('');
 }
 
-// ── SCHEDULER ──
+function loadSnippet(i) {
+  document.getElementById('code-editor').value = SNIPPETS[i].code;
+  switchPage('python');
+  showToast('success', '📋', 'تم التحميل', SNIPPETS[i].title + ' — اضغط ▶ للتشغيل');
+}
+
+/* ════════════════════════════════════════
+   SCHEDULER
+════════════════════════════════════════ */
 async function loadJobs() {
   if (!API || !TOKEN) return;
   const list = document.getElementById('jobs-list');
   list.innerHTML = '<div class="empty-state">Loading...</div>';
   try {
     const res = await apiFetch('/jobs');
-    if (!res.ok) { list.innerHTML = '<div class="empty-state">Failed to load</div>'; return; }
+    if (!res.ok) { list.innerHTML = '<div class="empty-state">فشل التحميل</div>'; return; }
     const jobs = await res.json();
-    if (!jobs.length) {
-      list.innerHTML = '<div class="empty-state">No scheduled tasks yet<br><span style="font-size:10px">Tap + to create your first task</span></div>';
-      return;
-    }
-    // FIX #10: Use DOM creation instead of innerHTML with template literals to prevent XSS
+    if (!jobs.length) { list.innerHTML = '<div class="empty-state">لا توجد مهام مجدولة<br><span style="font-size:10px">اضغط + لإنشاء مهمة</span></div>'; return; }
     list.innerHTML = '';
     jobs.forEach(j => {
-      const statusCls = j.last_status || 'pending';
-      const statusLabel = j.last_status
-        ? (j.last_status === 'success' ? '✅ Success' : '❌ Error')
-        : '⏳ Pending';
-      const schedLabel = formatSchedule(j.schedule);
-
+      const sCls = j.last_status || 'pending';
+      const sLabel = j.last_status ? (j.last_status === 'success' ? '✅ نجح' : '❌ خطأ') : '⏳ لم يعمل';
       const card = document.createElement('div');
       card.className = 'job-card' + (j.enabled ? '' : ' disabled');
-      card.id = 'jobcard-' + j.id;
-
       card.innerHTML = `
         <div class="job-header">
           <div class="job-name"></div>
-          <span class="job-status ${escHtml(statusCls)}">${escHtml(statusLabel)}</span>
+          <span class="job-status-badge ${sCls}">${sLabel}</span>
         </div>
-        <div class="job-schedule">⏱ ${escHtml(schedLabel)}</div>
-        <div class="job-lastrun">${j.last_run ? 'Last run: ' + escHtml(j.last_run.substring(0,19).replace('T',' ')) + ' UTC' : 'Never run'}</div>
-        ${j.last_output ? `<div class="job-output">${escHtml(j.last_output.substring(0,300))}</div>` : ''}
+        <div class="job-schedule">⏱ ${escHtml(formatSchedule(j.schedule))}</div>
+        <div class="job-lastrun">${j.last_run ? 'آخر تشغيل: '+escHtml(j.last_run.substring(0,19).replace('T',' '))+' UTC' : 'لم يعمل بعد'}</div>
+        ${j.last_output ? `<div class="job-output-preview">${escHtml(j.last_output.substring(0,300))}</div>` : ''}
         <div class="job-actions">
-          <button class="job-btn run" data-id="${j.id}" data-action="run">▶ Run Now</button>
-          <button class="job-btn ${j.enabled ? 'toggle-on' : 'toggle-off'}" data-id="${j.id}" data-enabled="${j.enabled}" data-action="toggle">${j.enabled ? '⏸ Pause' : '▶ Enable'}</button>
-          <button class="job-btn edit" data-id="${j.id}" data-action="edit">✏ Edit</button>
-          <button class="job-btn edit" data-id="${j.id}" data-action="logs">📋 Logs</button>
-          <button class="job-btn del" data-id="${j.id}" data-action="delete">🗑</button>
-        </div>
-      `;
-      // Set job name safely
+          <button class="job-btn run" data-id="${j.id}" data-a="run">▶ تشغيل</button>
+          <button class="job-btn ${j.enabled ? 'toggle-on' : 'toggle-off'}" data-id="${j.id}" data-en="${j.enabled}" data-a="toggle">${j.enabled ? '⏸ إيقاف' : '▶ تفعيل'}</button>
+          <button class="job-btn edit" data-id="${j.id}" data-a="edit">✏ تعديل</button>
+          <button class="job-btn edit" data-id="${j.id}" data-a="logs">📋 سجل</button>
+          <button class="job-btn del" data-id="${j.id}" data-a="delete">🗑</button>
+        </div>`;
       card.querySelector('.job-name').textContent = j.name;
       list.appendChild(card);
     });
-
-    // Event delegation to avoid inline handlers with IDs
-    list.onclick = (e) => {
-      const btn = e.target.closest('[data-action]');
+    list.onclick = e => {
+      const btn = e.target.closest('[data-a]');
       if (!btn) return;
-      const id = parseInt(btn.dataset.id);
-      const action = btn.dataset.action;
-      if (action === 'run') runJobNow(id);
-      else if (action === 'toggle') toggleJob(id, parseInt(btn.dataset.enabled));
-      else if (action === 'edit') openEditJobModal(id);
-      else if (action === 'logs') viewLogs(id);
-      else if (action === 'delete') deleteJob(id);
+      const id = parseInt(btn.dataset.id), a = btn.dataset.a;
+      if (a === 'run') runJobNow(id);
+      else if (a === 'toggle') toggleJob(id, parseInt(btn.dataset.en));
+      else if (a === 'edit') openEditJobModal(id);
+      else if (a === 'logs') viewLogs(id);
+      else if (a === 'delete') deleteJob(id);
     };
-  } catch { list.innerHTML = '<div class="empty-state">Failed to load</div>'; }
+  } catch { list.innerHTML = '<div class="empty-state">فشل التحميل</div>'; }
 }
 
 function formatSchedule(s) {
-  if (s.startsWith('interval:')) return 'Every ' + s.split(':')[1] + ' seconds';
-  if (s.startsWith('daily:')) { const p = s.split(':'); return 'Daily at ' + p[1] + ':' + p[2] + ' UTC'; }
+  if (s.startsWith('interval:')) return 'كل ' + s.split(':')[1] + ' ثانية';
+  if (s.startsWith('daily:')) { const p = s.split(':'); return 'يومياً الساعة ' + p[1] + ':' + p[2] + ' UTC'; }
   if (s.startsWith('cron:')) return 'Cron: ' + s.substring(5);
   return s;
 }
@@ -844,24 +1272,23 @@ function getScheduleStr() {
   const t = document.getElementById('job-sched-type').value;
   if (t === 'interval') {
     const s = parseInt(document.getElementById('sched-seconds').value);
-    if (!s || s < 10) { showToast('error', '⚠', 'Minimum 10 seconds', ''); return null; }
+    if (!s || s < 10) { showToast('error', '⚠', 'الحد الأدنى 10 ثوانٍ', ''); return null; }
     return 'interval:' + s;
   }
   if (t === 'daily') {
-    const time = document.getElementById('sched-time').value;
-    const [h, m] = time.split(':');
+    const [h, m] = document.getElementById('sched-time').value.split(':');
     return 'daily:' + h + ':' + m;
   }
   if (t === 'cron') {
     const expr = document.getElementById('sched-cron').value.trim();
-    if (!expr) { showToast('error', '⚠', 'Enter cron expression', ''); return null; }
+    if (!expr) { showToast('error', '⚠', 'أدخل تعبير Cron', ''); return null; }
     return 'cron:' + expr;
   }
   return null;
 }
 
 function openNewJobModal() {
-  document.getElementById('job-modal-title').textContent = '➕ New Scheduled Task';
+  document.getElementById('job-modal-title').textContent = '➕ مهمة جديدة';
   document.getElementById('job-modal-id').value = '';
   document.getElementById('job-name').value = '';
   document.getElementById('job-code').value = '';
@@ -876,11 +1303,10 @@ function openNewJobModal() {
 async function openEditJobModal(id) {
   try {
     const res = await apiFetch('/jobs');
-    if (!res.ok) return;
     const jobs = await res.json();
     const j = jobs.find(x => x.id === id);
     if (!j) return;
-    document.getElementById('job-modal-title').textContent = '✏ Edit Task';
+    document.getElementById('job-modal-title').textContent = '✏ تعديل المهمة';
     document.getElementById('job-modal-id').value = id;
     document.getElementById('job-name').value = j.name;
     document.getElementById('job-code').value = j.code;
@@ -890,7 +1316,7 @@ async function openEditJobModal(id) {
     } else if (j.schedule.startsWith('daily:')) {
       document.getElementById('job-sched-type').value = 'daily';
       const p = j.schedule.split(':');
-      document.getElementById('sched-time').value = p[1].padStart(2, '0') + ':' + p[2].padStart(2, '0');
+      document.getElementById('sched-time').value = p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');
     } else if (j.schedule.startsWith('cron:')) {
       document.getElementById('job-sched-type').value = 'cron';
       document.getElementById('sched-cron').value = j.schedule.substring(5);
@@ -905,56 +1331,36 @@ async function saveJob() {
   const name = document.getElementById('job-name').value.trim();
   const code = document.getElementById('job-code').value.trim();
   const schedule = getScheduleStr();
-
-  // FIX #11: Fix broken validation logic (original had a bug: `if (name && code) return`)
-  if (!name || !code || !schedule) {
-    showToast('error', '⚠', 'Fill all fields', '');
-    return;
-  }
-
+  if (!name || !code || !schedule) { showToast('error', '⚠', 'أكمل جميع الحقول', ''); return; }
   try {
-    let res;
-    if (id) {
-      res = await apiFetch('/jobs/' + id, 'PUT', { name, code, schedule });
-    } else {
-      res = await apiFetch('/jobs', 'POST', { name, code, schedule });
-    }
-    if (res.ok) {
-      closeJobModal();
-      showToast('success', '✅', id ? 'Task updated' : 'Task created', name);
-      loadJobs();
-    } else {
-      const d = await res.json();
-      showToast('error', '❌', 'Failed', d.error || '');
-    }
-  } catch { showToast('error', '🔌', 'Network error', ''); }
+    const res = id ? await apiFetch('/jobs/'+id, 'PUT', {name,code,schedule}) : await apiFetch('/jobs', 'POST', {name,code,schedule});
+    if (res.ok) { closeJobModal(); showToast('success','✅',id?'تم التعديل':'تم الإنشاء',name); loadJobs(); }
+    else { const d = await res.json(); showToast('error','❌','فشل',d.error||''); }
+  } catch { showToast('error','🔌','خطأ في الشبكة',''); }
 }
 
 function closeJobModal() { document.getElementById('job-modal').classList.remove('open'); }
 
 async function runJobNow(id) {
-  showToast('loading', null, 'Running task...', '');
+  showToast('loading', null, 'جاري التشغيل...', '');
   try {
-    const res = await apiFetch('/jobs/' + id + '/run', 'POST', {});
-    if (res.ok) {
-      showToast('success', '✅', 'Task triggered!', 'Check logs for output');
-      setTimeout(loadJobs, 2500);
-    }
-  } catch { showToast('error', '❌', 'Failed', ''); }
+    const res = await apiFetch('/jobs/'+id+'/run', 'POST', {});
+    if (res.ok) { showToast('success','✅','تم التشغيل!','راجع السجل للنتائج'); setTimeout(loadJobs, 2500); }
+  } catch { showToast('error','❌','فشل',''); }
 }
 
 async function toggleJob(id, enabled) {
   try {
-    const res = await apiFetch('/jobs/' + id, 'PUT', { enabled: enabled ? 0 : 1 });
-    if (res.ok) { loadJobs(); showToast('success', '✅', enabled ? 'Task paused' : 'Task enabled', ''); }
+    const res = await apiFetch('/jobs/'+id, 'PUT', {enabled: enabled ? 0 : 1});
+    if (res.ok) { loadJobs(); showToast('success','✅', enabled?'تم الإيقاف':'تم التفعيل',''); }
   } catch {}
 }
 
 async function deleteJob(id) {
-  if (!confirm('Delete this task?')) return;
+  if (!confirm('حذف هذه المهمة؟')) return;
   try {
-    const res = await apiFetch('/jobs/' + id, 'DELETE');
-    if (res.ok) { loadJobs(); showToast('success', '🗑', 'Deleted', ''); }
+    const res = await apiFetch('/jobs/'+id, 'DELETE');
+    if (res.ok) { loadJobs(); showToast('success','🗑','تم الحذف',''); }
   } catch {}
 }
 
@@ -962,66 +1368,62 @@ async function viewLogs(id) {
   document.getElementById('logs-modal').classList.add('open');
   document.getElementById('logs-content').innerHTML = 'Loading...';
   try {
-    const res = await apiFetch('/jobs/' + id + '/logs');
-    if (!res.ok) { document.getElementById('logs-content').innerHTML = 'Access denied or error'; return; }
+    const res = await apiFetch('/jobs/'+id+'/logs');
+    if (!res.ok) { document.getElementById('logs-content').innerHTML = 'غير مصرح'; return; }
     const logs = await res.json();
-    if (!logs.length) {
-      document.getElementById('logs-content').innerHTML = '<div class="empty-state">No logs yet</div>';
-      return;
-    }
+    if (!logs.length) { document.getElementById('logs-content').innerHTML = '<div class="empty-state">لا توجد سجلات بعد</div>'; return; }
     document.getElementById('logs-content').innerHTML = logs.map(l => `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-          <span style="font-size:9px;color:var(--muted)">${l.ran_at ? escHtml(l.ran_at.substring(0,19).replace('T',' ')) + ' UTC' : ''}</span>
-          <span style="font-size:9px;font-weight:bold;color:${l.status === 'success' ? 'var(--green)' : 'var(--red)'}">${l.status === 'success' ? '✅ OK' : '❌ Error'}</span>
+          <span style="font-size:9px;color:var(--muted)">${l.ran_at ? escHtml(l.ran_at.substring(0,19).replace('T',' '))+' UTC' : ''}</span>
+          <span style="font-size:9px;font-weight:bold;color:${l.status==='success'?'var(--green)':'var(--red)'}">${l.status==='success'?'✅ OK':'❌ Error'}</span>
         </div>
-        <pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">${escHtml(l.output || '(no output)')}</pre>
-      </div>
-    `).join('');
-  } catch { document.getElementById('logs-content').innerHTML = 'Failed to load'; }
+        <pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">${escHtml(l.output||'(لا يوجد ناتج)')}</pre>
+      </div>`).join('');
+  } catch { document.getElementById('logs-content').innerHTML = 'فشل التحميل'; }
 }
 
-// ── ADMIN ──
+/* ════════════════════════════════════════
+   ADMIN
+════════════════════════════════════════ */
 async function loadUsers() {
   if (!API || !TOKEN) return;
   const list = document.getElementById('users-list');
   list.innerHTML = '<div class="empty-state">Loading...</div>';
   try {
     const res = await apiFetch('/admin/users');
-    if (res.status === 403) { list.innerHTML = '<div class="empty-state">Admin only</div>'; return; }
-    if (!res.ok) { list.innerHTML = '<div class="empty-state">Failed to load</div>'; return; }
+    if (res.status === 403) { list.innerHTML = '<div class="empty-state">للمدراء فقط</div>'; return; }
     const users = await res.json();
     list.innerHTML = users.map(u => {
-      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses, 1)) * 100);
-      return `
-        <div class="user-row">
-          <div class="user-info">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div class="user-name">${escHtml(u.username)}</div>
-              <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${escHtml(u.role)}</span>
-              ${!u.active ? '<span style="font-size:8px;color:var(--red)">DISABLED</span>' : ''}
-            </div>
-            <div class="user-meta">${u.role === 'admin' ? '∞ unlimited' : u.uses_left + ' / ' + u.max_uses + ' uses left'} • ${u.created ? escHtml(u.created.substring(0,10)) : ''}</div>
-            <div class="uses-bar" style="width:120px"><div class="uses-fill" style="width:${pct}%"></div></div>
+      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses,1)) * 100);
+      return `<div class="user-row">
+        <div class="user-info">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="user-name-admin">${escHtml(u.username)}</div>
+            <span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>
+            ${!u.active?'<span style="font-size:8px;color:var(--red)">DISABLED</span>':''}
           </div>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <button class="job-btn edit" onclick="openEditUser(${u.id},${JSON.stringify(u.username)},${JSON.stringify(u.role)},${u.max_uses},${u.uses_left},${u.active})">✏</button>
-            <button class="job-btn del" onclick="deleteUser(${u.id},${JSON.stringify(u.username)})">🗑</button>
-          </div>
-        </div>`;
+          <div class="user-meta">${u.role==='admin'?'∞ غير محدود':u.uses_left+'/'+u.max_uses+' استخدام'} • ${u.created?escHtml(u.created.substring(0,10)):''}</div>
+          <div class="uses-bar" style="width:120px"><div class="uses-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <button class="job-btn edit" onclick="openEditUser(${u.id},${JSON.stringify(u.username)},${JSON.stringify(u.role)},${u.max_uses},${u.uses_left},${u.active})">✏</button>
+          <button class="job-btn del" onclick="deleteUser(${u.id},${JSON.stringify(u.username)})">🗑</button>
+        </div>
+      </div>`;
     }).join('');
-  } catch { list.innerHTML = '<div class="empty-state">Failed to load</div>'; }
+  } catch { list.innerHTML = '<div class="empty-state">فشل التحميل</div>'; }
 }
 
 function openAddUserModal() {
   document.getElementById('edit-uid').value = '';
   document.getElementById('new-username').value = '';
+  document.getElementById('new-username').disabled = false;
   document.getElementById('new-password').value = '';
   document.getElementById('new-role').value = 'user';
   document.getElementById('new-maxuses').value = '100';
   document.getElementById('new-usesleft').value = '100';
   document.getElementById('new-active').value = '1';
-  document.getElementById('new-username').disabled = false;
   document.getElementById('adduser-modal').classList.add('open');
 }
 
@@ -1048,41 +1450,30 @@ async function saveUser() {
   };
   const pw = document.getElementById('new-password').value;
   if (pw) body.password = pw;
-  if (!id && !pw) { showToast('error', '⚠', 'Password required', 'for new users'); return; }
-  // FIX #12: Validate username not empty on new user
-  if (!id && !body.username) { showToast('error', '⚠', 'Username required', ''); return; }
-
+  if (!id && !pw) { showToast('error','⚠','كلمة المرور مطلوبة','للمستخدمين الجدد'); return; }
+  if (!id && !body.username) { showToast('error','⚠','اسم المستخدم مطلوب',''); return; }
   try {
-    let res;
-    if (id) {
-      res = await apiFetch('/admin/users/' + id, 'PUT', body);
-    } else {
-      res = await apiFetch('/admin/users', 'POST', body);
-    }
+    const res = id ? await apiFetch('/admin/users/'+id, 'PUT', body) : await apiFetch('/admin/users', 'POST', body);
     if (res.ok) {
       document.getElementById('adduser-modal').classList.remove('open');
-      showToast('success', '✅', id ? 'User updated' : 'User created', body.username);
+      showToast('success','✅',id?'تم التعديل':'تم الإنشاء',body.username);
       loadUsers();
-    } else {
-      const d = await res.json();
-      showToast('error', '❌', 'Failed', d.error || '');
-    }
-  } catch { showToast('error', '🔌', 'Network error', ''); }
+    } else { const d = await res.json(); showToast('error','❌','فشل',d.error||''); }
+  } catch { showToast('error','🔌','خطأ في الشبكة',''); }
 }
 
 async function deleteUser(id, name) {
-  if (!confirm('Delete user ' + name + '?')) return;
+  if (!confirm('حذف المستخدم ' + name + '؟')) return;
   try {
-    const res = await apiFetch('/admin/users/' + id, 'DELETE');
-    if (res.ok) { loadUsers(); showToast('success', '🗑', 'Deleted', name); }
-    else {
-      const d = await res.json();
-      showToast('error', '❌', 'Failed', d.error || '');
-    }
+    const res = await apiFetch('/admin/users/'+id, 'DELETE');
+    if (res.ok) { loadUsers(); showToast('success','🗑','تم الحذف',name); }
+    else { const d = await res.json(); showToast('error','❌','فشل',d.error||''); }
   } catch {}
 }
 
-// ── TOAST ──
+/* ════════════════════════════════════════
+   TOAST & HELPERS
+════════════════════════════════════════ */
 function showToast(type, icon, title, detail) {
   const t = document.getElementById('toast');
   t.className = 'toast ' + type;
@@ -1094,16 +1485,16 @@ function showToast(type, icon, title, detail) {
   if (type !== 'loading') toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// FIX #13: Robust escHtml that handles non-string input
 function escHtml(s) {
   if (s === null || s === undefined) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 </script>
 </body>
 </html>
+ENDOFFILE
+Output
