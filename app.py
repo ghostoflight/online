@@ -521,7 +521,13 @@ def admin_delete_user(uid):
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
-    init_db()
+    # تهيئة قاعدة البيانات والمهام فوراً عند إقلاع السيرفر في Railway
+init_db()
+try:
     load_all_jobs()
+except Exception as e:
+    print(f"Scheduler error: {e}")
+
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
