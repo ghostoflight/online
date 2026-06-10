@@ -18,8 +18,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
-
-/* ── LOGIN SCREEN ── */
 #login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 24px;width:100%;max-width:340px}
 .login-logo{text-align:center;font-size:28px;font-weight:bold;color:var(--accent);letter-spacing:4px;margin-bottom:6px}
@@ -33,8 +31,6 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .login-btn:active{transform:scale(.97)}
 .login-btn:disabled{opacity:.5;cursor:not-allowed}
 .login-uses{text-align:center;font-size:10px;color:var(--muted);margin-top:14px}
-
-/* ── HEADER ── */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 13px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between}
 .header-title{font-size:15px;font-weight:bold;color:var(--accent);letter-spacing:3px}
 .header-right{display:flex;gap:8px;align-items:center}
@@ -44,19 +40,13 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .badge-gold{background:#2a1a00;color:var(--accent)}
 .user-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--muted);font-size:10px;cursor:pointer;font-family:inherit}
 .user-btn:active{border-color:var(--red);color:var(--red)}
-
-/* ── NAV ── */
 .nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:200}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;cursor:pointer;color:var(--muted);font-size:9px;letter-spacing:.5px;border-top:2px solid transparent;gap:3px;transition:color .2s}
 .nav-item.active{color:var(--accent);border-top-color:var(--accent)}
 .nav-item svg{width:19px;height:19px}
-
-/* ── PAGES ── */
 .page{display:none;padding-bottom:72px}
 .page.active{display:block}
 .page-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 13px;font-size:10px;color:var(--muted);letter-spacing:2px}
-
-/* ── CARDS & COMMON ── */
 .section-pad{padding:12px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
 .card+.card{margin-top:10px}
@@ -77,8 +67,6 @@ select.field-input{cursor:pointer}
 .btn-row{display:flex;gap:8px}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .divider{height:1px;background:var(--border);margin:12px 0}
-
-/* ── PYTHON ── */
 .py-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .py-status{font-size:10px;padding:3px 9px;border-radius:20px;letter-spacing:1px;font-weight:bold}
 .py-status.loading{background:#3a3020;color:var(--py2)}
@@ -109,8 +97,6 @@ select.field-input{cursor:pointer}
 .code-editor::placeholder{color:var(--muted)}
 .output-area{background:#050510;min-height:140px;padding:9px 12px;font-size:11px;font-family:'Courier New',monospace;line-height:1.6;direction:ltr;text-align:left;overflow-y:auto;max-height:280px;white-space:pre-wrap;word-break:break-all}
 .out-stdout{color:#c8f0c8}.out-stderr{color:#f0a0a0}.out-success{color:var(--green)}.out-error{color:var(--red)}.out-sys{color:var(--muted);font-style:italic}
-
-/* ── SCHEDULER ── */
 .job-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:9px;position:relative}
 .job-card.disabled{opacity:.6}
 .job-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -131,8 +117,6 @@ select.field-input{cursor:pointer}
 .job-btn.del{background:var(--card);border:1px solid var(--red);color:var(--red)}
 .job-output{background:#050510;border-radius:7px;padding:8px;font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;max-height:80px;overflow-y:auto;margin-top:8px;font-family:'Courier New',monospace}
 .empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
-
-/* ── ADMIN ── */
 .user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .user-info{flex:1}
 .user-name{font-size:13px;font-weight:bold;color:var(--text)}
@@ -142,14 +126,10 @@ select.field-input{cursor:pointer}
 .role-badge{font-size:8px;padding:2px 7px;border-radius:20px}
 .role-admin{background:#2a1a00;color:var(--accent)}
 .role-user{background:#1a1a35;color:var(--accent2)}
-
-/* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));width:100%;max-height:90vh;overflow-y:auto}
 .modal-title{font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:16px;letter-spacing:1px}
-
-/* ── TOAST ── */
 .toast{position:fixed;bottom:80px;left:12px;right:12px;z-index:600;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:9px;transform:translateY(20px);opacity:0;transition:all .25s;pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}.toast.loading{border-color:var(--accent2)}
@@ -166,18 +146,20 @@ select.field-input{cursor:pointer}
 </head>
 <body>
 
-<!-- ════════ LOGIN SCREEN ════════ -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">⚡ ONLINE</div>
     <div class="login-sub">SECURE ACCESS REQUIRED</div>
     <div class="login-field">
       <label class="login-label">USERNAME</label>
-      <input class="login-input" id="inp-user" type="text" autocomplete="username" placeholder="Enter username" onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
+      <input class="login-input" id="inp-user" type="text" autocomplete="username" placeholder="Enter username"
+        onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
     </div>
     <div class="login-field">
       <label class="login-label">PASSWORD</label>
-      <input class="login-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+      <input class="login-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="Enter password"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="login-error" id="login-error"></div>
     <button class="login-btn" id="login-btn" onclick="doLogin()">SIGN IN →</button>
@@ -185,9 +167,8 @@ select.field-input{cursor:pointer}
   </div>
 </div>
 
-<!-- ════════ MAIN APP ════════ -->
+<!-- MAIN APP -->
 <div id="main-app" style="display:none">
-
   <div class="header">
     <div class="header-title">⚡ ONLINE</div>
     <div class="header-right">
@@ -197,7 +178,7 @@ select.field-input{cursor:pointer}
     </div>
   </div>
 
-  <!-- ── PYTHON PAGE ── -->
+  <!-- PYTHON PAGE -->
   <div class="page active" id="page-python">
     <div class="py-toolbar">
       <span class="py-status loading" id="py-status">Loading Python...</span>
@@ -207,7 +188,7 @@ select.field-input{cursor:pointer}
     </div>
     <div class="server-bar">
       <span style="font-size:10px;color:var(--accent);white-space:nowrap">🌐</span>
-      <input class="server-input" id="server-url" placeholder="https://your-app.railway.app">
+      <input class="server-input" id="server-url" placeholder="https://web-production-42c2c.up.railway.app">
       <button class="connect-btn" onclick="connectServer()">Connect</button>
       <div class="server-dot" id="server-dot"></div>
     </div>
@@ -219,7 +200,8 @@ select.field-input{cursor:pointer}
     <div class="pkg-chips" id="pkg-chips">
       <span class="pkg-empty" id="pkg-empty">No packages installed</span>
     </div>
-    <textarea class="code-editor" id="code-editor" placeholder="# Write Python code here..." spellcheck="false" onkeydown="handleTab(event)"></textarea>
+    <textarea class="code-editor" id="code-editor" placeholder="# Write Python code here..."
+      spellcheck="false" onkeydown="handleTab(event)"></textarea>
     <div class="py-toolbar" style="padding:7px 12px">
       <span style="font-size:10px;color:var(--muted)">OUTPUT</span>
       <button class="py-btn green" id="btn-run2" onclick="runPython()" disabled>▶ Run Code</button>
@@ -227,7 +209,7 @@ select.field-input{cursor:pointer}
     <div class="output-area" id="output-area"><span class="out-sys">// Waiting for code...</span></div>
   </div>
 
-  <!-- ── SCHEDULER PAGE ── -->
+  <!-- SCHEDULER PAGE -->
   <div class="page" id="page-scheduler">
     <div class="page-bar">⏱ SCHEDULER — Auto Tasks</div>
     <div class="section-pad">
@@ -236,14 +218,14 @@ select.field-input{cursor:pointer}
     </div>
   </div>
 
-  <!-- ── SETTINGS PAGE ── -->
+  <!-- SETTINGS PAGE -->
   <div class="page" id="page-settings">
     <div class="page-bar">⚙️ SETTINGS</div>
     <div class="section-pad">
       <div class="card">
         <div class="card-title">🌐 SERVER</div>
         <div class="field-label">Railway Backend URL</div>
-        <input class="field-input" id="cfg-server" dir="ltr" placeholder="https://your-app.railway.app" oninput="syncServerInput(this.value)">
+        <input class="field-input" id="cfg-server" dir="ltr" placeholder="https://web-production-42c2c.up.railway.app" oninput="syncServerInput(this.value)">
         <button class="btn btn-primary" onclick="connectServer()">Connect & Save</button>
       </div>
       <div class="card">
@@ -260,7 +242,7 @@ select.field-input{cursor:pointer}
     </div>
   </div>
 
-  <!-- ── ADMIN PAGE ── -->
+  <!-- ADMIN PAGE -->
   <div class="page" id="page-admin">
     <div class="page-bar">🔑 ADMIN — User Management</div>
     <div class="section-pad">
@@ -289,8 +271,7 @@ select.field-input{cursor:pointer}
   </nav>
 </div>
 
-<!-- ════════ MODALS ════════ -->
-
+<!-- MODALS -->
 <!-- Job Modal -->
 <div class="modal-overlay" id="job-modal">
   <div class="modal">
@@ -320,7 +301,8 @@ select.field-input{cursor:pointer}
       </div>
     </div>
     <div class="field-label">PYTHON CODE</div>
-    <textarea class="code-editor" id="job-code" style="min-height:140px;border-radius:9px;border:1px solid var(--border);margin-bottom:12px" placeholder="# Python code to run automatically&#10;import datetime&#10;print('Task ran at:', datetime.datetime.now())"></textarea>
+    <textarea class="code-editor" id="job-code" style="min-height:140px;border-radius:9px;border:1px solid var(--border);margin-bottom:12px"
+      placeholder="# Python code to run automatically&#10;import datetime&#10;print('Task ran at:', datetime.datetime.now())"></textarea>
     <div class="btn-row">
       <button class="btn btn-primary" style="flex:2" onclick="saveJob()">💾 Save Task</button>
       <button class="btn btn-gray" onclick="closeJobModal()">Cancel</button>
@@ -379,16 +361,20 @@ select.field-input{cursor:pointer}
 </div>
 
 <script>
-// STATE
-let API = localStorage.getItem('ol_server') || 'https://web-production-42c2c.up.railway.app';
+// ── STATE ──
+const DEFAULT_SERVER = 'https://web-production-42c2c.up.railway.app';
+let API = localStorage.getItem('ol_server') || DEFAULT_SERVER;
 let TOKEN = localStorage.getItem('ol_token') || '';
 let CURRENT_USER = null;
 let pyodide = null, pyReady = false;
 let serverConnected = false;
-let installedPkgs = JSON.parse(localStorage.getItem('ol_pkgs') || '[]');
+let installedPkgs = [];
+// FIX #2: Safe JSON parse with fallback
+try { installedPkgs = JSON.parse(localStorage.getItem('ol_pkgs') || '[]'); } catch { installedPkgs = []; }
 let toastTimer = null;
+let isRunning = false; // FIX #3: Prevent double-submit on run
 
-// BOOT
+// ── BOOT ──
 window.onload = async () => {
   if (API) {
     document.getElementById('server-url').value = API;
@@ -420,11 +406,7 @@ async function restoreSession() {
 function showLogin() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('main-app').style.display = 'none';
-  if (API) {
-    document.getElementById('login-server-status').textContent = '🟢 Server Connected';
-  } else {
-    document.getElementById('login-server-status').textContent = '⚠ No server configured';
-  }
+  document.getElementById('login-server-status').textContent = '🟢 ' + API;
 }
 
 function enterApp() {
@@ -442,15 +424,18 @@ function enterApp() {
   loadPyodideRuntime();
 }
 
-// AUTH
+// ── AUTH ──
 async function doLogin() {
   const user = document.getElementById('inp-user').value.trim();
   const pass = document.getElementById('inp-pass').value;
   const btn = document.getElementById('login-btn');
   const err = document.getElementById('login-error');
+
   if (!user || !pass) { err.textContent = '⚠ Enter username and password'; return; }
-  if (!API) { err.textContent = '⚠ No server URL — open Settings first'; return; }
+  if (!API) { API = DEFAULT_SERVER; }
+
   btn.disabled = true; btn.textContent = 'Signing in...'; err.textContent = '';
+
   try {
     const res = await fetch(API + '/auth/login', {
       method: 'POST',
@@ -481,20 +466,22 @@ async function doLogout() {
   localStorage.removeItem('ol_token');
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('inp-pass').value = '';
+  // FIX #4: Also hide admin nav on logout
+  document.getElementById('nav-admin').style.display = 'none';
   showLogin();
 }
 
-// API HELPER
-async function apiFetch(path, method='GET', body=null) {
+// ── API HELPER ──
+async function apiFetch(path, method = 'GET', body = null) {
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json', 'X-Token': TOKEN }
   };
-  if (body) opts.body = JSON.stringify(body);
+  if (body !== null) opts.body = JSON.stringify(body);
   return fetch(API + path, opts);
 }
 
-// NAVIGATION
+// ── NAVIGATION ──
 function switchPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -502,9 +489,10 @@ function switchPage(name) {
   document.getElementById('nav-' + name).classList.add('active');
 }
 
-// SERVER CONNECTION
-async function connectServer(silent=false) {
-  let url = document.getElementById('server-url').value.trim() || document.getElementById('cfg-server').value.trim();
+// ── SERVER CONNECTION ──
+async function connectServer(silent = false) {
+  let url = document.getElementById('server-url').value.trim() ||
+            document.getElementById('cfg-server').value.trim();
   if (!url) return;
   if (!url.startsWith('http')) url = 'https://' + url;
   url = url.replace(/\/$/, '');
@@ -512,6 +500,7 @@ async function connectServer(silent=false) {
   localStorage.setItem('ol_server', url);
   document.getElementById('server-url').value = url;
   document.getElementById('cfg-server').value = url;
+
   if (!silent) showToast('loading', null, 'Connecting...', url);
   try {
     const res = await fetch(url + '/', { signal: AbortSignal.timeout(8000) });
@@ -522,8 +511,14 @@ async function connectServer(silent=false) {
       document.getElementById('btn-run2').disabled = false;
       document.getElementById('btn-pip').disabled = false;
       if (!silent) showToast('success', '✅', 'Connected!', 'Railway server ready');
-    } else { setDot('err'); }
-  } catch { setDot('err'); if (!silent) showToast('error', '❌', 'Connection failed', 'Check URL'); }
+    } else {
+      setDot('err');
+      if (!silent) showToast('error', '❌', 'Server error', 'HTTP ' + res.status);
+    }
+  } catch {
+    setDot('err');
+    if (!silent) showToast('error', '❌', 'Connection failed', 'Check URL');
+  }
 }
 
 function setDot(cls) {
@@ -535,12 +530,10 @@ function syncServerInput(val) {
   document.getElementById('server-url').value = val;
 }
 
-// SYNC SETTINGS
+// ── SYNC SETTINGS ──
 async function syncToServer() {
   if (!API || !TOKEN) { showToast('error', '⚠', 'Not connected', ''); return; }
   const settings = {
-    gaid: localStorage.getItem('ol_gaid') || '',
-    afid: localStorage.getItem('ol_afid') || '',
     server: API,
     pkgs: localStorage.getItem('ol_pkgs') || '[]'
   };
@@ -572,14 +565,14 @@ async function loadAccountInfo() {
     if (res.ok) {
       const u = await res.json();
       CURRENT_USER = u;
-      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / u.max_uses) * 100);
+      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses, 1)) * 100);
       document.getElementById('account-info').innerHTML = `
         <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span style="color:var(--text)">\${u.username}</span>
-          <span class="role-badge \${u.role === 'admin' ? 'role-admin' : 'role-user'}">\${u.role.toUpperCase()}</span>
+          <span style="color:var(--text)">${escHtml(u.username)}</span>
+          <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${escHtml(u.role.toUpperCase())}</span>
         </div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Uses: \${u.role === 'admin' ? '∞ (unlimited)' : u.uses_left + ' / ' + u.max_uses}</div>
-        <div class="uses-bar"><div class="uses-fill" style="width:\${pct}%"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Uses: ${u.role === 'admin' ? '∞ (unlimited)' : u.uses_left + ' / ' + u.max_uses}</div>
+        <div class="uses-bar"><div class="uses-fill" style="width:${pct}%"></div></div>
       `;
       if (u.role === 'admin') document.getElementById('hdr-uses').textContent = 'ADMIN';
       else document.getElementById('hdr-uses').textContent = u.uses_left + ' uses';
@@ -587,28 +580,53 @@ async function loadAccountInfo() {
   } catch {}
 }
 
-// PYTHON
+// ── PYTHON ──
 async function runPython() {
+  // FIX #5: Prevent concurrent runs
+  if (isRunning) return;
   const code = document.getElementById('code-editor').value.trim();
   if (!code) { showToast('error', '⚠', 'Code is empty', ''); return; }
+
   clearOutput();
   appendOutput('// ▶ Running...\n', 'sys');
+  isRunning = true;
   document.getElementById('btn-run').disabled = true;
   document.getElementById('btn-run2').disabled = true;
+
   try {
     if (serverConnected && API) {
       const res = await apiFetch('/run', 'POST', { code });
       const data = await res.json();
-      if (data.error) { appendOutput('❌ ' + data.error + '\n', 'error'); }
-      else {
+      if (data.error) {
+        appendOutput('❌ ' + data.error + '\n', 'error');
+      } else {
         if (data.stdout) appendOutput(data.stdout, 'stdout');
         if (data.stderr) appendOutput(data.stderr, 'stderr');
-        appendOutput(data.returncode === 0 ? '\n// ✅ Done\n' : '\n// ❌ Error\n', data.returncode === 0 ? 'success' : 'error');
+        appendOutput(
+          data.returncode === 0 ? '\n// ✅ Done\n' : '\n// ❌ Error\n',
+          data.returncode === 0 ? 'success' : 'error'
+        );
         loadAccountInfo();
       }
     } else if (pyReady) {
-      const result = await pyodide.runPythonAsync(code);
-      if (result !== undefined && result !== null) appendOutput(String(result) + '\n', 'stdout');
+      // FIX #6: Capture stdout from pyodide properly
+      pyodide.runPython(`
+import sys, io
+_buf = io.StringIO()
+sys.stdout = _buf
+sys.stderr = _buf
+`);
+      try {
+        await pyodide.runPythonAsync(code);
+      } catch (pyErr) {
+        appendOutput(String(pyErr) + '\n', 'stderr');
+      }
+      const output = pyodide.runPython(`
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
+_buf.getvalue()
+`);
+      if (output) appendOutput(output, 'stdout');
       appendOutput('\n// ✅ Done\n', 'success');
     } else {
       showToast('error', '⏳', 'Not ready', 'Wait for Python or connect server');
@@ -616,6 +634,7 @@ async function runPython() {
   } catch (e) {
     appendOutput(e.message + '\n', 'error');
   } finally {
+    isRunning = false;
     document.getElementById('btn-run').disabled = false;
     document.getElementById('btn-run2').disabled = false;
   }
@@ -624,29 +643,47 @@ async function runPython() {
 async function installPackage() {
   const pkg = document.getElementById('pip-input').value.trim().toLowerCase();
   if (!pkg) return;
+
+  // FIX #7: Validate package name on client side too
+  if (!/^[a-zA-Z0-9_\-\.]+$/.test(pkg)) {
+    showToast('error', '⚠', 'Invalid package name', '');
+    return;
+  }
+
   const btn = document.getElementById('btn-pip');
   btn.disabled = true; btn.textContent = '⏳';
   showToast('loading', null, 'pip install ' + pkg, 'Installing...');
+
   try {
     if (serverConnected && API) {
       const res = await apiFetch('/pip', 'POST', { package: pkg });
       const data = await res.json();
       if (data.success) {
-        if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs)); }
+        if (!installedPkgs.includes(pkg)) {
+          installedPkgs.push(pkg);
+          localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs));
+        }
         renderInstalledPkgs();
         document.getElementById('pip-input').value = '';
         showToast('success', '✅', 'Installed!', pkg + ' ready');
-      } else { showToast('error', '❌', 'Failed', data.message || ''); }
+      } else {
+        showToast('error', '❌', 'Failed', data.message || '');
+      }
     } else if (pyReady) {
-      await pyodide.runPythonAsync(`import micropip\nawait micropip.install('\${pkg}')`);
-      if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs)); }
+      await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`);
+      if (!installedPkgs.includes(pkg)) {
+        installedPkgs.push(pkg);
+        localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs));
+      }
       renderInstalledPkgs();
       document.getElementById('pip-input').value = '';
       showToast('success', '✅', 'Installed!', pkg);
     }
   } catch (e) {
     showToast('error', '❌', 'Failed', e.message.split('\n')[0]);
-  } finally { btn.disabled = false; btn.textContent = 'Install'; }
+  } finally {
+    btn.disabled = false; btn.textContent = 'Install';
+  }
 }
 
 function renderInstalledPkgs() {
@@ -658,7 +695,15 @@ function renderInstalledPkgs() {
   installedPkgs.forEach(pkg => {
     const chip = document.createElement('div');
     chip.className = 'pkg-chip';
-    chip.innerHTML = `\${pkg} <span class="pkg-chip-x" onclick="removePkg('\${pkg}')">×</span>`;
+    // FIX #8: Use textContent instead of innerHTML to prevent XSS in package names
+    const pkgSpan = document.createElement('span');
+    pkgSpan.textContent = pkg;
+    const x = document.createElement('span');
+    x.className = 'pkg-chip-x';
+    x.textContent = '×';
+    x.onclick = () => removePkg(pkg);
+    chip.appendChild(pkgSpan);
+    chip.appendChild(x);
     c.appendChild(chip);
   });
 }
@@ -677,8 +722,10 @@ function appendOutput(text, kind) {
   area.appendChild(span);
   area.scrollTop = area.scrollHeight;
 }
+
 function clearOutput() { document.getElementById('output-area').innerHTML = ''; }
 function clearEditor() { document.getElementById('code-editor').value = ''; }
+
 function handleTab(e) {
   if (e.key === 'Tab') {
     e.preventDefault();
@@ -710,39 +757,72 @@ async function loadPyodideRuntime() {
       document.getElementById('py-status').textContent = '❌ Load failed';
     }
   };
+  // FIX #9: Handle script load error
+  script.onerror = () => {
+    document.getElementById('py-status').className = 'py-status error';
+    document.getElementById('py-status').textContent = '❌ Load failed';
+  };
 }
 
-// SCHEDULER
+// ── SCHEDULER ──
 async function loadJobs() {
   if (!API || !TOKEN) return;
   const list = document.getElementById('jobs-list');
   list.innerHTML = '<div class="empty-state">Loading...</div>';
   try {
     const res = await apiFetch('/jobs');
+    if (!res.ok) { list.innerHTML = '<div class="empty-state">Failed to load</div>'; return; }
     const jobs = await res.json();
-    if (!jobs.length) { list.innerHTML = '<div class="empty-state">No scheduled tasks yet<br><span style="font-size:10px">Tap + to create your first task</span></div>'; return; }
-    list.innerHTML = jobs.map(j => {
+    if (!jobs.length) {
+      list.innerHTML = '<div class="empty-state">No scheduled tasks yet<br><span style="font-size:10px">Tap + to create your first task</span></div>';
+      return;
+    }
+    // FIX #10: Use DOM creation instead of innerHTML with template literals to prevent XSS
+    list.innerHTML = '';
+    jobs.forEach(j => {
       const statusCls = j.last_status || 'pending';
-      const statusLabel = j.last_status ? (j.last_status === 'success' ? '✅ Success' : '❌ Error') : '⏳ Pending';
+      const statusLabel = j.last_status
+        ? (j.last_status === 'success' ? '✅ Success' : '❌ Error')
+        : '⏳ Pending';
       const schedLabel = formatSchedule(j.schedule);
-      return `
-        <div class="job-card \${j.enabled ? '' : 'disabled'}" id="jobcard-\${j.id}">
-          <div class="job-header">
-            <div class="job-name">\${j.name}</div>
-            <span class="job-status \${statusCls}">\${statusLabel}</span>
-          </div>
-          <div class="job-schedule">⏱ \${schedLabel}</div>
-          <div class="job-lastrun">\${j.last_run ? 'Last run: ' + j.last_run.substring(0,19).replace('T',' ') + ' UTC' : 'Never run'}</div>
-          \${j.last_output ? `<div class="job-output">\${escHtml(j.last_output.substring(0,300))}</div>` : ''}
-          <div class="job-actions">
-            <button class="job-btn run" onclick="runJobNow(\${j.id})">▶ Run Now</button>
-            <button class="job-btn \${j.enabled ? 'toggle-on' : 'toggle-off'}" onclick="toggleJob(\${j.id},\${j.enabled})">\${j.enabled ? '⏸ Pause' : '▶ Enable'}</button>
-            <button class="job-btn edit" onclick="openEditJobModal(\${j.id})">✏ Edit</button>
-            <button class="job-btn edit" onclick="viewLogs(\${j.id})">📋 Logs</button>
-            <button class="job-btn del" onclick="deleteJob(\${j.id})">🗑</button>
-          </div>
-        </div>`;
-    }).join('');
+
+      const card = document.createElement('div');
+      card.className = 'job-card' + (j.enabled ? '' : ' disabled');
+      card.id = 'jobcard-' + j.id;
+
+      card.innerHTML = `
+        <div class="job-header">
+          <div class="job-name"></div>
+          <span class="job-status ${escHtml(statusCls)}">${escHtml(statusLabel)}</span>
+        </div>
+        <div class="job-schedule">⏱ ${escHtml(schedLabel)}</div>
+        <div class="job-lastrun">${j.last_run ? 'Last run: ' + escHtml(j.last_run.substring(0,19).replace('T',' ')) + ' UTC' : 'Never run'}</div>
+        ${j.last_output ? `<div class="job-output">${escHtml(j.last_output.substring(0,300))}</div>` : ''}
+        <div class="job-actions">
+          <button class="job-btn run" data-id="${j.id}" data-action="run">▶ Run Now</button>
+          <button class="job-btn ${j.enabled ? 'toggle-on' : 'toggle-off'}" data-id="${j.id}" data-enabled="${j.enabled}" data-action="toggle">${j.enabled ? '⏸ Pause' : '▶ Enable'}</button>
+          <button class="job-btn edit" data-id="${j.id}" data-action="edit">✏ Edit</button>
+          <button class="job-btn edit" data-id="${j.id}" data-action="logs">📋 Logs</button>
+          <button class="job-btn del" data-id="${j.id}" data-action="delete">🗑</button>
+        </div>
+      `;
+      // Set job name safely
+      card.querySelector('.job-name').textContent = j.name;
+      list.appendChild(card);
+    });
+
+    // Event delegation to avoid inline handlers with IDs
+    list.onclick = (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id);
+      const action = btn.dataset.action;
+      if (action === 'run') runJobNow(id);
+      else if (action === 'toggle') toggleJob(id, parseInt(btn.dataset.enabled));
+      else if (action === 'edit') openEditJobModal(id);
+      else if (action === 'logs') viewLogs(id);
+      else if (action === 'delete') deleteJob(id);
+    };
   } catch { list.innerHTML = '<div class="empty-state">Failed to load</div>'; }
 }
 
@@ -763,7 +843,7 @@ function updateSchedHelper() {
 function getScheduleStr() {
   const t = document.getElementById('job-sched-type').value;
   if (t === 'interval') {
-    const s = document.getElementById('sched-seconds').value;
+    const s = parseInt(document.getElementById('sched-seconds').value);
     if (!s || s < 10) { showToast('error', '⚠', 'Minimum 10 seconds', ''); return null; }
     return 'interval:' + s;
   }
@@ -796,6 +876,7 @@ function openNewJobModal() {
 async function openEditJobModal(id) {
   try {
     const res = await apiFetch('/jobs');
+    if (!res.ok) return;
     const jobs = await res.json();
     const j = jobs.find(x => x.id === id);
     if (!j) return;
@@ -809,7 +890,7 @@ async function openEditJobModal(id) {
     } else if (j.schedule.startsWith('daily:')) {
       document.getElementById('job-sched-type').value = 'daily';
       const p = j.schedule.split(':');
-      document.getElementById('sched-time').value = p[1].padStart(2,'0') + ':' + p[2].padStart(2,'0');
+      document.getElementById('sched-time').value = p[1].padStart(2, '0') + ':' + p[2].padStart(2, '0');
     } else if (j.schedule.startsWith('cron:')) {
       document.getElementById('job-sched-type').value = 'cron';
       document.getElementById('sched-cron').value = j.schedule.substring(5);
@@ -824,7 +905,13 @@ async function saveJob() {
   const name = document.getElementById('job-name').value.trim();
   const code = document.getElementById('job-code').value.trim();
   const schedule = getScheduleStr();
-  if (!name || !code || !schedule) { if (name && code) return; showToast('error', '⚠', 'Fill all fields', ''); return; }
+
+  // FIX #11: Fix broken validation logic (original had a bug: `if (name && code) return`)
+  if (!name || !code || !schedule) {
+    showToast('error', '⚠', 'Fill all fields', '');
+    return;
+  }
+
   try {
     let res;
     if (id) {
@@ -876,21 +963,25 @@ async function viewLogs(id) {
   document.getElementById('logs-content').innerHTML = 'Loading...';
   try {
     const res = await apiFetch('/jobs/' + id + '/logs');
+    if (!res.ok) { document.getElementById('logs-content').innerHTML = 'Access denied or error'; return; }
     const logs = await res.json();
-    if (!logs.length) { document.getElementById('logs-content').innerHTML = '<div class="empty-state">No logs yet</div>'; return; }
+    if (!logs.length) {
+      document.getElementById('logs-content').innerHTML = '<div class="empty-state">No logs yet</div>';
+      return;
+    }
     document.getElementById('logs-content').innerHTML = logs.map(l => `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-          <span style="font-size:9px;color:var(--muted)">\${l.ran_at ? l.ran_at.substring(0,19).replace('T',' ') + ' UTC' : ''}</span>
-          <span style="font-size:9px;font-weight:bold;color:\${l.status === 'success' ? 'var(--green)' : 'var(--red)'}">\${l.status === 'success' ? '✅ OK' : '❌ Error'}</span>
+          <span style="font-size:9px;color:var(--muted)">${l.ran_at ? escHtml(l.ran_at.substring(0,19).replace('T',' ')) + ' UTC' : ''}</span>
+          <span style="font-size:9px;font-weight:bold;color:${l.status === 'success' ? 'var(--green)' : 'var(--red)'}">${l.status === 'success' ? '✅ OK' : '❌ Error'}</span>
         </div>
-        <pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">\${escHtml(l.output || '(no output)')}</pre>
+        <pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">${escHtml(l.output || '(no output)')}</pre>
       </div>
     `).join('');
   } catch { document.getElementById('logs-content').innerHTML = 'Failed to load'; }
 }
 
-// ADMIN
+// ── ADMIN ──
 async function loadUsers() {
   if (!API || !TOKEN) return;
   const list = document.getElementById('users-list');
@@ -898,23 +989,24 @@ async function loadUsers() {
   try {
     const res = await apiFetch('/admin/users');
     if (res.status === 403) { list.innerHTML = '<div class="empty-state">Admin only</div>'; return; }
+    if (!res.ok) { list.innerHTML = '<div class="empty-state">Failed to load</div>'; return; }
     const users = await res.json();
     list.innerHTML = users.map(u => {
-      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses,1)) * 100);
+      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses, 1)) * 100);
       return `
         <div class="user-row">
           <div class="user-info">
             <div style="display:flex;align-items:center;gap:8px">
-              <div class="user-name">\${u.username}</div>
-              <span class="role-badge \${u.role === 'admin' ? 'role-admin' : 'role-user'}">\${u.role}</span>
-              \${!u.active ? '<span style="font-size:8px;color:var(--red)">DISABLED</span>' : ''}
+              <div class="user-name">${escHtml(u.username)}</div>
+              <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${escHtml(u.role)}</span>
+              ${!u.active ? '<span style="font-size:8px;color:var(--red)">DISABLED</span>' : ''}
             </div>
-            <div class="user-meta">\${u.role === 'admin' ? '∞ unlimited' : u.uses_left + ' / ' + u.max_uses + ' uses left'} • \${u.created ? u.created.substring(0,10) : ''}</div>
-            <div class="uses-bar" style="width:120px"><div class="uses-fill" style="width:\${pct}%"></div></div>
+            <div class="user-meta">${u.role === 'admin' ? '∞ unlimited' : u.uses_left + ' / ' + u.max_uses + ' uses left'} • ${u.created ? escHtml(u.created.substring(0,10)) : ''}</div>
+            <div class="uses-bar" style="width:120px"><div class="uses-fill" style="width:${pct}%"></div></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:5px">
-            <button class="job-btn edit" onclick="openEditUser(\${u.id},'\${u.username}','\${u.role}',\${u.max_uses},\${u.uses_left},\${u.active})">✏</button>
-            <button class="job-btn del" onclick="deleteUser(\${u.id},'\${u.username}')">🗑</button>
+            <button class="job-btn edit" onclick="openEditUser(${u.id},${JSON.stringify(u.username)},${JSON.stringify(u.role)},${u.max_uses},${u.uses_left},${u.active})">✏</button>
+            <button class="job-btn del" onclick="deleteUser(${u.id},${JSON.stringify(u.username)})">🗑</button>
           </div>
         </div>`;
     }).join('');
@@ -957,6 +1049,9 @@ async function saveUser() {
   const pw = document.getElementById('new-password').value;
   if (pw) body.password = pw;
   if (!id && !pw) { showToast('error', '⚠', 'Password required', 'for new users'); return; }
+  // FIX #12: Validate username not empty on new user
+  if (!id && !body.username) { showToast('error', '⚠', 'Username required', ''); return; }
+
   try {
     let res;
     if (id) {
@@ -980,14 +1075,18 @@ async function deleteUser(id, name) {
   try {
     const res = await apiFetch('/admin/users/' + id, 'DELETE');
     if (res.ok) { loadUsers(); showToast('success', '🗑', 'Deleted', name); }
+    else {
+      const d = await res.json();
+      showToast('error', '❌', 'Failed', d.error || '');
+    }
   } catch {}
 }
 
-// TOAST
+// ── TOAST ──
 function showToast(type, icon, title, detail) {
   const t = document.getElementById('toast');
   t.className = 'toast ' + type;
-  document.getElementById('toast-icon').innerHTML = type === 'loading' ? '<div class="spinner"></div>' : icon;
+  document.getElementById('toast-icon').innerHTML = type === 'loading' ? '<div class="spinner"></div>' : (icon || '');
   document.getElementById('toast-title').textContent = title;
   document.getElementById('toast-detail').textContent = detail;
   t.classList.add('show');
@@ -995,17 +1094,16 @@ function showToast(type, icon, title, detail) {
   if (type !== 'loading') toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+// FIX #13: Robust escHtml that handles non-string input
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if (s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
-
-['job-modal','logs-modal','adduser-modal'].forEach(id => {
-  document.getElementById(id).addEventListener('click', function(e) {
-    if (e.target === this) this.classList.remove('open');
-  });
-});
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
