@@ -521,7 +521,7 @@ def admin_delete_user(uid):
     return jsonify({"ok": True})
 
 if __name__ == "__main__":
-    # تهيئة قاعدة البيانات والمهام فوراً عند إقلاع السيرفر في Railway
+ # تهيئة قاعدة البيانات والمهام فوراً عند إقلاع Gunicorn في Railway
 init_db()
 try:
     load_all_jobs()
