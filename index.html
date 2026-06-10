@@ -92,31 +92,61 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 .no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px;display:none}
 
 /* ═══ GAME DETAIL ═══ */
-.back-btn{display:flex;align-items:center;gap:6px;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer;color:var(--accent);font-size:12px}
-.detail-header{padding:16px 14px;background:var(--card);border-bottom:1px solid var(--border)}
-.detail-game-name{font-size:16px;font-weight:bold;color:var(--accent);margin-bottom:4px}
-.detail-pkg{font-size:10px;color:var(--muted)}
-.detail-body{padding:14px;display:flex;flex-direction:column;gap:12px}
-.field-label{font-size:10px;color:var(--muted);margin-bottom:4px;letter-spacing:1px}
-.template-display{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--accent2);font-family:inherit}
-.level-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;text-align:center}
-.level-input:focus{border-color:var(--accent)}
-.preview-text{font-size:11px;color:var(--accent3);min-height:18px;text-align:center}
-.btn-row{display:flex;gap:8px}
-.btn{flex:1;padding:13px;border:none;border-radius:10px;font-family:inherit;font-size:12px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s}
-.btn-primary{background:var(--accent2);color:white}
-.btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--muted)}
-.btn:active{transform:scale(.96)}
-.log-section-title{font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:8px}
-.log-list{display:flex;flex-direction:column;gap:6px}
-.log-entry{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px}
-.log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.log-dot.success{background:var(--green)}
-.log-dot.error{background:var(--red)}
-.log-time{font-size:9px;color:var(--muted);flex-shrink:0}
-.log-text{font-size:10px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.log-status{font-size:9px;color:var(--muted);flex-shrink:0}
-.log-empty{text-align:center;padding:20px;color:var(--muted);font-size:11px}
+.back-btn { 
+    display: flex; align-items: center; gap: 6px; padding: 12px 14px; 
+    background: var(--surface); border-bottom: 1px solid var(--border); 
+    cursor: pointer; color: var(--accent); font-size: 12px; 
+}
+.detail-header { padding: 16px 14px; background: var(--card); border-bottom: 1px solid var(--border); }
+.detail-game-name { font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 4px; }
+.detail-pkg { font-size: 10px; color: var(--muted); }
+.detail-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+
+.field-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; }
+.template-display { 
+    background: var(--card); border: 1px solid var(--border); 
+    border-radius: 8px; padding: 10px 12px; font-size: 12px; 
+    color: var(--accent2); font-family: inherit; 
+}
+.level-input { 
+    width: 100%; background: var(--card); border: 1px solid var(--border); 
+    border-radius: 8px; padding: 10px 12px; color: var(--text); 
+    font-size: 13px; font-family: inherit; outline: none; 
+    transition: border-color .2s; text-align: center; 
+}
+.level-input:focus { border-color: var(--accent); }
+.preview-text { font-size: 11px; color: var(--accent3); min-height: 18px; text-align: center; margin-top: 4px; }
+
+.btn-row { display: flex; gap: 8px; }
+.btn { 
+    flex: 1; padding: 13px; border: none; border-radius: 10px; 
+    font-family: inherit; font-size: 12px; font-weight: bold; 
+    cursor: pointer; letter-spacing: 1px; transition: all .15s; 
+}
+.btn-primary { background: var(--accent2); color: white; }
+.btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+.btn-schedule { 
+    background: var(--accent); color: #000; margin-top: 4px; 
+    padding: 13px; border: none; border-radius: 10px; 
+    font-family: inherit; font-size: 12px; font-weight: bold; 
+    cursor: pointer; letter-spacing: 1px; transition: all .15s; 
+}
+.btn:active, .btn-schedule:active { transform: scale(.96); }
+
+/* ═══ LOGS SECTION ═══ */
+.log-section-title { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin: 12px 0 8px; }
+.log-list { display: flex; flex-direction: column; gap: 6px; }
+.log-entry { 
+    background: var(--card); border: 1px solid var(--border); 
+    border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; 
+}
+.log-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.log-dot.success { background: var(--green); }
+.log-dot.error { background: var(--red); }
+.log-time { font-size: 9px; color: var(--muted); flex-shrink: 0; }
+.log-text { font-size: 10px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.log-status { font-size: 9px; color: var(--muted); flex-shrink: 0; }
+.log-empty { text-align: center; padding: 20px; color: var(--muted); font-size: 11px; }
 
 /* ═══ PYTHON ═══ */
 .py-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
@@ -293,7 +323,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   </div>
 
   <!-- ════ PAGE: GAMES ════ -->
-  <div class="page active" id="page-games">
+ <div class="page active" id="page-games">
     <div class="ids-bar">
       <div class="id-chip" onclick="openIdModal()">
         <span class="id-label">GAID</span>
@@ -340,6 +370,9 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
           <button class="btn btn-primary" onclick="sendLevelEvent()">📤 إرسال حدث</button>
           <button class="btn btn-secondary" onclick="sendPurchase()">💰 شراء</button>
         </div>
+        
+        <button class="btn-schedule" onclick="openJobModalFromGame()">⏱ جدولة حدث تلقائي</button>
+
         <div>
           <div class="log-section-title">EVENT LOG</div>
           <div class="log-list" id="event-log"><div class="log-empty">لا توجد أحداث بعد</div></div>
@@ -1492,6 +1525,45 @@ function escHtml(s) {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+  /* إضافة هذه الدالة في نهاية ملف السكربت 
+   لربط زر "جدولة حدث تلقائي" بمودال المهام 
+*/
+function openJobModalFromGame() {
+  if (!activeGame) {
+    showToast('error', '⚠', 'خطأ', 'يرجى اختيار لعبة أولاً');
+    return;
+  }
+
+  // 1. تحديث عنوان المودال
+  document.getElementById('job-modal-title').textContent = '⏱ جدولة: ' + activeGame.name;
+  
+  // 2. تفريغ الحقول القديمة
+  document.getElementById('job-modal-id').value = '';
+  document.getElementById('job-name').value = "Auto: " + activeGame.name;
+  
+  // 3. كتابة كود بايثون افتراضي داخل المودال بناءً على اللعبة المختارة
+  const code = `# كود تلقائي لإرسال الحدث لـ ${activeGame.name}
+import requests
+import json
+
+package = "${activeGame.package}"
+dev_key = "${activeGame.dev_key}"
+gaid = "${curGaid}"
+afid = "${curAfid}"
+
+# يمكنك إضافة كود إرسال الحدث هنا
+print(f"Executing scheduled event for {package}...")`;
+
+  document.getElementById('job-code').value = code;
+  
+  // 4. ضبط الإعدادات الافتراضية للجدولة
+  document.getElementById('job-sched-type').value = 'interval';
+  document.getElementById('sched-seconds').value = '3600';
+  updateSchedHelper();
+  
+  // 5. إظهار المودال للمستخدم
+  document.getElementById('job-modal').classList.add('open');
 }
 </script>
 </body>
