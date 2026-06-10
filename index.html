@@ -380,7 +380,7 @@ select.field-input{cursor:pointer}
 
 <script>
 // STATE
-let API = localStorage.getItem('ol_server') || '';
+let API = localStorage.getItem('ol_server') || 'https://online-production-5450.up.railway.app';
 let TOKEN = localStorage.getItem('ol_token') || '';
 let CURRENT_USER = null;
 let pyodide = null, pyReady = false;
@@ -421,9 +421,9 @@ function showLogin() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('main-app').style.display = 'none';
   if (API) {
-    document.getElementById('login-server-status').textContent = '🟢 Server: ' + API.replace('https://','').substring(0,30);
+    document.getElementById('login-server-status').textContent = '🟢 Server Connected';
   } else {
-    document.getElementById('login-server-status').textContent = '⚠ No server configured — set in Settings first';
+    document.getElementById('login-server-status').textContent = '⚠ No server configured';
   }
 }
 
