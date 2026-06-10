@@ -520,9 +520,11 @@ def admin_delete_user(uid):
     conn.close()
     return jsonify({"ok": True})
 
-if __name__ == "__main__":
- # تهيئة قاعدة البيانات والمهام فوراً عند إقلاع Gunicorn في Railway
+# ═══════════════════════════════════════
+# INITIALIZATION & RUN
+# ═══════════════════════════════════════
 init_db()
+
 try:
     load_all_jobs()
 except Exception as e:
