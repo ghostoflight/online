@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Online">
+<link rel="manifest" href="manifest.json">
+<title>ONLINE</title>
+<style>
+:root {
+  --bg:#0a0a14; --surface:#11111e; --card:#191928; --border:#252540;
+  --accent:#e8b86d; --accent2:#7c6af5; --green:#5de8a0; --red:#e85d5d;
+  --blue:#5db8e8; --text:#e8e8f0; --muted:#6666aa; --radius:12px;
+  --py:#3572A5; --py2:#FFD43B;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
+
+/* ── LOGIN SCREEN ── */
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 24px;width:100%;max-width:340px}
+.login-logo{text-align:center;font-size:28px;font-weight:bold;color:var(--accent);letter-spacing:4px;margin-bottom:6px}
+.login-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:28px;letter-spacing:2px}
+.login-field{margin-bottom:14px}
+.login-label{font-size:10px;color:var(--muted);margin-bottom:5px;display:block;letter-spacing:1px}
+.login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.login-input:focus{border-color:var(--accent2)}
+.login-error{color:var(--red);font-size:11px;text-align:center;min-height:18px;margin-bottom:10px}
+.login-btn{width:100%;background:var(--accent2);border:none;border-radius:10px;padding:13px;color:#fff;font-size:13px;font-weight:bold;font-family:inherit;cursor:pointer;letter-spacing:1px;transition:all .15s}
+.login-btn:active{transform:scale(.97)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-uses{text-align:center;font-size:10px;color:var(--muted);margin-top:14px}
+
+/* ── HEADER ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 13px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between}
+.header-title{font-size:15px;font-weight:bold;color:var(--accent);letter-spacing:3px}
+.header-right{display:flex;gap:8px;align-items:center}
+.badge{font-size:9px;padding:3px 8px;border-radius:20px;letter-spacing:1px}
+.badge-purple{background:var(--accent2);color:#fff}
+.badge-green{background:#1a3020;color:var(--green)}
+.badge-gold{background:#2a1a00;color:var(--accent)}
+.user-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--muted);font-size:10px;cursor:pointer;font-family:inherit}
+.user-btn:active{border-color:var(--red);color:var(--red)}
+
+/* ── NAV ── */
+.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:200}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;cursor:pointer;color:var(--muted);font-size:9px;letter-spacing:.5px;border-top:2px solid transparent;gap:3px;transition:color .2s}
+.nav-item.active{color:var(--accent);border-top-color:var(--accent)}
+.nav-item svg{width:19px;height:19px}
+
+/* ── PAGES ── */
+.page{display:none;padding-bottom:72px}
+.page.active{display:block}
+.page-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 13px;font-size:10px;color:var(--muted);letter-spacing:2px}
+
+/* ── CARDS & COMMON ── */
+.section-pad{padding:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.card+.card{margin-top:10px}
+.card-title{font-size:11px;color:var(--accent);font-weight:bold;margin-bottom:10px;letter-spacing:1px}
+.field-label{font-size:9px;color:var(--muted);margin-bottom:4px;letter-spacing:1px}
+.field-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px}
+.field-input:focus{border-color:var(--accent2)}
+.field-input[dir="ltr"]{direction:ltr;text-align:left}
+select.field-input{cursor:pointer}
+.btn{padding:11px 16px;border:none;border-radius:9px;font-family:inherit;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--accent2);color:#fff}
+.btn-green{background:#1a4a2a;border:1px solid var(--green);color:var(--green)}
+.btn-red{background:#3a1020;border:1px solid var(--red);color:var(--red)}
+.btn-gold{background:#2a1800;border:1px solid var(--accent);color:var(--accent)}
+.btn-gray{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:8px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* ── PYTHON ── */
+.py-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.py-status{font-size:10px;padding:3px 9px;border-radius:20px;letter-spacing:1px;font-weight:bold}
+.py-status.loading{background:#3a3020;color:var(--py2)}
+.py-status.ready{background:#1a3020;color:var(--green)}
+.py-status.error{background:#3a1020;color:var(--red)}
+.py-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-size:10px;font-family:inherit;cursor:pointer;transition:all .15s}
+.py-btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.py-btn.green{background:#1a4a2a;border-color:var(--green);color:var(--green)}
+.py-btn:active{transform:scale(.95)}
+.py-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.server-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:7px;align-items:center}
+.server-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:10px;font-family:inherit;outline:none;direction:ltr;transition:border-color .2s}
+.server-input:focus{border-color:var(--accent)}
+.connect-btn{background:var(--accent);border:none;border-radius:7px;padding:6px 11px;color:#000;font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
+.server-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.server-dot.ok{background:var(--green)}
+.server-dot.err{background:var(--red)}
+.pip-bar{background:var(--card);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;gap:7px;align-items:center}
+.pip-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;font-family:inherit;outline:none;transition:border-color .2s;direction:ltr}
+.pip-input:focus{border-color:var(--py2)}
+.pip-btn{background:var(--py);border:none;border-radius:7px;padding:6px 13px;color:var(--py2);font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
+.pip-btn:disabled{opacity:.4;cursor:not-allowed}
+.pkg-chips{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 12px;display:flex;gap:5px;flex-wrap:wrap;min-height:34px}
+.pkg-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:9px;color:var(--green);display:flex;align-items:center;gap:4px}
+.pkg-chip-x{color:var(--muted);cursor:pointer;font-size:11px}
+.pkg-empty{font-size:9px;color:var(--muted);padding:5px 0}
+.code-editor{width:100%;min-height:180px;background:#0d0d18;border:none;border-bottom:1px solid var(--border);color:#e8e8f0;font-size:12px;font-family:'Courier New',monospace;padding:11px;outline:none;resize:vertical;direction:ltr;text-align:left;line-height:1.5;tab-size:2}
+.code-editor::placeholder{color:var(--muted)}
+.output-area{background:#050510;min-height:140px;padding:9px 12px;font-size:11px;font-family:'Courier New',monospace;line-height:1.6;direction:ltr;text-align:left;overflow-y:auto;max-height:280px;white-space:pre-wrap;word-break:break-all}
+.out-stdout{color:#c8f0c8}.out-stderr{color:#f0a0a0}.out-success{color:var(--green)}.out-error{color:var(--red)}.out-sys{color:var(--muted);font-style:italic}
+
+/* ── SCHEDULER ── */
+.job-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:9px;position:relative}
+.job-card.disabled{opacity:.6}
+.job-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.job-name{font-size:13px;color:var(--accent);font-weight:bold}
+.job-status{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:bold}
+.job-status.success{background:#1a3020;color:var(--green)}
+.job-status.error{background:#3a1020;color:var(--red)}
+.job-status.pending{background:#252540;color:var(--muted)}
+.job-schedule{font-size:10px;color:var(--accent2);margin-bottom:4px}
+.job-lastrun{font-size:9px;color:var(--muted)}
+.job-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.job-btn{padding:6px 10px;border-radius:7px;font-size:9px;font-weight:bold;font-family:inherit;cursor:pointer;border:none;letter-spacing:.5px;transition:all .15s}
+.job-btn:active{transform:scale(.95)}
+.job-btn.run{background:var(--accent2);color:#fff}
+.job-btn.toggle-on{background:#1a4a2a;border:1px solid var(--green);color:var(--green)}
+.job-btn.toggle-off{background:#3a1020;border:1px solid var(--red);color:var(--red)}
+.job-btn.edit{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+.job-btn.del{background:var(--card);border:1px solid var(--red);color:var(--red)}
+.job-output{background:#050510;border-radius:7px;padding:8px;font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;max-height:80px;overflow-y:auto;margin-top:8px;font-family:'Courier New',monospace}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
+
+/* ── ADMIN ── */
+.user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.user-info{flex:1}
+.user-name{font-size:13px;font-weight:bold;color:var(--text)}
+.user-meta{font-size:9px;color:var(--muted);margin-top:2px}
+.uses-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+.uses-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s}
+.role-badge{font-size:8px;padding:2px 7px;border-radius:20px}
+.role-admin{background:#2a1a00;color:var(--accent)}
+.role-user{background:#1a1a35;color:var(--accent2)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:16px;letter-spacing:1px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:12px;right:12px;z-index:600;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:9px;transform:translateY(20px);opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}.toast.loading{border-color:var(--accent2)}
+.toast-icon{font-size:17px;flex-shrink:0}
+.toast-body{flex:1;min-width:0}
+.toast-title{font-size:12px;font-weight:bold;color:var(--text)}
+.toast-detail{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spinner{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent2);animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ════════ LOGIN SCREEN ════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">⚡ ONLINE</div>
+    <div class="login-sub">SECURE ACCESS REQUIRED</div>
+    <div class="login-field">
+      <label class="login-label">USERNAME</label>
+      <input class="login-input" id="inp-user" type="text" autocomplete="username" placeholder="Enter username" onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
+    </div>
+    <div class="login-field">
+      <label class="login-label">PASSWORD</label>
+      <input class="login-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">SIGN IN →</button>
+    <div class="login-uses" id="login-server-status">Connecting to server...</div>
+  </div>
+</div>
+
+<!-- ════════ MAIN APP ════════ -->
+<div id="main-app" style="display:none">
+
+  <div class="header">
+    <div class="header-title">⚡ ONLINE</div>
+    <div class="header-right">
+      <span class="badge badge-green" id="hdr-uses">-- uses</span>
+      <span class="badge badge-gold" id="hdr-user">--</span>
+      <button class="user-btn" onclick="doLogout()">EXIT</button>
+    </div>
+  </div>
+
+  <!-- ── PYTHON PAGE ── -->
+  <div class="page active" id="page-python">
+    <div class="py-toolbar">
+      <span class="py-status loading" id="py-status">Loading Python...</span>
+      <button class="py-btn primary" id="btn-run" onclick="runPython()" disabled>▶ Run</button>
+      <button class="py-btn" onclick="clearEditor()">Clear</button>
+      <button class="py-btn" onclick="clearOutput()">Clear Output</button>
+    </div>
+    <div class="server-bar">
+      <span style="font-size:10px;color:var(--accent);white-space:nowrap">🌐</span>
+      <input class="server-input" id="server-url" placeholder="https://your-app.railway.app">
+      <button class="connect-btn" onclick="connectServer()">Connect</button>
+      <div class="server-dot" id="server-dot"></div>
+    </div>
+    <div class="pip-bar">
+      <span style="font-size:10px;color:var(--py2);white-space:nowrap">pip install</span>
+      <input class="pip-input" id="pip-input" placeholder="package name...">
+      <button class="pip-btn" id="btn-pip" onclick="installPackage()" disabled>Install</button>
+    </div>
+    <div class="pkg-chips" id="pkg-chips">
+      <span class="pkg-empty" id="pkg-empty">No packages installed</span>
+    </div>
+    <textarea class="code-editor" id="code-editor" placeholder="# Write Python code here..." spellcheck="false" onkeydown="handleTab(event)"></textarea>
+    <div class="py-toolbar" style="padding:7px 12px">
+      <span style="font-size:10px;color:var(--muted)">OUTPUT</span>
+      <button class="py-btn green" id="btn-run2" onclick="runPython()" disabled>▶ Run Code</button>
+    </div>
+    <div class="output-area" id="output-area"><span class="out-sys">// Waiting for code...</span></div>
+  </div>
+
+  <!-- ── SCHEDULER PAGE ── -->
+  <div class="page" id="page-scheduler">
+    <div class="page-bar">⏱ SCHEDULER — Auto Tasks</div>
+    <div class="section-pad">
+      <button class="btn btn-primary btn-full" onclick="openNewJobModal()" style="margin-bottom:14px">+ New Scheduled Task</button>
+      <div id="jobs-list"><div class="empty-state">No scheduled tasks yet</div></div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS PAGE ── -->
+  <div class="page" id="page-settings">
+    <div class="page-bar">⚙️ SETTINGS</div>
+    <div class="section-pad">
+      <div class="card">
+        <div class="card-title">🌐 SERVER</div>
+        <div class="field-label">Railway Backend URL</div>
+        <input class="field-input" id="cfg-server" dir="ltr" placeholder="https://your-app.railway.app" oninput="syncServerInput(this.value)">
+        <button class="btn btn-primary" onclick="connectServer()">Connect & Save</button>
+      </div>
+      <div class="card">
+        <div class="card-title">👤 ACCOUNT</div>
+        <div id="account-info" style="font-size:12px;color:var(--muted)">Loading...</div>
+        <div class="divider"></div>
+        <button class="btn btn-red" onclick="doLogout()">Logout</button>
+      </div>
+      <div class="card">
+        <div class="card-title">💾 SYNC</div>
+        <button class="btn btn-gold btn-full" onclick="syncToServer()" style="margin-bottom:8px">↑ Upload Settings to Server</button>
+        <button class="btn btn-gray btn-full" onclick="syncFromServer()">↓ Download Settings from Server</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN PAGE ── -->
+  <div class="page" id="page-admin">
+    <div class="page-bar">🔑 ADMIN — User Management</div>
+    <div class="section-pad">
+      <button class="btn btn-gold btn-full" onclick="openAddUserModal()" style="margin-bottom:14px">+ Add New User</button>
+      <div id="users-list"><div class="empty-state">Loading...</div></div>
+    </div>
+  </div>
+
+  <nav class="nav-bar">
+    <div class="nav-item active" id="nav-python" onclick="switchPage('python')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Python
+    </div>
+    <div class="nav-item" id="nav-scheduler" onclick="switchPage('scheduler');loadJobs()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Scheduler
+    </div>
+    <div class="nav-item" id="nav-settings" onclick="switchPage('settings');loadAccountInfo()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </div>
+    <div class="nav-item" id="nav-admin" onclick="switchPage('admin');loadUsers()" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Admin
+    </div>
+  </nav>
+</div>
+
+<!-- ════════ MODALS ════════ -->
+
+<!-- Job Modal -->
+<div class="modal-overlay" id="job-modal">
+  <div class="modal">
+    <div class="modal-title" id="job-modal-title">➕ New Scheduled Task</div>
+    <input type="hidden" id="job-modal-id">
+    <div class="field-label">TASK NAME</div>
+    <input class="field-input" id="job-name" placeholder="e.g. Daily Report">
+    <div class="field-label">SCHEDULE TYPE</div>
+    <select class="field-input" id="job-sched-type" onchange="updateSchedHelper()">
+      <option value="interval">Every X seconds (interval)</option>
+      <option value="daily">Every day at specific time</option>
+      <option value="cron">Custom cron expression</option>
+    </select>
+    <div id="sched-helper-interval">
+      <div class="field-label">INTERVAL (seconds)</div>
+      <input class="field-input" id="sched-seconds" type="number" min="10" placeholder="e.g. 3600 = every hour" dir="ltr">
+    </div>
+    <div id="sched-helper-daily" style="display:none">
+      <div class="field-label">TIME (UTC)</div>
+      <input class="field-input" id="sched-time" type="time" dir="ltr" value="08:00">
+    </div>
+    <div id="sched-helper-cron" style="display:none">
+      <div class="field-label">CRON EXPRESSION (min hour day month weekday)</div>
+      <input class="field-input" id="sched-cron" dir="ltr" placeholder="0 8 * * * (= every day at 8am)">
+      <div style="font-size:9px;color:var(--muted);margin-top:-8px;margin-bottom:10px">
+        Examples: "0 * * * *" = every hour | "0 9 * * 1" = every Monday 9am
+      </div>
+    </div>
+    <div class="field-label">PYTHON CODE</div>
+    <textarea class="code-editor" id="job-code" style="min-height:140px;border-radius:9px;border:1px solid var(--border);margin-bottom:12px" placeholder="# Python code to run automatically&#10;import datetime&#10;print('Task ran at:', datetime.datetime.now())"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" style="flex:2" onclick="saveJob()">💾 Save Task</button>
+      <button class="btn btn-gray" onclick="closeJobModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logs Modal -->
+<div class="modal-overlay" id="logs-modal">
+  <div class="modal">
+    <div class="modal-title">📋 Task Execution Logs</div>
+    <div id="logs-content" style="font-size:11px;color:var(--muted)">Loading...</div>
+    <div style="margin-top:14px">
+      <button class="btn btn-gray btn-full" onclick="document.getElementById('logs-modal').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" id="adduser-modal">
+  <div class="modal">
+    <div class="modal-title">➕ Add New User</div>
+    <input type="hidden" id="edit-uid">
+    <div class="field-label">USERNAME</div>
+    <input class="field-input" id="new-username" dir="ltr" placeholder="username">
+    <div class="field-label">PASSWORD</div>
+    <input class="field-input" id="new-password" type="password" dir="ltr" placeholder="password (leave blank to keep current)">
+    <div class="field-label">ROLE</div>
+    <select class="field-input" id="new-role">
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+    <div class="field-label">MAX USES (number of allowed runs)</div>
+    <input class="field-input" id="new-maxuses" type="number" min="1" dir="ltr" placeholder="100">
+    <div class="field-label">USES LEFT (remaining)</div>
+    <input class="field-input" id="new-usesleft" type="number" min="0" dir="ltr" placeholder="100">
+    <div class="field-label">STATUS</div>
+    <select class="field-input" id="new-active">
+      <option value="1">Active</option>
+      <option value="0">Disabled</option>
+    </select>
+    <div class="btn-row">
+      <button class="btn btn-gold" style="flex:2" onclick="saveUser()">💾 Save User</button>
+      <button class="btn btn-gray" onclick="document.getElementById('adduser-modal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon"></div>
+  <div class="toast-body">
+    <div class="toast-title" id="toast-title"></div>
+    <div class="toast-detail" id="toast-detail"></div>
+  </div>
+</div>
+
+<script>
+// STATE
+let API = localStorage.getItem('ol_server') || '';
+let TOKEN = localStorage.getItem('ol_token') || '';
+let CURRENT_USER = null;
+let pyodide = null, pyReady = false;
+let serverConnected = false;
+let installedPkgs = JSON.parse(localStorage.getItem('ol_pkgs') || '[]');
+let toastTimer = null;
+
+// BOOT
+window.onload = async () => {
+  if (API) {
+    document.getElementById('server-url').value = API;
+    document.getElementById('cfg-server').value = API;
+  }
+  if (TOKEN) {
+    await restoreSession();
+  } else {
+    showLogin();
+  }
+};
+
+async function restoreSession() {
+  if (!API) { showLogin(); return; }
+  try {
+    const res = await apiFetch('/auth/me');
+    if (res.ok) {
+      const data = await res.json();
+      CURRENT_USER = data;
+      enterApp();
+    } else {
+      localStorage.removeItem('ol_token');
+      TOKEN = '';
+      showLogin();
+    }
+  } catch { showLogin(); }
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  if (API) {
+    document.getElementById('login-server-status').textContent = '🟢 Server: ' + API.replace('https://','').substring(0,30);
+  } else {
+    document.getElementById('login-server-status').textContent = '⚠ No server configured — set in Settings first';
+  }
+}
+
+function enterApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('hdr-user').textContent = CURRENT_USER.username;
+  if (CURRENT_USER.role === 'admin') {
+    document.getElementById('hdr-uses').textContent = 'ADMIN';
+    document.getElementById('nav-admin').style.display = 'flex';
+  } else {
+    document.getElementById('hdr-uses').textContent = CURRENT_USER.uses_left + ' uses';
+  }
+  connectServer(true);
+  renderInstalledPkgs();
+  loadPyodideRuntime();
+}
+
+// AUTH
+async function doLogin() {
+  const user = document.getElementById('inp-user').value.trim();
+  const pass = document.getElementById('inp-pass').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  if (!user || !pass) { err.textContent = '⚠ Enter username and password'; return; }
+  if (!API) { err.textContent = '⚠ No server URL — open Settings first'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in...'; err.textContent = '';
+  try {
+    const res = await fetch(API + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      TOKEN = data.token;
+      CURRENT_USER = data;
+      localStorage.setItem('ol_token', TOKEN);
+      enterApp();
+    } else {
+      err.textContent = '❌ ' + (data.error || 'Login failed');
+    }
+  } catch (e) {
+    err.textContent = '🔌 Cannot reach server — check URL';
+  } finally {
+    btn.disabled = false; btn.textContent = 'SIGN IN →';
+  }
+}
+
+async function doLogout() {
+  if (API && TOKEN) {
+    try { await apiFetch('/auth/logout', 'POST', {}); } catch {}
+  }
+  TOKEN = ''; CURRENT_USER = null;
+  localStorage.removeItem('ol_token');
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('inp-pass').value = '';
+  showLogin();
+}
+
+// API HELPER
+async function apiFetch(path, method='GET', body=null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Token': TOKEN }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(API + path, opts);
+}
+
+// NAVIGATION
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+}
+
+// SERVER CONNECTION
+async function connectServer(silent=false) {
+  let url = document.getElementById('server-url').value.trim() || document.getElementById('cfg-server').value.trim();
+  if (!url) return;
+  if (!url.startsWith('http')) url = 'https://' + url;
+  url = url.replace(/\/$/, '');
+  API = url;
+  localStorage.setItem('ol_server', url);
+  document.getElementById('server-url').value = url;
+  document.getElementById('cfg-server').value = url;
+  if (!silent) showToast('loading', null, 'Connecting...', url);
+  try {
+    const res = await fetch(url + '/', { signal: AbortSignal.timeout(8000) });
+    if (res.ok) {
+      serverConnected = true;
+      setDot('ok');
+      document.getElementById('btn-run').disabled = false;
+      document.getElementById('btn-run2').disabled = false;
+      document.getElementById('btn-pip').disabled = false;
+      if (!silent) showToast('success', '✅', 'Connected!', 'Railway server ready');
+    } else { setDot('err'); }
+  } catch { setDot('err'); if (!silent) showToast('error', '❌', 'Connection failed', 'Check URL'); }
+}
+
+function setDot(cls) {
+  const d = document.getElementById('server-dot');
+  d.className = 'server-dot' + (cls ? ' ' + cls : '');
+}
+
+function syncServerInput(val) {
+  document.getElementById('server-url').value = val;
+}
+
+// SYNC SETTINGS
+async function syncToServer() {
+  if (!API || !TOKEN) { showToast('error', '⚠', 'Not connected', ''); return; }
+  const settings = {
+    gaid: localStorage.getItem('ol_gaid') || '',
+    afid: localStorage.getItem('ol_afid') || '',
+    server: API,
+    pkgs: localStorage.getItem('ol_pkgs') || '[]'
+  };
+  try {
+    const res = await apiFetch('/data', 'POST', settings);
+    if (res.ok) showToast('success', '✅', 'Synced to server', 'Settings saved online');
+    else showToast('error', '❌', 'Sync failed', '');
+  } catch { showToast('error', '🔌', 'Network error', ''); }
+}
+
+async function syncFromServer() {
+  if (!API || !TOKEN) { showToast('error', '⚠', 'Not connected', ''); return; }
+  try {
+    const res = await apiFetch('/data');
+    if (res.ok) {
+      const data = await res.json();
+      for (const [key, obj] of Object.entries(data)) {
+        localStorage.setItem('ol_' + key, obj.value);
+      }
+      showToast('success', '✅', 'Downloaded from server', 'Settings restored');
+    }
+  } catch { showToast('error', '🔌', 'Network error', ''); }
+}
+
+async function loadAccountInfo() {
+  if (!API || !TOKEN) return;
+  try {
+    const res = await apiFetch('/auth/me');
+    if (res.ok) {
+      const u = await res.json();
+      CURRENT_USER = u;
+      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / u.max_uses) * 100);
+      document.getElementById('account-info').innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--text)">\${u.username}</span>
+          <span class="role-badge \${u.role === 'admin' ? 'role-admin' : 'role-user'}">\${u.role.toUpperCase()}</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">Uses: \${u.role === 'admin' ? '∞ (unlimited)' : u.uses_left + ' / ' + u.max_uses}</div>
+        <div class="uses-bar"><div class="uses-fill" style="width:\${pct}%"></div></div>
+      `;
+      if (u.role === 'admin') document.getElementById('hdr-uses').textContent = 'ADMIN';
+      else document.getElementById('hdr-uses').textContent = u.uses_left + ' uses';
+    }
+  } catch {}
+}
+
+// PYTHON
+async function runPython() {
+  const code = document.getElementById('code-editor').value.trim();
+  if (!code) { showToast('error', '⚠', 'Code is empty', ''); return; }
+  clearOutput();
+  appendOutput('// ▶ Running...\n', 'sys');
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('btn-run2').disabled = true;
+  try {
+    if (serverConnected && API) {
+      const res = await apiFetch('/run', 'POST', { code });
+      const data = await res.json();
+      if (data.error) { appendOutput('❌ ' + data.error + '\n', 'error'); }
+      else {
+        if (data.stdout) appendOutput(data.stdout, 'stdout');
+        if (data.stderr) appendOutput(data.stderr, 'stderr');
+        appendOutput(data.returncode === 0 ? '\n// ✅ Done\n' : '\n// ❌ Error\n', data.returncode === 0 ? 'success' : 'error');
+        loadAccountInfo();
+      }
+    } else if (pyReady) {
+      const result = await pyodide.runPythonAsync(code);
+      if (result !== undefined && result !== null) appendOutput(String(result) + '\n', 'stdout');
+      appendOutput('\n// ✅ Done\n', 'success');
+    } else {
+      showToast('error', '⏳', 'Not ready', 'Wait for Python or connect server');
+    }
+  } catch (e) {
+    appendOutput(e.message + '\n', 'error');
+  } finally {
+    document.getElementById('btn-run').disabled = false;
+    document.getElementById('btn-run2').disabled = false;
+  }
+}
+
+async function installPackage() {
+  const pkg = document.getElementById('pip-input').value.trim().toLowerCase();
+  if (!pkg) return;
+  const btn = document.getElementById('btn-pip');
+  btn.disabled = true; btn.textContent = '⏳';
+  showToast('loading', null, 'pip install ' + pkg, 'Installing...');
+  try {
+    if (serverConnected && API) {
+      const res = await apiFetch('/pip', 'POST', { package: pkg });
+      const data = await res.json();
+      if (data.success) {
+        if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs)); }
+        renderInstalledPkgs();
+        document.getElementById('pip-input').value = '';
+        showToast('success', '✅', 'Installed!', pkg + ' ready');
+      } else { showToast('error', '❌', 'Failed', data.message || ''); }
+    } else if (pyReady) {
+      await pyodide.runPythonAsync(`import micropip\nawait micropip.install('\${pkg}')`);
+      if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs)); }
+      renderInstalledPkgs();
+      document.getElementById('pip-input').value = '';
+      showToast('success', '✅', 'Installed!', pkg);
+    }
+  } catch (e) {
+    showToast('error', '❌', 'Failed', e.message.split('\n')[0]);
+  } finally { btn.disabled = false; btn.textContent = 'Install'; }
+}
+
+function renderInstalledPkgs() {
+  const c = document.getElementById('pkg-chips');
+  const empty = document.getElementById('pkg-empty');
+  c.querySelectorAll('.pkg-chip').forEach(x => x.remove());
+  if (!installedPkgs.length) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  installedPkgs.forEach(pkg => {
+    const chip = document.createElement('div');
+    chip.className = 'pkg-chip';
+    chip.innerHTML = `\${pkg} <span class="pkg-chip-x" onclick="removePkg('\${pkg}')">×</span>`;
+    c.appendChild(chip);
+  });
+}
+
+function removePkg(pkg) {
+  installedPkgs = installedPkgs.filter(p => p !== pkg);
+  localStorage.setItem('ol_pkgs', JSON.stringify(installedPkgs));
+  renderInstalledPkgs();
+}
+
+function appendOutput(text, kind) {
+  const area = document.getElementById('output-area');
+  const span = document.createElement('span');
+  span.className = 'out-' + kind;
+  span.textContent = text;
+  area.appendChild(span);
+  area.scrollTop = area.scrollHeight;
+}
+function clearOutput() { document.getElementById('output-area').innerHTML = ''; }
+function clearEditor() { document.getElementById('code-editor').value = ''; }
+function handleTab(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const t = e.target, s = t.selectionStart;
+    t.value = t.value.substring(0, s) + '  ' + t.value.substring(t.selectionEnd);
+    t.selectionStart = t.selectionEnd = s + 2;
+  }
+}
+
+async function loadPyodideRuntime() {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+  document.head.appendChild(script);
+  script.onload = async () => {
+    try {
+      document.getElementById('py-status').className = 'py-status loading';
+      document.getElementById('py-status').textContent = '⚙ Initializing...';
+      pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/' });
+      pyReady = true;
+      document.getElementById('py-status').className = 'py-status ready';
+      document.getElementById('py-status').textContent = '✅ Python Ready';
+      if (!serverConnected) {
+        document.getElementById('btn-run').disabled = false;
+        document.getElementById('btn-run2').disabled = false;
+        document.getElementById('btn-pip').disabled = false;
+      }
+    } catch (e) {
+      document.getElementById('py-status').className = 'py-status error';
+      document.getElementById('py-status').textContent = '❌ Load failed';
+    }
+  };
+}
+
+// SCHEDULER
+async function loadJobs() {
+  if (!API || !TOKEN) return;
+  const list = document.getElementById('jobs-list');
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+  try {
+    const res = await apiFetch('/jobs');
+    const jobs = await res.json();
+    if (!jobs.length) { list.innerHTML = '<div class="empty-state">No scheduled tasks yet<br><span style="font-size:10px">Tap + to create your first task</span></div>'; return; }
+    list.innerHTML = jobs.map(j => {
+      const statusCls = j.last_status || 'pending';
+      const statusLabel = j.last_status ? (j.last_status === 'success' ? '✅ Success' : '❌ Error') : '⏳ Pending';
+      const schedLabel = formatSchedule(j.schedule);
+      return `
+        <div class="job-card \${j.enabled ? '' : 'disabled'}" id="jobcard-\${j.id}">
+          <div class="job-header">
+            <div class="job-name">\${j.name}</div>
+            <span class="job-status \${statusCls}">\${statusLabel}</span>
+          </div>
+          <div class="job-schedule">⏱ \${schedLabel}</div>
+          <div class="job-lastrun">\${j.last_run ? 'Last run: ' + j.last_run.substring(0,19).replace('T',' ') + ' UTC' : 'Never run'}</div>
+          \${j.last_output ? `<div class="job-output">\${escHtml(j.last_output.substring(0,300))}</div>` : ''}
+          <div class="job-actions">
+            <button class="job-btn run" onclick="runJobNow(\${j.id})">▶ Run Now</button>
+            <button class="job-btn \${j.enabled ? 'toggle-on' : 'toggle-off'}" onclick="toggleJob(\${j.id},\${j.enabled})">\${j.enabled ? '⏸ Pause' : '▶ Enable'}</button>
+            <button class="job-btn edit" onclick="openEditJobModal(\${j.id})">✏ Edit</button>
+            <button class="job-btn edit" onclick="viewLogs(\${j.id})">📋 Logs</button>
+            <button class="job-btn del" onclick="deleteJob(\${j.id})">🗑</button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch { list.innerHTML = '<div class="empty-state">Failed to load</div>'; }
+}
+
+function formatSchedule(s) {
+  if (s.startsWith('interval:')) return 'Every ' + s.split(':')[1] + ' seconds';
+  if (s.startsWith('daily:')) { const p = s.split(':'); return 'Daily at ' + p[1] + ':' + p[2] + ' UTC'; }
+  if (s.startsWith('cron:')) return 'Cron: ' + s.substring(5);
+  return s;
+}
+
+function updateSchedHelper() {
+  const t = document.getElementById('job-sched-type').value;
+  document.getElementById('sched-helper-interval').style.display = t === 'interval' ? 'block' : 'none';
+  document.getElementById('sched-helper-daily').style.display = t === 'daily' ? 'block' : 'none';
+  document.getElementById('sched-helper-cron').style.display = t === 'cron' ? 'block' : 'none';
+}
+
+function getScheduleStr() {
+  const t = document.getElementById('job-sched-type').value;
+  if (t === 'interval') {
+    const s = document.getElementById('sched-seconds').value;
+    if (!s || s < 10) { showToast('error', '⚠', 'Minimum 10 seconds', ''); return null; }
+    return 'interval:' + s;
+  }
+  if (t === 'daily') {
+    const time = document.getElementById('sched-time').value;
+    const [h, m] = time.split(':');
+    return 'daily:' + h + ':' + m;
+  }
+  if (t === 'cron') {
+    const expr = document.getElementById('sched-cron').value.trim();
+    if (!expr) { showToast('error', '⚠', 'Enter cron expression', ''); return null; }
+    return 'cron:' + expr;
+  }
+  return null;
+}
+
+function openNewJobModal() {
+  document.getElementById('job-modal-title').textContent = '➕ New Scheduled Task';
+  document.getElementById('job-modal-id').value = '';
+  document.getElementById('job-name').value = '';
+  document.getElementById('job-code').value = '';
+  document.getElementById('job-sched-type').value = 'interval';
+  document.getElementById('sched-seconds').value = '3600';
+  document.getElementById('sched-time').value = '08:00';
+  document.getElementById('sched-cron').value = '';
+  updateSchedHelper();
+  document.getElementById('job-modal').classList.add('open');
+}
+
+async function openEditJobModal(id) {
+  try {
+    const res = await apiFetch('/jobs');
+    const jobs = await res.json();
+    const j = jobs.find(x => x.id === id);
+    if (!j) return;
+    document.getElementById('job-modal-title').textContent = '✏ Edit Task';
+    document.getElementById('job-modal-id').value = id;
+    document.getElementById('job-name').value = j.name;
+    document.getElementById('job-code').value = j.code;
+    if (j.schedule.startsWith('interval:')) {
+      document.getElementById('job-sched-type').value = 'interval';
+      document.getElementById('sched-seconds').value = j.schedule.split(':')[1];
+    } else if (j.schedule.startsWith('daily:')) {
+      document.getElementById('job-sched-type').value = 'daily';
+      const p = j.schedule.split(':');
+      document.getElementById('sched-time').value = p[1].padStart(2,'0') + ':' + p[2].padStart(2,'0');
+    } else if (j.schedule.startsWith('cron:')) {
+      document.getElementById('job-sched-type').value = 'cron';
+      document.getElementById('sched-cron').value = j.schedule.substring(5);
+    }
+    updateSchedHelper();
+    document.getElementById('job-modal').classList.add('open');
+  } catch {}
+}
+
+async function saveJob() {
+  const id = document.getElementById('job-modal-id').value;
+  const name = document.getElementById('job-name').value.trim();
+  const code = document.getElementById('job-code').value.trim();
+  const schedule = getScheduleStr();
+  if (!name || !code || !schedule) { if (name && code) return; showToast('error', '⚠', 'Fill all fields', ''); return; }
+  try {
+    let res;
+    if (id) {
+      res = await apiFetch('/jobs/' + id, 'PUT', { name, code, schedule });
+    } else {
+      res = await apiFetch('/jobs', 'POST', { name, code, schedule });
+    }
+    if (res.ok) {
+      closeJobModal();
+      showToast('success', '✅', id ? 'Task updated' : 'Task created', name);
+      loadJobs();
+    } else {
+      const d = await res.json();
+      showToast('error', '❌', 'Failed', d.error || '');
+    }
+  } catch { showToast('error', '🔌', 'Network error', ''); }
+}
+
+function closeJobModal() { document.getElementById('job-modal').classList.remove('open'); }
+
+async function runJobNow(id) {
+  showToast('loading', null, 'Running task...', '');
+  try {
+    const res = await apiFetch('/jobs/' + id + '/run', 'POST', {});
+    if (res.ok) {
+      showToast('success', '✅', 'Task triggered!', 'Check logs for output');
+      setTimeout(loadJobs, 2500);
+    }
+  } catch { showToast('error', '❌', 'Failed', ''); }
+}
+
+async function toggleJob(id, enabled) {
+  try {
+    const res = await apiFetch('/jobs/' + id, 'PUT', { enabled: enabled ? 0 : 1 });
+    if (res.ok) { loadJobs(); showToast('success', '✅', enabled ? 'Task paused' : 'Task enabled', ''); }
+  } catch {}
+}
+
+async function deleteJob(id) {
+  if (!confirm('Delete this task?')) return;
+  try {
+    const res = await apiFetch('/jobs/' + id, 'DELETE');
+    if (res.ok) { loadJobs(); showToast('success', '🗑', 'Deleted', ''); }
+  } catch {}
+}
+
+async function viewLogs(id) {
+  document.getElementById('logs-modal').classList.add('open');
+  document.getElementById('logs-content').innerHTML = 'Loading...';
+  try {
+    const res = await apiFetch('/jobs/' + id + '/logs');
+    const logs = await res.json();
+    if (!logs.length) { document.getElementById('logs-content').innerHTML = '<div class="empty-state">No logs yet</div>'; return; }
+    document.getElementById('logs-content').innerHTML = logs.map(l => `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:9px;color:var(--muted)">\${l.ran_at ? l.ran_at.substring(0,19).replace('T',' ') + ' UTC' : ''}</span>
+          <span style="font-size:9px;font-weight:bold;color:\${l.status === 'success' ? 'var(--green)' : 'var(--red)'}">\${l.status === 'success' ? '✅ OK' : '❌ Error'}</span>
+        </div>
+        <pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">\${escHtml(l.output || '(no output)')}</pre>
+      </div>
+    `).join('');
+  } catch { document.getElementById('logs-content').innerHTML = 'Failed to load'; }
+}
+
+// ADMIN
+async function loadUsers() {
+  if (!API || !TOKEN) return;
+  const list = document.getElementById('users-list');
+  list.innerHTML = '<div class="empty-state">Loading...</div>';
+  try {
+    const res = await apiFetch('/admin/users');
+    if (res.status === 403) { list.innerHTML = '<div class="empty-state">Admin only</div>'; return; }
+    const users = await res.json();
+    list.innerHTML = users.map(u => {
+      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses,1)) * 100);
+      return `
+        <div class="user-row">
+          <div class="user-info">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="user-name">\${u.username}</div>
+              <span class="role-badge \${u.role === 'admin' ? 'role-admin' : 'role-user'}">\${u.role}</span>
+              \${!u.active ? '<span style="font-size:8px;color:var(--red)">DISABLED</span>' : ''}
+            </div>
+            <div class="user-meta">\${u.role === 'admin' ? '∞ unlimited' : u.uses_left + ' / ' + u.max_uses + ' uses left'} • \${u.created ? u.created.substring(0,10) : ''}</div>
+            <div class="uses-bar" style="width:120px"><div class="uses-fill" style="width:\${pct}%"></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <button class="job-btn edit" onclick="openEditUser(\${u.id},'\${u.username}','\${u.role}',\${u.max_uses},\${u.uses_left},\${u.active})">✏</button>
+            <button class="job-btn del" onclick="deleteUser(\${u.id},'\${u.username}')">🗑</button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch { list.innerHTML = '<div class="empty-state">Failed to load</div>'; }
+}
+
+function openAddUserModal() {
+  document.getElementById('edit-uid').value = '';
+  document.getElementById('new-username').value = '';
+  document.getElementById('new-password').value = '';
+  document.getElementById('new-role').value = 'user';
+  document.getElementById('new-maxuses').value = '100';
+  document.getElementById('new-usesleft').value = '100';
+  document.getElementById('new-active').value = '1';
+  document.getElementById('new-username').disabled = false;
+  document.getElementById('adduser-modal').classList.add('open');
+}
+
+function openEditUser(id, username, role, max, left, active) {
+  document.getElementById('edit-uid').value = id;
+  document.getElementById('new-username').value = username;
+  document.getElementById('new-username').disabled = true;
+  document.getElementById('new-password').value = '';
+  document.getElementById('new-role').value = role;
+  document.getElementById('new-maxuses').value = max;
+  document.getElementById('new-usesleft').value = left;
+  document.getElementById('new-active').value = active;
+  document.getElementById('adduser-modal').classList.add('open');
+}
+
+async function saveUser() {
+  const id = document.getElementById('edit-uid').value;
+  const body = {
+    username: document.getElementById('new-username').value.trim(),
+    role: document.getElementById('new-role').value,
+    max_uses: parseInt(document.getElementById('new-maxuses').value) || 100,
+    uses_left: parseInt(document.getElementById('new-usesleft').value) || 0,
+    active: parseInt(document.getElementById('new-active').value)
+  };
+  const pw = document.getElementById('new-password').value;
+  if (pw) body.password = pw;
+  if (!id && !pw) { showToast('error', '⚠', 'Password required', 'for new users'); return; }
+  try {
+    let res;
+    if (id) {
+      res = await apiFetch('/admin/users/' + id, 'PUT', body);
+    } else {
+      res = await apiFetch('/admin/users', 'POST', body);
+    }
+    if (res.ok) {
+      document.getElementById('adduser-modal').classList.remove('open');
+      showToast('success', '✅', id ? 'User updated' : 'User created', body.username);
+      loadUsers();
+    } else {
+      const d = await res.json();
+      showToast('error', '❌', 'Failed', d.error || '');
+    }
+  } catch { showToast('error', '🔌', 'Network error', ''); }
+}
+
+async function deleteUser(id, name) {
+  if (!confirm('Delete user ' + name + '?')) return;
+  try {
+    const res = await apiFetch('/admin/users/' + id, 'DELETE');
+    if (res.ok) { loadUsers(); showToast('success', '🗑', 'Deleted', name); }
+  } catch {}
+}
+
+// TOAST
+function showToast(type, icon, title, detail) {
+  const t = document.getElementById('toast');
+  t.className = 'toast ' + type;
+  document.getElementById('toast-icon').innerHTML = type === 'loading' ? '<div class="spinner"></div>' : icon;
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-detail').textContent = detail;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  if (type !== 'loading') toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+['job-modal','logs-modal','adduser-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
