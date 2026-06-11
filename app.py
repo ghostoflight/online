@@ -38,7 +38,7 @@ def init_db():
      );
      CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created TEXT DEFAULT (datetime('now')), FOREIGN KEY(user_id) REFERENCES users(id));
      CREATE TABLE IF NOT EXISTS user_data (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, key TEXT NOT NULL, value TEXT, updated TEXT DEFAULT (datetime('now')), UNIQUE(user_id, key), FOREIGN KEY(user_id) REFERENCES users(id));
-     
+   
      -- تحديث الجدول ليدعم النظام الجديد
      DROP TABLE IF EXISTS scheduled_jobs;
      CREATE TABLE IF NOT EXISTS scheduled_jobs (
@@ -449,13 +449,13 @@ def list_jobs():
 @require_auth
 def create_job():
    data = request.json or {}
-   
+ 
    # 1. استخراج البيانات الجديدة من الطلب (Request)
    name = data.get("name", "").strip()
    events = data.get("events") # هذه ستكون مصفوفة [{}, {}]
    schedule = data.get("schedule", "").strip()
    user_ip = data.get("user_ip", "").strip()
-   
+ 
    # بيانات اللعبة الضرورية للإرسال
    package = data.get("package")
    dev_key = data.get("dev_key")
@@ -468,21 +468,21 @@ def create_job():
 
    user_id = request.current_user["id"]
    conn = get_db()
-   
+ 
    # 3. حفظ البيانات في الجدول المحدث (لاحظ استخدام json.dumps للأحداث)
    cursor = conn.execute("""
      INSERT INTO scheduled_jobs 
      (user_id, name, events, schedule, user_ip, package, dev_key, gaid, afid, enabled) 
      VALUES (?,?,?,?,?,?,?,?,?,1)
    """, (user_id, name, json.dumps(events), schedule, user_ip, package, dev_key, gaid, afid))
-   
+ 
    job_id = cursor.lastrowid
    conn.commit()
    conn.close()
 
    # 4. تسجيل المهمة في المجدول (Scheduler)
    register_job_in_scheduler(job_id, schedule, True)
-   
+ 
    return jsonify({"ok": True, "id": job_id})
 
 @app.route("/jobs/<int:job_id>", methods=["PUT"])
@@ -491,7 +491,7 @@ def update_job(job_id):
    data = request.json or {}
    conn = get_db()
    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-   
+ 
    if not job:
      conn.close()
      return jsonify({"error": "Not found"}), 404
@@ -506,7 +506,7 @@ def update_job(job_id):
    events = data.get("events", job["events"])
    # التأكد من تحويل المصفوفة إلى نص JSON قبل التخزين
    events_json = json.dumps(events) if isinstance(events, list) else events
-   
+ 
    schedule = data.get("schedule", job["schedule"])
    user_ip = data.get("user_ip", job["user_ip"])
    package = data.get("package", job["package"])
@@ -521,7 +521,7 @@ def update_job(job_id):
      SET name=?, events=?, schedule=?, user_ip=?, package=?, dev_key=?, gaid=?, afid=?, enabled=? 
      WHERE id=?
    """, (name, events_json, schedule, user_ip, package, dev_key, gaid, afid, enabled, job_id))
-   
+ 
    conn.commit()
    conn.close()
 
