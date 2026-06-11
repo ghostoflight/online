@@ -1029,8 +1029,17 @@ body{background:var(--ink);color:var(--t1);font-family:-apple-system,BlinkMacSys
     <div class="m-label">اسم المهمة</div>
     <input class="m-input" id="job-name" placeholder="مثال: إرسال أحداث يومية">
 
-    <div class="m-label">IP Address</div>
-    <input class="m-input" id="job-ip" dir="ltr" placeholder="أدخل البروكسي: username:pass@ip:port">
+  <div class="m-label">إعدادات البروكسي (Proxy Settings)</div>
+
+<div class="m-row" style="margin-bottom: 8px;">
+    <input class="m-input" id="proxy-ip" dir="ltr" placeholder="الـ IP (مثال: 198.51.100.24)" style="flex: 2; margin-bottom: 0;">
+    <input class="m-input" id="proxy-port" dir="ltr" type="number" placeholder="Port (8080)" style="flex: 1; margin-bottom: 0;">
+</div>
+
+<div class="m-row" style="margin-bottom: 12px;">
+    <input class="m-input" id="proxy-user" dir="ltr" placeholder="اسم المستخدم (اختياري)" style="margin-bottom: 0;">
+    <input class="m-input" id="proxy-pass" type="password" dir="ltr" placeholder="كلمة المرور (اختياري)" style="margin-bottom: 0;">
+</div>
     
     <div class="m-label">الجدولة</div>
     <select class="m-select" id="job-sched-type" onchange="updateSchedHelper()">
@@ -1588,6 +1597,27 @@ async function openEditJobModal(id){
     document.getElementById('job-modal-title').textContent='✏ تعديل المهمة';
     document.getElementById('job-modal-id').value=id;
     document.getElementById('job-name').value=j.name;
+    document.getElementById('proxy-ip').value = '';
+    document.getElementById('proxy-port').value = '';
+    document.getElementById('proxy-user').value = '';
+    document.getElementById('proxy-pass').value = '';
+
+    // 2. فك شفرة البروكسي القادم من السيرفر وتوزيعه
+    if (j.user_ip) {
+        // تعبير نمطي (Regex) يفصل: user:pass@ip:port أو ip:port
+        const proxyRegex = /^(?:([^:]+):([^@]+)@)?([^:]+):(\d+)$/;
+        const match = j.user_ip.match(proxyRegex);
+        
+        if (match) {
+            document.getElementById('proxy-user').value = match[1] || '';
+            document.getElementById('proxy-pass').value = match[2] || '';
+            document.getElementById('proxy-ip').value = match[3] || '';
+            document.getElementById('proxy-port').value = match[4] || '';
+        } else {
+            // إذا كان البروكسي المحفوظ قديماً أو بصيغة غريبة، ضعه في حقل الـ IP فقط
+            document.getElementById('proxy-ip').value = j.user_ip;
+        }
+    }
     document.getElementById('job-code').value=j.code||'';
     document.getElementById('job-ip').value='';
     document.getElementById('event-list').innerHTML='';
@@ -1605,65 +1635,69 @@ async function saveJob() {
     const id = document.getElementById('job-modal-id').value;
     const name = document.getElementById('job-name').value.trim();
     const schedule = getScheduleStr();
-    const userIP = document.getElementById('job-ip').value.trim();
-    const rawEvents = getEventsSequence();
+    const extraCode = document.getElementById('job-code').value.trim();
+    const events = getEventsSequence();
 
-    // 1. التحقق من الحقول الأساسية
-    if (!name || !schedule || !userIP) {
-        showToast('error', '⚠', 'أكمل الحقول المطلوبة', 'الاسم، الجدول، والـ IP مطلوبان');
-        return;
+    // 1. جلب قيم البروكسي المجزأة من الواجهة
+    const pIp = document.getElementById('proxy-ip').value.trim();
+    const pPort = document.getElementById('proxy-port').value.trim();
+    const pUser = document.getElementById('proxy-user').value.trim();
+    const pPass = document.getElementById('proxy-pass').value.trim();
+
+    // 2. بناء سلسلة البروكسي ديناميكياً حسب المعطيات
+    let userIP = "";
+    if (pIp && pPort) {
+        if (pUser && pPass) {
+            // في حال وجود حساب محمي بكلمة سر
+            userIP = `${pIp}:${pPort}`; // تم تعديلها لتتوافق مع السيرفر الحقيقي
+            // إذا كان السيرفر يحتاج الصيغة الكاملة المدمجة:
+            userIP = `${pUser}:${pPass}@${pIp}:${pPort}`;
+        } else {
+            // في حال كان البروكسي مفتوحاً أو يعتمد على القائمة البيضاء
+            userIP = `${pIp}:${pPort}`;
+        }
     }
 
-    // 2. التحقق من وجود حدث واحد على الأقل
-    if (rawEvents.length === 0) {
+    // 3. التحقق من الحقول الإلزامية
+    if (!name || !schedule || !userIP) {
+        showToast('error', '⚠', 'أكمل الحقول المطلوبة', 'الاسم، الجدول، وبيانات البروكسي الأساسية (IP + Port) مطلوبة');
+        return;
+    }
+    if (events.length === 0) {
         showToast('error', '⚠', 'خطأ في الأحداث', 'أضف حدثاً واحداً على الأقل للمهمة');
         return;
     }
 
-    // 3. تنسيق مصفوفة الأحداث
-    const formattedEvents = rawEvents.map(ev => ({
-        name: ev.name,
-        delay: ev.delay
-    }));
-
-    // 4. تأمين بيانات اللعبة (في حال تم الفتح من خارج صفحة اللعبة)
     const game = activeGame || { package: "", dev_key: "" };
 
-    // 5. بناء الـ Payload ليتطابق بنسبة 100% مع ما يتوقعه Flask
     const payload = {
         name: name,
-        events: formattedEvents, // نرسلها كمصفوفة ليقوم السيرفر بعمل json.dumps لها
+        events: events, 
         schedule: schedule,
-        user_ip: userIP,
+        user_ip: userIP, // السلسلة المدمجة والجاهزة للـ requests
         package: game.package,
         dev_key: game.dev_key,
         gaid: curGaid,
         afid: curAfid,
-        enabled: 1 // ضروري في حالة التعديل (PUT) لضمان بقاء المهمة مفعلة
+        enabled: 1
     };
 
     try {
         let res;
-        // توجيه الطلب: إنشاء جديد (POST) أو تعديل (PUT)
-        if (id) {
-            res = await apiFetch('/jobs/' + id, 'PUT', payload);
-        } else {
-            res = await apiFetch('/jobs', 'POST', payload);
-        }
-
+        if (id) res = await apiFetch('/jobs/' + id, 'PUT', payload);
+        else res = await apiFetch('/jobs', 'POST', payload);
+        
         if (res.ok) {
             closeJobModal();
             showToast('success', '✅', id ? 'تم التعديل' : 'تم الإنشاء', name);
-            loadJobs(); // تحديث القائمة الشاملة
-            if (activeGame && typeof loadGameJobs === 'function') {
-                loadGameJobs(); // تحديث قائمة مهام اللعبة الحالية
-            }
+            loadJobs();
+            if (activeGame && typeof loadGameJobs === 'function') loadGameJobs();
         } else {
             const d = await res.json();
-            showToast('error', '❌', 'فشل الحفظ', d.error || 'السيرفر رفض الطلب (تحقق من البيانات)');
+            showToast('error', '❌', 'فشل الحفظ', d.error || 'السيرفر رفض الطلب');
         }
     } catch (e) {
-        showToast('error', '🔌', 'خطأ في الشبكة', 'فشل الاتصال بالسيرفر: ' + e.message);
+        showToast('error', '🔌', 'خطأ في الشبكة', 'فشل الاتصال: ' + e.message);
     }
 }
 
