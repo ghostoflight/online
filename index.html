@@ -929,31 +929,31 @@ function updateEventPreview() {
 }
 
 async function loadGameJobs() {
-  const container = document.getElementById('game-jobs-list');
-  if (!container) return; // الحماية في حال لم تكن في صفحة التفاصيل
-  
-  container.innerHTML = '<div class="log-empty">جاري تحميل المهام...</div>';
-  try {
-    const res = await apiFetch('/jobs');
-    if (!res.ok) throw new Error();
-    const allJobs = await res.json();
+    const container = document.getElementById('game-jobs-list');
+    if (!container) return;
     
-    // فلترة المهام بناءً على الـ package الخاص باللعبة النشطة
-    const myJobs = allJobs.filter(j => j.code.includes(activeGame.package));
-    
-    if (myJobs.length === 0) {
-      container.innerHTML = '<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';
-    } else {
-      container.innerHTML = myJobs.map(j => `
-        <div class="log-entry">
-          <div class="log-dot ${j.enabled ? 'success' : 'error'}"></div>
-          <div class="log-text">${escHtml(j.name)}</div>
-          <div class="log-status">${formatSchedule(j.schedule)}</div>
-        </div>`).join('');
+    container.innerHTML = '<div class="log-empty">جاري تحميل المهام...</div>';
+    try {
+        const res = await apiFetch('/jobs');
+        if (!res.ok) throw new Error();
+        const allJobs = await res.json();
+        
+        // التصحيح: البحث في حقل الـ package وليس الـ code
+        const myJobs = allJobs.filter(j => j.package === activeGame.package);
+        
+        if (myJobs.length === 0) {
+            container.innerHTML = '<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';
+        } else {
+            container.innerHTML = myJobs.map(j => `
+                <div class="log-entry">
+                    <div class="log-dot ${j.enabled ? 'success' : 'error'}"></div>
+                    <div class="log-text">${escHtml(j.name)}</div>
+                    <div class="log-status">${formatSchedule(j.schedule)}</div>
+                </div>`).join('');
+        }
+    } catch {
+        container.innerHTML = '<div class="log-empty">فشل تحميل السجل</div>';
     }
-  } catch {
-    container.innerHTML = '<div class="log-empty">فشل تحميل السجل</div>';
-  }
 }
 
 async function sendLevelEvent() {
