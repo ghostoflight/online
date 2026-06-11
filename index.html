@@ -323,7 +323,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   </div>
 
   <!-- ════ PAGE: GAMES ════ -->
- <div class="page active" id="page-games">
+<div class="page active" id="page-games">
     <div class="ids-bar">
       <div class="id-chip" onclick="openIdModal()">
         <span class="id-label">GAID</span>
@@ -373,6 +373,13 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
         
         <button class="btn-schedule" onclick="openJobModalFromGame()">⏱ جدولة حدث تلقائي</button>
 
+        <div class="job-log-section">
+          <div class="log-section-title">SCHEDULED JOBS</div>
+          <div id="game-jobs-list" class="log-list">
+            <div class="log-empty">جاري تحميل المهام...</div>
+          </div>
+        </div>
+
         <div>
           <div class="log-section-title">EVENT LOG</div>
           <div class="log-list" id="event-log"><div class="log-empty">لا توجد أحداث بعد</div></div>
@@ -380,7 +387,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
       </div>
     </div>
   </div>
-
+  
   <!-- ════ PAGE: PYTHON ════ -->
   <div class="page" id="page-python">
     <div class="page-titlebar">🐍 PYTHON TERMINAL — Pyodide + Server</div>
@@ -896,6 +903,9 @@ function openGame(idx) {
   document.getElementById('event-log').innerHTML = '<div class="log-empty">لا توجد أحداث بعد</div>';
   eventLog = [];
   showView('view-detail');
+  
+  // إضافة استدعاء دالة جلب مهام اللعبة الحالية
+  loadGameJobs();
 }
 
 function goBack() { showView('view-main'); }
@@ -910,6 +920,34 @@ function updateEventPreview() {
   const tmpl = activeGame.level_events[0].template;
   const val = document.getElementById('level-input').value;
   document.getElementById('event-preview').textContent = (tmpl.includes('{}') && val) ? '→ ' + tmpl.replace('{}', val) : '';
+}
+
+async function loadGameJobs() {
+  const container = document.getElementById('game-jobs-list');
+  if (!container) return; // الحماية في حال لم تكن في صفحة التفاصيل
+  
+  container.innerHTML = '<div class="log-empty">جاري تحميل المهام...</div>';
+  try {
+    const res = await apiFetch('/jobs');
+    if (!res.ok) throw new Error();
+    const allJobs = await res.json();
+    
+    // فلترة المهام بناءً على الـ package الخاص باللعبة النشطة
+    const myJobs = allJobs.filter(j => j.code.includes(activeGame.package));
+    
+    if (myJobs.length === 0) {
+      container.innerHTML = '<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';
+    } else {
+      container.innerHTML = myJobs.map(j => `
+        <div class="log-entry">
+          <div class="log-dot ${j.enabled ? 'success' : 'error'}"></div>
+          <div class="log-text">${escHtml(j.name)}</div>
+          <div class="log-status">${formatSchedule(j.schedule)}</div>
+        </div>`).join('');
+    }
+  } catch {
+    container.innerHTML = '<div class="log-empty">فشل تحميل السجل</div>';
+  }
 }
 
 async function sendLevelEvent() {
@@ -1364,22 +1402,50 @@ async function saveJob() {
   const name = document.getElementById('job-name').value.trim();
   const code = document.getElementById('job-code').value.trim();
   const schedule = getScheduleStr();
-  if (!name || !code || !schedule) { showToast('error', '⚠', 'أكمل جميع الحقول', ''); return; }
+  
+  if (!name || !code || !schedule) { 
+    showToast('error', '⚠', 'أكمل جميع الحقول', ''); 
+    return; 
+  }
+  
   try {
     const res = id ? await apiFetch('/jobs/'+id, 'PUT', {name,code,schedule}) : await apiFetch('/jobs', 'POST', {name,code,schedule});
-    if (res.ok) { closeJobModal(); showToast('success','✅',id?'تم التعديل':'تم الإنشاء',name); loadJobs(); }
-    else { const d = await res.json(); showToast('error','❌','فشل',d.error||''); }
-  } catch { showToast('error','🔌','خطأ في الشبكة',''); }
+    if (res.ok) { 
+      closeJobModal(); 
+      showToast('success', '✅', id ? 'تم التعديل' : 'تم الإنشاء', name); 
+      loadJobs(); // تحديث القائمة العامة
+      
+      // تحديث السجل الخاص باللعبة إذا كانت الصفحة مفتوحة
+      if (typeof loadGameJobs === 'function') loadGameJobs(); 
+    } else { 
+      const d = await res.json(); 
+      showToast('error', '❌', 'فشل', d.error || ''); 
+    }
+  } catch { 
+    showToast('error', '🔌', 'خطأ في الشبكة', ''); 
+  }
 }
 
-function closeJobModal() { document.getElementById('job-modal').classList.remove('open'); }
+function closeJobModal() { 
+  document.getElementById('job-modal').classList.remove('open'); 
+}
 
 async function runJobNow(id) {
   showToast('loading', null, 'جاري التشغيل...', '');
   try {
     const res = await apiFetch('/jobs/'+id+'/run', 'POST', {});
-    if (res.ok) { showToast('success','✅','تم التشغيل!','راجع السجل للنتائج'); setTimeout(loadJobs, 2500); }
-  } catch { showToast('error','❌','فشل',''); }
+    if (res.ok) { 
+      showToast('success', '✅', 'تم التشغيل!', 'راجع السجل للنتائج'); 
+      setTimeout(() => {
+        loadJobs(); 
+        if (typeof loadGameJobs === 'function') loadGameJobs(); // تحديث السجل بعد التشغيل
+      }, 2500); 
+    } else {
+      showToast('error', '❌', 'فشل', '');
+    }
+  } catch { 
+    showToast('error', '❌', 'فشل', ''); 
+  }
 }
 
 async function toggleJob(id, enabled) {
@@ -1526,9 +1592,8 @@ function escHtml(s) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
-  /* إضافة هذه الدالة في نهاية ملف السكربت 
-   لربط زر "جدولة حدث تلقائي" بمودال المهام 
-*/
+  
+  /* دالة ربط زر "جدولة حدث تلقائي" بمودال المهام */
 function openJobModalFromGame() {
   if (!activeGame) {
     showToast('error', '⚠', 'خطأ', 'يرجى اختيار لعبة أولاً');
@@ -1538,12 +1603,12 @@ function openJobModalFromGame() {
   // 1. تحديث عنوان المودال
   document.getElementById('job-modal-title').textContent = '⏱ جدولة: ' + activeGame.name;
   
-  // 2. تفريغ الحقول القديمة
+  // 2. تفريغ وتعبئة بيانات المهمة
   document.getElementById('job-modal-id').value = '';
   document.getElementById('job-name').value = "Auto: " + activeGame.name;
   
-  // 3. كتابة كود بايثون افتراضي داخل المودال بناءً على اللعبة المختارة
-  const code = `# كود تلقائي لإرسال الحدث لـ ${activeGame.name}
+  // 3. كود بايثون تلقائي يتم ملؤه في المحرر مع الحفاظ على متغيرات اللعبة
+  const code = `# كود الجدولة التلقائي لـ: ${activeGame.name}
 import requests
 import json
 
@@ -1552,17 +1617,17 @@ dev_key = "${activeGame.dev_key}"
 gaid = "${curGaid}"
 afid = "${curAfid}"
 
-# يمكنك إضافة كود إرسال الحدث هنا
-print(f"Executing scheduled event for {package}...")`;
+# المنطقة المخصصة لإرسال الأحداث
+print(f"جاري التنفيذ لـ {package}...")`;
 
   document.getElementById('job-code').value = code;
   
-  // 4. ضبط الإعدادات الافتراضية للجدولة
+  // 4. ضبط الإعدادات الافتراضية للجدولة (يمكنك تعديل القيم حسب رغبتك)
   document.getElementById('job-sched-type').value = 'interval';
-  document.getElementById('sched-seconds').value = '3600';
-  updateSchedHelper();
+  document.getElementById('sched-seconds').value = '3600'; // القيمة الافتراضية ساعة
   
-  // 5. إظهار المودال للمستخدم
+  // 5. استدعاء المساعد وتحديث المودال
+  updateSchedHelper();
   document.getElementById('job-modal').classList.add('open');
 }
 </script>
