@@ -8,10 +8,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pharaoh Pro">
+<meta name="apple-mobile-web-app-title" content="online">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>PHARAOH PRO v17.0</title>
+<title>online v1</title>
 <style>
 :root {
   --bg:#0a0a14; --surface:#11111e; --card:#191928; --border:#252540;
@@ -291,7 +291,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 <!-- ════ LOGIN ════ -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">⚡ PHARAOH PRO</div>
+    <div class="login-logo">⚡ online</div>
     <div class="login-sub">SECURE ACCESS — v17.0</div>
     <div class="login-field">
       <label class="login-label">USERNAME</label>
@@ -313,7 +313,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
 <div id="main-app" style="display:none">
 
   <div class="header">
-    <div class="header-title">⚡ PHARAOH PRO</div>
+    <div class="header-title">⚡ online</div>
     <div class="header-right">
       <span class="py-badge" id="py-badge">🐍 Loading...</span>
       <span class="header-badge badge-green" id="hdr-uses" style="display:none">-- uses</span>
@@ -413,7 +413,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     </div>
     <div class="editor-container">
       <textarea class="code-editor" id="code-editor"
-        placeholder="# اكتب كود Python هنا...&#10;print('مرحباً من Pharaoh Pro!')"
+        placeholder="# اكتب كود Python هنا...&#10;print('مرحباً من online!')"
         spellcheck="false" onkeydown="handleTab(event)"></textarea>
     </div>
     <div class="py-toolbar" style="padding:8px 12px">
@@ -479,7 +479,7 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
       <div class="settings-section">INFO</div>
       <div class="settings-item">
         <div class="settings-label">الإصدار</div>
-        <div style="font-size:11px;color:var(--muted)">v17.0 — Pharaoh Pro</div>
+        <div style="font-size:11px;color:var(--muted)">v17.0 — online</div>
       </div>
       <div class="settings-item">
         <div class="settings-label">محرك Python</div>
@@ -655,6 +655,14 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="toast-detail" id="toast-detail"></div>
   </div>
 </div>
+  <div id="login-screen">...</div>
+
+    <div id="main-app" style="display:none;">
+        <h1>إدارة المهام المجدولة</h1>
+        <div id="event-input-section">...</div>
+        <ul id="eventList"></ul>
+        <button onclick="sendJobToServer()">بدء تنفيذ سلسلة الأهداف</button>
+    </div>
 
 <script>
 /* ════════════════════════════════════════
@@ -1251,7 +1259,7 @@ function handleTab(e) {
 ════════════════════════════════════════ */
 const SNIPPETS = [
   {title:'مرحبا بالعالم',tag:'Python',desc:'أول كود Python — طباعة رسالة وتاريخ اليوم',
-   code:`from datetime import datetime\nprint("مرحباً من Pharaoh Pro! 🐍")\nprint(f"التاريخ الآن: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")`},
+   code:`from datetime import datetime\nprint("مرحباً من online! 🐍")\nprint(f"التاريخ الآن: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")`},
   {title:'حساب إحصائي',tag:'math',desc:'حسابات رياضية بدون مكتبات خارجية',
    code:`import math, statistics\nnums = [10,25,33,47,52,61,78,90]\nprint(f"المجموع: {sum(nums)}")\nprint(f"المتوسط: {statistics.mean(nums):.2f}")\nprint(f"الوسيط: {statistics.median(nums)}")\nprint(f"الانحراف: {statistics.stdev(nums):.2f}")`},
   {title:'معالجة JSON',tag:'json',desc:'تحليل وبناء بيانات JSON',
@@ -1426,46 +1434,41 @@ async function saveJob() {
   const id = document.getElementById('job-modal-id').value;
   const name = document.getElementById('job-name').value.trim();
   const schedule = getScheduleStr();
-  const events = getEventsSequence(); // تجميع الأحداث من الحقول الديناميكية
-  const userIP = document.getElementById('job-ip').value.trim(); // سحب الـ IP المدخل
   
-  // التحقق من أن جميع البيانات المطلوبة موجودة (بما فيها الـ IP)
-  if (!name || events.length === 0 || !schedule || !userIP) { 
+  // 1. تجميع الأحداث وحساب الفوارق الزمنية تلقائياً
+  const rawEvents = getEventsSequence(); 
+  let eventsQueue = [];
+  let lastTotalSeconds = 0;
+
+  rawEvents.forEach(ev => {
+    // ev.delay هنا قادم من حقل الإدخال (بالدقائق)
+    let totalSeconds = ev.delay * 60; 
+    let delayFromPrevious = totalSeconds - lastTotalSeconds;
+    if (delayFromPrevious < 0) delayFromPrevious = 0;
+    
+    eventsQueue.push({ name: ev.name, delay: delayFromPrevious });
+    lastTotalSeconds = totalSeconds;
+  });
+
+  const userIP = document.getElementById('job-ip').value.trim();
+  
+  if (!name || eventsQueue.length === 0 || !schedule || !userIP) { 
     showToast('error', '⚠', 'أكمل جميع الحقول (بما فيها الـ IP)', ''); 
     return; 
   }
   
-  // تجهيز البيانات لإرسالها
   const payload = { 
     name, 
-    events, 
+    events: eventsQueue, // إرسال السلسلة المحسوبة
     schedule,
-    user_ip: userIP, // إرسال الـ IP للسيرفر
+    user_ip: userIP,
     package: activeGame.package,
     dev_key: activeGame.dev_key,
     gaid: curGaid,
     afid: curAfid
   };
   
-  try {
-    const res = id 
-      ? await apiFetch('/jobs/' + id, 'PUT', payload) 
-      : await apiFetch('/jobs', 'POST', payload);
-      
-    if (res.ok) { 
-      closeJobModal(); 
-      showToast('success', '✅', id ? 'تم التعديل' : 'تم الإنشاء', name); 
-      loadJobs(); // تحديث القائمة العامة للمهام
-      
-      // تحديث السجل الخاص باللعبة إذا كانت صفحة التفاصيل مفتوحة
-      if (typeof loadGameJobs === 'function') loadGameJobs(); 
-    } else { 
-      const d = await res.json(); 
-      showToast('error', '❌', 'فشل', d.error || 'خطأ في السيرفر'); 
-    }
-  } catch { 
-    showToast('error', '🔌', 'خطأ في الاتصال', 'تعذر الوصول للسيرفر'); 
-  }
+  // ... (باقي كود الإرسال fetch كما هو موجود لديك)
 }
   
 function closeJobModal() { 
@@ -1680,7 +1683,7 @@ function addEventRow(name = '', delay = 0) {
   row.style.marginBottom = '5px';
   row.innerHTML = `
     <input class="modal-input event-name" value="${name}" placeholder="Event Name">
-    <input class="modal-input event-delay" type="number" value="${delay}" placeholder="تأخير (ث)" style="width:80px">
+    <input class="modal-input event-delay" type="number" value="${delay}" placeholder="تأخير (دقيقة)" style="width:80px">
     <button class="btn btn-secondary" style="width:40px" onclick="this.parentElement.remove()">🗑</button>
   `;
   container.appendChild(row);
