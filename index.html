@@ -1425,17 +1425,23 @@ async function saveJob() {
     const id = document.getElementById('job-modal-id').value;
     const name = document.getElementById('job-name').value.trim();
     const schedule = getScheduleStr();
-    const rawEvents = getEventsSequence(); 
+    const rawEvents = getEventsSequence(); // [ {name: '...', delay: 5}, ... ]
     const userIP = document.getElementById('job-ip').value.trim();
 
     if (!name || rawEvents.length === 0 || !schedule || !userIP) { 
-        showToast('error', '⚠', 'تنبيه', 'أكمل جميع الحقول المطلوبة'); 
+        showToast('error', '⚠', 'تنبيه', 'أكمل جميع الحقول المطلوبة (بما فيها الـ IP)'); 
         return; 
     }
 
+    // تجهيز الأحداث للسيرفر
+    const formattedEvents = rawEvents.map(ev => ({
+        name: ev.name,
+        delay: ev.delay // السيرفر سيقوم بـ sleep بناءً على هذه القيمة
+    }));
+
     const payload = { 
         name, 
-        events: rawEvents, 
+        events: formattedEvents, 
         schedule,
         user_ip: userIP,
         package: activeGame.package,
@@ -1445,19 +1451,17 @@ async function saveJob() {
     };
 
     try {
-        // تحديد المسار: إما إضافة (POST) أو تعديل (PUT)
         const url = id ? `/jobs/${id}` : '/jobs';
         const method = id ? 'PUT' : 'POST';
 
         const res = await apiFetch(url, method, payload);
-        const data = await res.json();
-
         if (res.ok) {
             showToast('success', '✅', 'تم الحفظ', 'تمت جدولة المهمة بنجاح');
             closeJobModal();
-            loadJobs(); // تحديث القائمة
+            loadJobs(); 
         } else {
-            showToast('error', '❌', 'فشل الحفظ', data.error || 'حدث خطأ غير معروف');
+            const data = await res.json();
+            showToast('error', '❌', 'فشل الحفظ', data.error || 'خطأ في السيرفر');
         }
     } catch (err) {
         showToast('error', '🔌', 'خطأ في الاتصال', 'تعذر الوصول للسيرفر');
