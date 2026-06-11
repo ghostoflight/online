@@ -1680,27 +1680,38 @@ function openJobModalFromGame() {
    إضافات نظام تسلسل الأحداث الديناميكي
 ════════════════════════════════════════ */
 
-// دالة إضافة صف حدث جديد
+// دالة إضافة صف حدث جديد - معدلة لتكون أكثر استقراراً
 function addEventRow(name = '', delay = 0) {
-  const container = document.getElementById('event-list');
-  const row = document.createElement('div');
-  row.className = 'btn-row';
-  row.style.marginBottom = '5px';
-  row.innerHTML = `
-    <input class="modal-input event-name" value="${name}" placeholder="Event Name">
-    <input class="modal-input event-delay" type="number" value="${delay}" placeholder="تأخير (دقيقة)" style="width:80px">
-    <button class="btn btn-secondary" style="width:40px" onclick="this.parentElement.remove()">🗑</button>
-  `;
-  container.appendChild(row);
+    const container = document.getElementById('event-list');
+    const rowId = 'row-' + Date.now(); // معرف فريد لكل صف
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+    row.style.marginBottom = '5px';
+    row.id = rowId;
+    row.innerHTML = `
+        <input class="modal-input event-name" name="event_name" placeholder="Event Name" value="${escHtml(name)}">
+        <input class="modal-input event-delay" name="event_delay" type="number" value="${delay}" placeholder="دقيقة" style="width:80px">
+        <button class="btn btn-secondary" style="width:40px" onclick="document.getElementById('${rowId}').remove()">🗑</button>
+    `;
+    container.appendChild(row);
 }
 
 // ... (نفس دالة getEventsSequence الموجودة لديك)
 function getEventsSequence() {
-  const rows = document.querySelectorAll('#event-list > div');
-  return Array.from(rows).map(row => ({
-    name: row.querySelector('.event-name').value,
-    delay: parseInt(row.querySelector('.event-delay').value) || 0
-  }));
+    const rows = document.querySelectorAll('#event-list > div');
+    const sequence = [];
+    rows.forEach(row => {
+        const nameInput = row.querySelector('input[name="event_name"]');
+        const delayInput = row.querySelector('input[name="event_delay"]');
+        
+        if (nameInput && delayInput) {
+            sequence.push({
+                name: nameInput.value.trim(),
+                delay: parseInt(delayInput.value) || 0
+            });
+        }
+    });
+    return sequence;
 }
 </script>
 </body>
