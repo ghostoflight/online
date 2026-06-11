@@ -360,38 +360,68 @@ def init_db():
 
 def execute_job(job_id):
     conn = get_db()
-    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-    if not job or not job["enabled"]:
-        conn.close()
-        return
-
     try:
+        # 1. جلب بيانات المهمة
+        job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+        if not job or not job["enabled"]:
+            return
+
         events = json.loads(job["events"])
-    except:
-        events = []
-
-    # منطق التنفيذ:
-    # بما أننا نستخدم apscheduler مع وقت محدد، سننفذ الحدث الحالي فقط
-    # ثم سنقوم بجدولة "الحدث القادم" إذا وجد.
-    
-    # هذه الدالة ستنفذ "الحدث الأول المتاح" أو "الحدث التالي في السلسلة"
-    # لجعلها دقيقة، سنقوم بتعديل هيكل الـ events في قاعدة البيانات
-    # ليحتفظ بحالة (current_index)
-    
-    # بدلاً من التعقيد، إليك أبسط وأقوى طريقة:
-    # السيرفر سينفذ كل المصفوفة دفعة واحدة (إذا كانت الـ Delays قصيرة)
-    # أو نستخدم threading.Timer للحدث القادم.
-
-    for event in events:
-        # إرسال الحدث إلى AppsFlyer (كما في كودك السابق)
-        # ... (نفس كود إرسال الـ request) ...
+        output_log = ""
         
-        # إذا كان هناك delay للحدث القادم، نخرج من الحلقة وننتظر
-        if event.get("delay", 0) > 0:
-            threading.Timer(event["delay"], execute_job, args=[job_id]).start()
-            break
+        # 2. إعداد البروكسي (في حال وجود IP)
+        # إذا كان البروكسي يحتاج توثيقاً: استخدم الصيغة "http://user:pass@ip:port"
+        proxies = None
+        if job["user_ip"]:
+            proxies = {
+                "http": f"http://{job['user_ip']}",
+                "https": f"http://{job['user_ip']}"
+            }
+        
+        # 3. تنفيذ سلسلة الأحداث
+        for event in events:
+            payload = {
+                "appsflyer_id": job["afid"],
+                "advertising_id": job["gaid"],
+                "eventName": event["name"],
+                "eventTime": datetime.now(timezone.utc).isoformat(),
+                "eventValue": "{}"
+            }
             
-    conn.close()
+            try:
+                res = requests.post(
+                    f"https://api2.appsflyer.com/inappevent/{job['package']}",
+                    headers={"authentication": job["dev_key"]},
+                    json=payload,
+                    proxies=proxies, # تفعيل البروكسي هنا
+                    timeout=15
+                )
+                output_log += f"Event: {event['name']} | Status: {res.status_code}\n"
+            except Exception as e:
+                output_log += f"Event: {event['name']} | Failed: {str(e)}\n"
+            
+            # تنفيذ التأخير (Delay) إذا وجد
+            if event.get("delay", 0) > 0:
+                time.sleep(event["delay"] * 60)
+        
+        # 4. تسجيل نجاح المهمة في الجدول والسجل
+        conn.execute("UPDATE scheduled_jobs SET last_status='success', last_output=?, last_run=datetime('now') WHERE id=?", 
+                     (output_log, job_id))
+        conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
+                     (job_id, "success", output_log))
+        conn.commit()
+
+    except Exception as e:
+        # 5. تسجيل الفشل في الجدول والسجل
+        error_msg = str(e)
+        conn.execute("UPDATE scheduled_jobs SET last_status='error', last_output=?, last_run=datetime('now') WHERE id=?", 
+                     (error_msg, job_id))
+        conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
+                     (job_id, "error", error_msg))
+        conn.commit()
+    
+    finally:
+        conn.close()
 
 def register_job_in_scheduler(job_id, schedule_str, enabled):
     # إزالة المهمة القديمة إذا كانت موجودة لمنع التكرار
@@ -441,114 +471,82 @@ def list_jobs():
 @app.route("/jobs", methods=["POST"])
 @require_auth
 def create_job():
-  data = request.json or {}
+    data = request.json or {}
+    # التحقق من البيانات وتجهيزها
+    name = data.get("name", "").strip()
+    events = data.get("events") 
+    schedule = data.get("schedule", "").strip()
+    user_ip = data.get("user_ip", "").strip()
+    
+    if not name or not events or not schedule or not user_ip:
+        return jsonify({"error": "Missing fields"}), 400
 
-  # 1. استخراج البيانات الجديدة من الطلب (Request)
-  name = data.get("name", "").strip()
-  events = data.get("events") # هذه ستكون مصفوفة [{}, {}]
-  schedule = data.get("schedule", "").strip()
-  user_ip = data.get("user_ip", "").strip()
+    conn = get_db()
+    cursor = conn.execute("""
+        INSERT INTO scheduled_jobs (user_id, name, events, schedule, user_ip, package, dev_key, gaid, afid, enabled)
+        VALUES (?,?,?,?,?,?,?,?,?,1)
+    """, (request.current_user["id"], name, json.dumps(events), schedule, user_ip, 
+          data.get("package"), data.get("dev_key"), data.get("gaid"), data.get("afid")))
+    
+    job_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
 
-  # بيانات اللعبة الضرورية للإرسال
-  package = data.get("package")
-  dev_key = data.get("dev_key")
-  gaid = data.get("gaid")
-  afid = data.get("afid")
-
-  # 2. التحقق من وجود البيانات الأساسية
-  if not name or not events or not schedule or not user_ip:
-    return jsonify({"error": "name, events, schedule, and user_ip are required"}), 400
-
-  user_id = request.current_user["id"]
-  conn = get_db()
-
-  # 3. حفظ البيانات في الجدول المحدث (لاحظ استخدام json.dumps للأحداث)
-  cursor = conn.execute("""
-    INSERT INTO scheduled_jobs
-    (user_id, name, events, schedule, user_ip, package, dev_key, gaid, afid, enabled)
-    VALUES (?,?,?,?,?,?,?,?,?,1)
-  """, (user_id, name, json.dumps(events), schedule, user_ip, package, dev_key, gaid, afid))
-
-  job_id = cursor.lastrowid
-  conn.commit()
-  conn.close()
-
-  # 4. تسجيل المهمة في المجدول (Scheduler)
-  register_job_in_scheduler(job_id, schedule, True)
-
-  return jsonify({"ok": True, "id": job_id})
+    # التفعيل الفوري للمهمة
+    register_job_in_scheduler(job_id, schedule, True)
+    return jsonify({"ok": True, "id": job_id})
 
 @app.route("/jobs/<int:job_id>", methods=["PUT"])
 @require_auth
 def update_job(job_id):
-  data = request.json or {}
-  conn = get_db()
-  job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-
-  if not job:
+    data = request.json or {}
+    conn = get_db()
+    
+    # تحديث البيانات
+    conn.execute("""
+        UPDATE scheduled_jobs 
+        SET name=?, events=?, schedule=?, enabled=? 
+        WHERE id=? AND (user_id=? OR ?='admin')
+    """, (data.get("name"), json.dumps(data.get("events")), data.get("schedule"), 
+          int(data.get("enabled")), job_id, request.current_user["id"], request.current_user["role"]))
+    
+    conn.commit()
     conn.close()
-    return jsonify({"error": "Not found"}), 404
 
-  # التحقق من الصلاحيات
-  if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-    conn.close()
-    return jsonify({"error": "Forbidden"}), 403
-
-  # استخراج البيانات المحدثة (مع مراعاة الهيكل الجديد)
-  name = data.get("name", job["name"])
-  events = data.get("events", job["events"])
-  # التأكد من تحويل المصفوفة إلى نص JSON قبل التخزين
-  events_json = json.dumps(events) if isinstance(events, list) else events
-
-  schedule = data.get("schedule", job["schedule"])
-  user_ip = data.get("user_ip", job["user_ip"])
-  package = data.get("package", job["package"])
-  dev_key = data.get("dev_key", job["dev_key"])
-  gaid = data.get("gaid", job["gaid"])
-  afid = data.get("afid", job["afid"])
-  enabled = int(data.get("enabled", job["enabled"]))
-
-  # تحديث الجدول بالبيانات الجديدة
-  conn.execute("""
-    UPDATE scheduled_jobs
-    SET name=?, events=?, schedule=?, user_ip=?, package=?, dev_key=?, gaid=?, afid=?, enabled=?
-    WHERE id=?
-  """, (name, events_json, schedule, user_ip, package, dev_key, gaid, afid, enabled, job_id))
-
-  conn.commit()
-  conn.close()
-
-  # إعادة تسجيل المهمة في المجدول بالتحديثات الجديدة
-  register_job_in_scheduler(job_id, schedule, enabled)
-  return jsonify({"ok": True})
+    # إعادة جدولة المهمة المحدثة
+    register_job_in_scheduler(job_id, data.get("schedule"), int(data.get("enabled")))
+    return jsonify({"ok": True})
 
 @app.route("/jobs/<int:job_id>", methods=["DELETE"])
 @require_auth
 def delete_job(job_id):
-  conn = get_db()
-  job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-  if not job:
-    conn.close()
-    return jsonify({"error": "Not found"}), 404
-
-  if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-    conn.close()
-    return jsonify({"error": "Forbidden"}), 403
-
-  conn.execute("DELETE FROM scheduled_jobs WHERE id=?", (job_id,))
-  conn.execute("DELETE FROM job_logs WHERE job_id=?", (job_id,))
-  conn.commit()
-  conn.close()
-
-  # BUG FIX #10: Guard against KeyError when job not in dict
-  if job_id in scheduled_jobs:
+    conn = get_db()
     try:
-      scheduled_jobs[job_id].remove()
-    except Exception:
-      pass
-    del scheduled_jobs[job_id]
+        job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+        if not job:
+            return jsonify({"error": "Not found"}), 404
 
-  return jsonify({"ok": True})
+        # التحقق من الصلاحيات
+        if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
+            return jsonify({"error": "Forbidden"}), 403
+
+        # الحذف من قاعدة البيانات
+        conn.execute("DELETE FROM scheduled_jobs WHERE id=?", (job_id,))
+        conn.execute("DELETE FROM job_logs WHERE job_id=?", (job_id,))
+        conn.commit()
+
+        # الحذف من المجدول (بشكل آمن)
+        job_instance = scheduled_jobs.pop(job_id, None)
+        if job_instance:
+            try:
+                job_instance.remove()
+            except Exception:
+                pass
+
+        return jsonify({"ok": True})
+    
+    finally:
+        conn.close()
 
 @app.route("/jobs/<int:job_id>/run", methods=["POST"])
 @require_auth
@@ -688,14 +686,23 @@ def admin_delete_user(uid):
 # INITIALIZATION & RUN
 # ═══════════════════════════════════════
 
+# التأكد من إنشاء الجداول أولاً
 init_db()
 
+# محاولة تحميل المهام النشطة من قاعدة البيانات إلى الذاكرة (Scheduler)
 try:
-  load_all_jobs()
+    load_all_jobs()
+    print("المهام المجدولة تم تحميلها بنجاح.")
 except Exception as e:
-  print(f"Scheduler load error: {e}")
-
+    print(f"خطأ أثناء تحميل المهام: {e}")
+  
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"حدث خطأ غير متوقع: {e}")
+    return jsonify({"error": "Internal Server Error"}), 500
+  
 if __name__ == "__main__":
-  port = int(os.environ.get("PORT", 5000))
-  app.run(host="0.0.0.0", port=port, debug=False)
+    # تشغيل السيرفر
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
     
