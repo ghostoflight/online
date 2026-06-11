@@ -3,337 +3,783 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a0a14">
+<meta name="theme-color" content="#080812">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="online">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" href="icon-192.png">
 <title>online v1</title>
 <style>
+/* ── DESIGN TOKENS ── */
 :root {
-  --bg:#0a0a14; --surface:#11111e; --card:#191928; --border:#252540;
-  --accent:#e8b86d; --accent2:#7c6af5; --accent3:#5de8a0;
-  --red:#e85d5d; --green:#5de8a0; --blue:#5db8e8;
-  --text:#e8e8f0; --muted:#6666aa; --radius:12px;
-  --py:#3572A5; --py2:#FFD43B;
+  /* Palette: Deep Cosmos */
+  --ink:        #080812;
+  --ink2:       #0e0e1c;
+  --ink3:       #141428;
+  --panel:      #1a1a30;
+  --rim:        #252545;
+  --rim2:       #30305a;
+
+  /* Accents: warm amber + electric violet */
+  --gold:       #f0c060;
+  --gold2:      #d9922a;
+  --violet:     #8b6ff5;
+  --violet2:    #6045d4;
+  --violet-glow:rgba(139,111,245,.18);
+  --gold-glow:  rgba(240,192,96,.12);
+
+  /* Semantic */
+  --green:  #3de898;
+  --red:    #f05575;
+  --blue:   #52b8f5;
+  --amber:  #f0c060;
+
+  /* Text */
+  --t1: #eeeef8;
+  --t2: #9090c0;
+  --t3: #50507a;
+
+  --r: 14px;
+  --r-sm: 9px;
+  --trans: .18s cubic-bezier(.4,0,.2,1);
 }
+
+/* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
+body{background:var(--ink);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
 
-/* ═══ LOGIN ═══ */
-#login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 24px;width:100%;max-width:340px}
-.login-logo{text-align:center;font-size:26px;font-weight:bold;color:var(--accent);letter-spacing:3px;margin-bottom:4px}
-.login-sub{text-align:center;font-size:10px;color:var(--muted);margin-bottom:24px;letter-spacing:2px}
-.login-field{margin-bottom:12px}
-.login-label{font-size:10px;color:var(--muted);margin-bottom:4px;display:block;letter-spacing:1px}
-.login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;direction:ltr;text-align:left}
-.login-input:focus{border-color:var(--accent2)}
-.login-error{color:var(--red);font-size:11px;text-align:center;min-height:18px;margin-bottom:8px}
-.login-btn{width:100%;background:var(--accent2);border:none;border-radius:10px;padding:13px;color:#fff;font-size:13px;font-weight:bold;font-family:inherit;cursor:pointer;letter-spacing:1px;transition:all .15s}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rim2);border-radius:3px}
+
+/* ════════════════════════════════
+   LOGIN
+════════════════════════════════ */
+#login-screen{
+  position:fixed;inset:0;background:var(--ink);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  background-image:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,111,245,.15) 0%, transparent 70%);
+}
+.login-card{
+  width:100%;max-width:360px;
+  background:var(--ink2);
+  border:1px solid var(--rim);
+  border-radius:24px;
+  padding:36px 28px 28px;
+  box-shadow:0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(139,111,245,.08);
+}
+.login-glyph{
+  text-align:center;margin-bottom:6px;
+  font-size:36px;line-height:1;
+  filter:drop-shadow(0 0 16px rgba(240,192,96,.5));
+}
+.login-title{
+  text-align:center;font-size:22px;font-weight:700;
+  color:var(--gold);letter-spacing:.04em;margin-bottom:2px;
+}
+.login-sub{
+  text-align:center;font-size:11px;color:var(--t3);
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:28px;
+}
+.f-label{font-size:10px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:block}
+.f-input{
+  width:100%;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:11px 14px;
+  color:var(--t1);font-size:14px;font-family:inherit;outline:none;
+  transition:border-color var(--trans),box-shadow var(--trans);
+  direction:ltr;text-align:left;margin-bottom:14px;
+}
+.f-input:focus{border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-glow)}
+.f-input::placeholder{color:var(--t3)}
+.login-err{
+  color:var(--red);font-size:11px;text-align:center;
+  min-height:16px;margin-bottom:10px;
+}
+.login-btn{
+  width:100%;background:linear-gradient(135deg,var(--violet2),var(--violet));
+  border:none;border-radius:var(--r-sm);padding:13px;
+  color:#fff;font-size:14px;font-weight:700;font-family:inherit;
+  cursor:pointer;letter-spacing:.04em;
+  transition:transform var(--trans),box-shadow var(--trans),opacity var(--trans);
+  box-shadow:0 4px 20px rgba(139,111,245,.35);
+}
 .login-btn:active{transform:scale(.97)}
-.login-btn:disabled{opacity:.5;cursor:not-allowed}
-.login-status{text-align:center;font-size:10px;color:var(--muted);margin-top:12px}
+.login-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.login-server{
+  text-align:center;font-size:10px;color:var(--t3);
+  margin-top:14px;display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.srv-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 
-/* ═══ HEADER ═══ */
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 14px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between}
-.header-title{font-size:14px;font-weight:bold;color:var(--accent);letter-spacing:2px}
-.header-right{display:flex;gap:6px;align-items:center}
-.header-badge{background:var(--accent2);color:white;font-size:9px;padding:3px 7px;border-radius:20px;letter-spacing:1px}
-.py-badge{background:var(--py);color:var(--py2);font-size:9px;padding:3px 7px;border-radius:20px;letter-spacing:1px;font-weight:bold}
-.badge-green{background:#1a3020;color:var(--green)}
-.badge-gold{background:#2a1a00;color:var(--accent)}
-.user-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 9px;color:var(--muted);font-size:10px;cursor:pointer;font-family:inherit}
-.user-btn:active{border-color:var(--red);color:var(--red)}
+/* ════════════════════════════════
+   HEADER
+════════════════════════════════ */
+.header{
+  background:rgba(8,8,18,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--rim);
+  padding:11px 16px;
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hdr-logo{
+  font-size:16px;font-weight:800;
+  background:linear-gradient(90deg,var(--gold),var(--violet));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:.06em;
+}
+.hdr-right{display:flex;gap:6px;align-items:center}
+.pill{
+  font-size:9px;font-weight:700;letter-spacing:.08em;
+  padding:3px 9px;border-radius:20px;
+  text-transform:uppercase;
+}
+.pill-violet{background:rgba(139,111,245,.15);color:var(--violet);border:1px solid rgba(139,111,245,.3)}
+.pill-green{background:rgba(61,232,152,.1);color:var(--green);border:1px solid rgba(61,232,152,.2)}
+.pill-gold{background:rgba(240,192,96,.1);color:var(--gold);border:1px solid rgba(240,192,96,.2)}
+.pill-py{background:rgba(53,114,165,.2);color:#ffd43b;border:1px solid rgba(53,114,165,.3);font-family:'Courier New',monospace}
+.hdr-exit{
+  background:transparent;border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:4px 10px;
+  color:var(--t3);font-size:10px;cursor:pointer;font-family:inherit;
+  transition:border-color var(--trans),color var(--trans);
+}
+.hdr-exit:hover{border-color:var(--red);color:var(--red)}
 
-/* ═══ NAV BAR ═══ */
-.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:200}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;cursor:pointer;color:var(--muted);font-size:9px;letter-spacing:.5px;border-top:2px solid transparent;gap:3px;transition:color .2s}
-.nav-item.active{color:var(--accent);border-top-color:var(--accent)}
-.nav-item svg{width:19px;height:19px}
+/* ════════════════════════════════
+   NAV BAR
+════════════════════════════════ */
+.nav-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,10,20,.92);backdrop-filter:blur(20px);
+  border-top:1px solid var(--rim);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
+  z-index:200;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:9px 4px 8px;cursor:pointer;
+  color:var(--t3);font-size:9px;font-weight:600;
+  letter-spacing:.05em;gap:4px;
+  border-top:2px solid transparent;
+  transition:color var(--trans),border-color var(--trans);
+  position:relative;
+}
+.nav-item.active{color:var(--gold);border-top-color:var(--gold)}
+.nav-item svg{width:18px;height:18px;transition:transform var(--trans)}
+.nav-item.active svg{transform:translateY(-1px)}
 
-/* ═══ PAGES ═══ */
-.page{display:none;padding-bottom:70px}
+/* ════════════════════════════════
+   PAGES / VIEWS
+════════════════════════════════ */
+.page{display:none;padding-bottom:74px;animation:fadeUp .2s ease both}
 .page.active{display:block}
 .view{display:none}
 .view.active{display:block}
-.page-titlebar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 14px;font-size:10px;color:var(--muted);letter-spacing:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-/* ═══ IDS BAR ═══ */
-.ids-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:6px;align-items:center}
-.id-chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:9px;color:var(--muted);cursor:pointer;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:border-color .2s}
-.id-chip:active{border-color:var(--accent)}
-.id-label{color:var(--accent);font-size:8px;display:block;margin-bottom:1px}
+/* ════════════════════════════════
+   PAGE HEADER BAR
+════════════════════════════════ */
+.page-bar{
+  background:var(--ink2);border-bottom:1px solid var(--rim);
+  padding:10px 16px;
+  display:flex;align-items:center;gap:8px;
+}
+.page-bar-icon{font-size:14px}
+.page-bar-title{font-size:11px;font-weight:700;color:var(--t2);letter-spacing:.1em;text-transform:uppercase}
 
-/* ═══ TABS ═══ */
-.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 6px;overflow-x:auto;scrollbar-width:none}
+/* ════════════════════════════════
+   IDS BAR
+════════════════════════════════ */
+.ids-bar{
+  background:var(--ink2);border-bottom:1px solid var(--rim);
+  padding:10px 14px;display:flex;gap:8px;
+}
+.id-chip{
+  flex:1;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:8px 12px;cursor:pointer;
+  transition:border-color var(--trans),background var(--trans);
+  overflow:hidden;
+}
+.id-chip:active{border-color:var(--gold);background:var(--panel)}
+.id-lbl{font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.1em;margin-bottom:3px}
+.id-val{font-size:10px;color:var(--t2);font-family:'Courier New',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ════════════════════════════════
+   TABS
+════════════════════════════════ */
+.tabs{
+  display:flex;background:var(--ink2);
+  border-bottom:1px solid var(--rim);
+  padding:0 8px;overflow-x:auto;scrollbar-width:none;
+  gap:2px;
+}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;text-align:center;padding:10px 10px;font-size:10px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-/* ═══ SEARCH ═══ */
-.search-bar{padding:10px 12px;background:var(--bg);position:sticky;top:49px;z-index:100}
-.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;direction:rtl}
-.search-input:focus{border-color:var(--accent2)}
-.search-input::placeholder{color:var(--muted)}
-
-/* ═══ GAMES GRID ═══ */
-.games-grid{padding:0 10px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.game-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
-.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2);opacity:0;transition:opacity .2s}
-.game-card:active{transform:scale(.97);border-color:var(--accent2)}
-.game-card:active::before{opacity:1}
-.game-num{font-size:8px;color:var(--accent);margin-bottom:3px;letter-spacing:1px}
-.game-name{font-size:11px;color:var(--text);font-weight:bold;line-height:1.3;margin-bottom:4px}
-.game-pkg{font-size:8px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.no-results{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px;display:none}
-
-/* ═══ GAME DETAIL ═══ */
-.back-btn { 
-    display: flex; align-items: center; gap: 6px; padding: 12px 14px; 
-    background: var(--surface); border-bottom: 1px solid var(--border); 
-    cursor: pointer; color: var(--accent); font-size: 12px; 
+.tab{
+  flex-shrink:0;padding:11px 14px;
+  font-size:11px;font-weight:600;color:var(--t3);
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:color var(--trans),border-color var(--trans);white-space:nowrap;
 }
-.detail-header { padding: 16px 14px; background: var(--card); border-bottom: 1px solid var(--border); }
-.detail-game-name { font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 4px; }
-.detail-pkg { font-size: 10px; color: var(--muted); }
-.detail-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.tab.active{color:var(--violet);border-bottom-color:var(--violet)}
 
-.field-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; }
-.template-display { 
-    background: var(--card); border: 1px solid var(--border); 
-    border-radius: 8px; padding: 10px 12px; font-size: 12px; 
-    color: var(--accent2); font-family: inherit; 
+/* ════════════════════════════════
+   SEARCH
+════════════════════════════════ */
+.search-wrap{
+  padding:12px 14px;background:var(--ink);
+  position:sticky;top:49px;z-index:100;
+  border-bottom:1px solid var(--rim);
 }
-.level-input { 
-    width: 100%; background: var(--card); border: 1px solid var(--border); 
-    border-radius: 8px; padding: 10px 12px; color: var(--text); 
-    font-size: 13px; font-family: inherit; outline: none; 
-    transition: border-color .2s; text-align: center; 
+.search-box{
+  width:100%;background:var(--ink3);
+  border:1px solid var(--rim);border-radius:10px;
+  padding:10px 14px 10px 38px;
+  color:var(--t1);font-size:13px;font-family:inherit;
+  outline:none;transition:border-color var(--trans);direction:rtl;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8' stroke='%2350507a' stroke-width='2'/%3E%3Cpath d='m21 21-4.35-4.35' stroke='%2350507a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:10px center;
 }
-.level-input:focus { border-color: var(--accent); }
-.preview-text { font-size: 11px; color: var(--accent3); min-height: 18px; text-align: center; margin-top: 4px; }
+.search-box:focus{border-color:var(--violet)}
+.search-box::placeholder{color:var(--t3)}
 
-.btn-row { display: flex; gap: 8px; }
-.btn { 
-    flex: 1; padding: 13px; border: none; border-radius: 10px; 
-    font-family: inherit; font-size: 12px; font-weight: bold; 
-    cursor: pointer; letter-spacing: 1px; transition: all .15s; 
+/* ════════════════════════════════
+   GAMES GRID
+════════════════════════════════ */
+.games-grid{
+  padding:12px;display:grid;
+  grid-template-columns:1fr 1fr;gap:10px;
 }
-.btn-primary { background: var(--accent2); color: white; }
-.btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--muted); }
-.btn-schedule { 
-    background: var(--accent); color: #000; margin-top: 4px; 
-    padding: 13px; border: none; border-radius: 10px; 
-    font-family: inherit; font-size: 12px; font-weight: bold; 
-    cursor: pointer; letter-spacing: 1px; transition: all .15s; 
+.game-card{
+  background:var(--ink2);border:1px solid var(--rim);
+  border-radius:var(--r);padding:14px 12px;
+  cursor:pointer;transition:all var(--trans);
+  position:relative;overflow:hidden;
 }
-.btn:active, .btn-schedule:active { transform: scale(.96); }
-
-/* ═══ LOGS SECTION ═══ */
-.log-section-title { font-size: 10px; color: var(--muted); letter-spacing: 1px; margin: 12px 0 8px; }
-.log-list { display: flex; flex-direction: column; gap: 6px; }
-.log-entry { 
-    background: var(--card); border: 1px solid var(--border); 
-    border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; 
+.game-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--violet-glow),transparent);
+  opacity:0;transition:opacity var(--trans);
 }
-.log-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.log-dot.success { background: var(--green); }
-.log-dot.error { background: var(--red); }
-.log-time { font-size: 9px; color: var(--muted); flex-shrink: 0; }
-.log-text { font-size: 10px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.log-status { font-size: 9px; color: var(--muted); flex-shrink: 0; }
-.log-empty { text-align: center; padding: 20px; color: var(--muted); font-size: 11px; }
+.game-card:active{transform:scale(.96);border-color:var(--violet)}
+.game-card:active::after{opacity:1}
+.g-num{font-size:8px;color:var(--violet);font-weight:700;letter-spacing:.1em;margin-bottom:6px}
+.g-name{font-size:12px;color:var(--t1);font-weight:700;line-height:1.35;margin-bottom:5px}
+.g-pkg{font-size:9px;color:var(--t3);font-family:'Courier New',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-cat{
+  position:absolute;top:10px;left:10px;
+  font-size:8px;padding:2px 6px;border-radius:20px;font-weight:700;
+  background:rgba(139,111,245,.15);color:var(--violet);
+  border:1px solid rgba(139,111,245,.2);
+}
+.no-results{text-align:center;padding:50px 20px;color:var(--t3);font-size:13px;display:none}
 
-/* ═══ PYTHON ═══ */
-.py-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.py-status{font-size:10px;padding:3px 9px;border-radius:20px;letter-spacing:1px;font-weight:bold}
-.py-status.loading{background:#3a3020;color:var(--py2)}
-.py-status.ready{background:#1a3020;color:var(--green)}
-.py-status.error{background:#3a1020;color:var(--red)}
-.py-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-size:10px;font-family:inherit;cursor:pointer;transition:all .15s}
-.py-btn.primary{background:var(--accent2);border-color:var(--accent2);color:white}
-.py-btn.green{background:#1a4a2a;border-color:var(--green);color:var(--green)}
-.py-btn:active{transform:scale(.95)}
-.py-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.server-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:7px;align-items:center}
-.server-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:10px;font-family:inherit;outline:none;direction:ltr;transition:border-color .2s}
-.server-input:focus{border-color:var(--accent)}
-.server-input::placeholder{color:var(--muted)}
-.server-connect-btn{background:var(--accent);border:none;border-radius:7px;padding:6px 11px;color:#000;font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
-.server-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
-.server-dot.ok{background:var(--green)}
-.server-dot.err{background:var(--red)}
-.pip-bar{background:var(--card);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;gap:7px;align-items:center}
-.pip-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:6px 10px;color:var(--text);font-size:11px;font-family:inherit;outline:none;transition:border-color .2s}
-.pip-input:focus{border-color:var(--py2)}
-.pip-input::placeholder{color:var(--muted)}
-.pip-btn{background:var(--py);border:none;border-radius:7px;padding:6px 13px;color:var(--py2);font-size:10px;font-family:inherit;font-weight:bold;cursor:pointer;white-space:nowrap}
-.pip-btn:disabled{opacity:.4;cursor:not-allowed}
-.pkg-chips{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 12px;display:flex;gap:5px;flex-wrap:wrap;min-height:34px}
-.pkg-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:9px;color:var(--accent3);display:flex;align-items:center;gap:4px}
-.pkg-chip-remove{color:var(--muted);cursor:pointer;font-size:11px}
-.pkg-empty{font-size:9px;color:var(--muted);padding:5px 0}
-.editor-container{position:relative;background:var(--card)}
-.code-editor{width:100%;min-height:200px;background:#0d0d18;border:none;border-bottom:1px solid var(--border);color:#e8e8f0;font-size:12px;font-family:'Courier New',monospace;padding:12px;outline:none;resize:vertical;direction:ltr;text-align:left;line-height:1.5;tab-size:2}
-.code-editor::placeholder{color:var(--muted)}
-.output-area{background:#050510;min-height:160px;padding:10px 12px;font-size:11px;font-family:'Courier New',monospace;line-height:1.6;direction:ltr;text-align:left;overflow-y:auto;max-height:300px;white-space:pre-wrap;word-break:break-all}
-.out-line-stdout{color:#c8f0c8}
-.out-line-stderr{color:#f0a0a0}
-.out-line-info{color:#a0c0f0}
-.out-line-success{color:var(--green)}
-.out-line-error{color:var(--red)}
-.out-line-sys{color:var(--muted);font-style:italic}
+/* ════════════════════════════════
+   GAME DETAIL
+════════════════════════════════ */
+.back-row{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;background:var(--ink2);
+  border-bottom:1px solid var(--rim);cursor:pointer;
+}
+.back-ico{color:var(--violet);font-size:18px;line-height:1}
+.back-lbl{font-size:12px;color:var(--t2);font-weight:600}
+.detail-hero{
+  padding:18px 16px;
+  background:linear-gradient(180deg,var(--ink3) 0%,var(--ink2) 100%);
+  border-bottom:1px solid var(--rim);
+}
+.detail-name{font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px}
+.detail-pkg{font-size:10px;color:var(--t3);font-family:'Courier New',monospace}
+.detail-body{padding:14px;display:flex;flex-direction:column;gap:14px}
 
-/* ═══ SNIPPETS ═══ */
-.snippet-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.snippet-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color .2s}
-.snippet-card:active{border-color:var(--accent2)}
-.snippet-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
-.snippet-title{font-size:12px;color:var(--accent);font-weight:bold}
-.snippet-tag{font-size:8px;padding:2px 7px;border-radius:20px;background:var(--surface);color:var(--muted);letter-spacing:.5px}
-.snippet-desc{padding:0 12px 10px;font-size:10px;color:var(--muted);line-height:1.4}
-.snippet-preview{background:#050510;padding:8px 12px;font-size:10px;color:var(--muted);font-family:'Courier New',monospace;direction:ltr;text-align:left;line-height:1.4;overflow:hidden;max-height:60px;border-top:1px solid var(--border)}
+.section-label{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.tmpl-display{
+  background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:11px 14px;
+  font-size:13px;color:var(--violet);font-family:'Courier New',monospace;
+}
+.level-inp{
+  width:100%;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:12px;color:var(--t1);
+  font-size:18px;font-weight:700;font-family:inherit;
+  outline:none;transition:border-color var(--trans),box-shadow var(--trans);
+  text-align:center;
+}
+.level-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+.preview-line{
+  font-size:11px;color:var(--green);min-height:18px;
+  text-align:center;font-family:'Courier New',monospace;
+  transition:opacity var(--trans);
+}
+.action-row{display:flex;gap:10px}
+.btn-send{
+  flex:2;background:linear-gradient(135deg,var(--violet2),var(--violet));
+  border:none;border-radius:var(--r-sm);padding:13px;
+  color:#fff;font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;letter-spacing:.03em;
+  transition:transform var(--trans),box-shadow var(--trans);
+  box-shadow:0 4px 16px rgba(139,111,245,.3);
+}
+.btn-send:active{transform:scale(.96)}
+.btn-buy{
+  flex:1;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:13px;
+  color:var(--gold);font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all var(--trans);
+}
+.btn-buy:active{border-color:var(--gold);background:var(--panel)}
+.btn-sched{
+  width:100%;background:transparent;
+  border:1px dashed var(--gold);
+  border-radius:var(--r-sm);padding:12px;
+  color:var(--gold);font-size:12px;font-weight:700;font-family:inherit;
+  cursor:pointer;letter-spacing:.04em;
+  transition:all var(--trans);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-sched:active{background:var(--gold-glow)}
+.log-section{
+  background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r);overflow:hidden;
+}
+.log-head{
+  padding:10px 14px;background:var(--panel);
+  border-bottom:1px solid var(--rim);
+  font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.1em;
+}
+.log-body{padding:8px}
+.log-entry{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 8px;border-radius:7px;
+  transition:background var(--trans);
+}
+.log-entry:hover{background:var(--panel)}
+.log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.log-dot.ok{background:var(--green);box-shadow:0 0 6px rgba(61,232,152,.5)}
+.log-dot.err{background:var(--red);box-shadow:0 0 6px rgba(240,85,117,.5)}
+.log-time{font-size:9px;color:var(--t3);font-family:'Courier New',monospace;flex-shrink:0}
+.log-txt{font-size:10px;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Courier New',monospace}
+.log-st{font-size:9px;color:var(--t3);flex-shrink:0}
+.log-empty{text-align:center;padding:20px;color:var(--t3);font-size:12px}
 
-/* ═══ SETTINGS ═══ */
-.settings-list{padding:12px;display:flex;flex-direction:column;gap:10px}
-.settings-section{font-size:9px;color:var(--muted);letter-spacing:2px;padding:8px 0 4px}
-.settings-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
-.settings-label{font-size:12px;color:var(--text)}
-.settings-sublabel{font-size:10px;color:var(--muted);margin-top:2px}
-.toggle{width:42px;height:24px;border-radius:12px;background:var(--border);position:relative;cursor:pointer;transition:background .3s;flex-shrink:0;border:none}
-.toggle.on{background:var(--accent2)}
-.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;left:3px;transition:left .3s}
-.toggle.on::after{left:21px}
-.settings-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text);font-size:11px;font-family:inherit;outline:none;width:140px;text-align:center;direction:ltr}
+/* ════════════════════════════════
+   PYTHON
+════════════════════════════════ */
+.py-topbar{
+  background:var(--ink2);border-bottom:1px solid var(--rim);
+  padding:10px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+}
+.py-status{
+  font-size:10px;font-weight:700;letter-spacing:.08em;
+  padding:4px 10px;border-radius:20px;
+}
+.py-status.loading{background:rgba(255,212,59,.1);color:#ffd43b;border:1px solid rgba(255,212,59,.2)}
+.py-status.ready{background:rgba(61,232,152,.1);color:var(--green);border:1px solid rgba(61,232,152,.2)}
+.py-status.error{background:rgba(240,85,117,.1);color:var(--red);border:1px solid rgba(240,85,117,.2)}
+.py-act{
+  background:var(--panel);border:1px solid var(--rim);
+  border-radius:7px;padding:6px 12px;
+  color:var(--t2);font-size:10px;font-family:inherit;
+  cursor:pointer;transition:all var(--trans);
+}
+.py-act:hover{border-color:var(--rim2);color:var(--t1)}
+.py-act.primary{background:var(--violet2);border-color:var(--violet);color:#fff}
+.py-act:active{transform:scale(.95)}
+.py-act:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
-/* ═══ SCHEDULER ═══ */
-.section-pad{padding:12px}
-.job-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-bottom:9px}
-.job-card.disabled{opacity:.6}
-.job-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.job-name{font-size:13px;color:var(--accent);font-weight:bold}
-.job-status-badge{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:bold}
-.job-status-badge.success{background:#1a3020;color:var(--green)}
-.job-status-badge.error{background:#3a1020;color:var(--red)}
-.job-status-badge.pending{background:#252540;color:var(--muted)}
-.job-schedule{font-size:10px;color:var(--accent2);margin-bottom:4px}
-.job-lastrun{font-size:9px;color:var(--muted)}
-.job-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.job-btn{padding:6px 10px;border-radius:7px;font-size:9px;font-weight:bold;font-family:inherit;cursor:pointer;border:none;letter-spacing:.5px;transition:all .15s}
-.job-btn:active{transform:scale(.95)}
-.job-btn.run{background:var(--accent2);color:#fff}
-.job-btn.toggle-on{background:#1a4a2a;border:1px solid var(--green);color:var(--green)}
-.job-btn.toggle-off{background:#3a1020;border:1px solid var(--red);color:var(--red)}
-.job-btn.edit{background:var(--card);border:1px solid var(--border);color:var(--muted)}
-.job-btn.del{background:var(--card);border:1px solid var(--red);color:var(--red)}
-.job-output-preview{background:#050510;border-radius:7px;padding:8px;font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;max-height:80px;overflow-y:auto;margin-top:8px;font-family:'Courier New',monospace}
-.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:12px}
+.srv-row{
+  background:var(--ink2);border-bottom:1px solid var(--rim);
+  padding:9px 14px;display:flex;gap:8px;align-items:center;
+}
+.srv-lbl{font-size:10px;color:var(--gold);flex-shrink:0}
+.srv-inp{
+  flex:1;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:7px;padding:7px 11px;color:var(--t1);
+  font-size:11px;font-family:'Courier New',monospace;
+  outline:none;direction:ltr;transition:border-color var(--trans);
+}
+.srv-inp:focus{border-color:var(--gold)}
+.srv-inp::placeholder{color:var(--t3)}
+.srv-btn{
+  background:var(--gold2);border:none;border-radius:7px;
+  padding:7px 12px;color:#000;font-size:10px;
+  font-family:inherit;font-weight:700;cursor:pointer;white-space:nowrap;
+  transition:opacity var(--trans);
+}
+.srv-btn:active{opacity:.8}
+.srv-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:all var(--trans)}
+.srv-dot.ok{background:var(--green);box-shadow:0 0 8px rgba(61,232,152,.6)}
+.srv-dot.err{background:var(--red);box-shadow:0 0 8px rgba(240,85,117,.6)}
 
-/* ═══ ADMIN ═══ */
-.user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.user-info{flex:1}
-.user-name-admin{font-size:13px;font-weight:bold;color:var(--text)}
-.user-meta{font-size:9px;color:var(--muted);margin-top:2px}
-.uses-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
-.uses-fill{height:100%;background:var(--accent2);border-radius:2px}
-.role-badge{font-size:8px;padding:2px 7px;border-radius:20px}
-.role-admin{background:#2a1a00;color:var(--accent)}
-.role-user{background:#1a1a35;color:var(--accent2)}
-.card-block{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
-.card-block+.card-block{margin-top:10px}
-.card-title{font-size:11px;color:var(--accent);font-weight:bold;margin-bottom:10px;letter-spacing:1px}
-.field-input-admin{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px;direction:ltr}
-.field-input-admin:focus{border-color:var(--accent2)}
-.btn-admin{padding:11px 16px;border:none;border-radius:9px;font-family:inherit;font-size:11px;font-weight:bold;cursor:pointer;letter-spacing:1px;transition:all .15s}
-.btn-admin:active{transform:scale(.96)}
-.btn-primary-admin{background:var(--accent2);color:#fff}
-.btn-red-admin{background:#3a1020;border:1px solid var(--red);color:var(--red)}
-.btn-gold-admin{background:#2a1800;border:1px solid var(--accent);color:var(--accent)}
-.btn-gray-admin{background:var(--card);border:1px solid var(--border);color:var(--muted)}
-.btn-full{width:100%}
-.divider{height:1px;background:var(--border);margin:12px 0}
+.pip-row{
+  background:var(--ink3);border-bottom:1px solid var(--rim);
+  padding:8px 14px;display:flex;gap:8px;align-items:center;
+}
+.pip-lbl{font-size:10px;color:#ffd43b;font-family:'Courier New',monospace;flex-shrink:0}
+.pip-inp{
+  flex:1;background:var(--ink2);border:1px solid var(--rim);
+  border-radius:7px;padding:6px 10px;color:var(--t1);
+  font-size:12px;font-family:'Courier New',monospace;
+  outline:none;direction:ltr;transition:border-color var(--trans);
+}
+.pip-inp:focus{border-color:#ffd43b}
+.pip-inp::placeholder{color:var(--t3)}
+.pip-btn{
+  background:#3572A5;border:none;border-radius:7px;
+  padding:6px 13px;color:#ffd43b;
+  font-size:10px;font-family:inherit;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:opacity var(--trans);
+}
+.pip-btn:active{opacity:.8}
+.pip-btn:disabled{opacity:.35;cursor:not-allowed}
 
-/* ═══ MODAL ═══ */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal-overlay.center{align-items:center}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));width:100%;max-height:90vh;overflow-y:auto}
-.modal-overlay.center .modal{border-radius:16px;max-width:380px;width:calc(100% - 40px);max-height:80vh}
-.modal-title{font-size:14px;color:var(--accent);font-weight:bold;margin-bottom:14px;letter-spacing:1px}
-.modal-label{font-size:10px;color:var(--muted);margin-bottom:4px}
-.modal-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:11px;font-family:inherit;outline:none;direction:ltr;text-align:left;margin-bottom:10px}
-.modal-input:focus{border-color:var(--accent)}
-.modal-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:12px;font-family:inherit;outline:none;margin-bottom:10px;cursor:pointer}
+.pkg-row{
+  background:var(--ink2);border-bottom:1px solid var(--rim);
+  padding:7px 14px;display:flex;gap:6px;flex-wrap:wrap;min-height:36px;align-items:center;
+}
+.pkg-chip{
+  background:var(--ink3);border:1px solid var(--rim);
+  border-radius:20px;padding:3px 8px;
+  font-size:9px;color:var(--green);display:flex;align-items:center;gap:5px;
+  font-family:'Courier New',monospace;
+}
+.pkg-x{color:var(--t3);cursor:pointer;font-size:12px;transition:color var(--trans)}
+.pkg-x:hover{color:var(--red)}
+.pkg-empty{font-size:10px;color:var(--t3)}
 
-/* ═══ TOAST ═══ */
-.toast{position:fixed;bottom:80px;left:12px;right:12px;z-index:600;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:9px;transform:translateY(20px);opacity:0;transition:all .25s;pointer-events:none}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.success{border-color:var(--green)}
-.toast.error{border-color:var(--red)}
-.toast.loading{border-color:var(--accent2)}
-.toast-icon{font-size:17px;flex-shrink:0}
-.toast-body{flex:1;min-width:0}
-.toast-title{font-size:12px;font-weight:bold;color:var(--text)}
-.toast-detail{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.spinner{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent2);animation:spin .6s linear infinite}
+.code-wrap{background:var(--ink)}
+.code-editor{
+  width:100%;min-height:200px;background:#070711;
+  border:none;border-bottom:1px solid var(--rim);
+  color:#d4d4e8;font-size:12px;font-family:'Courier New','Fira Code',monospace;
+  padding:14px;outline:none;resize:vertical;
+  direction:ltr;text-align:left;line-height:1.65;tab-size:2;
+}
+.code-editor::placeholder{color:var(--t3)}
+.output-wrap{
+  background:#050510;min-height:160px;
+  padding:12px 14px;font-size:11px;
+  font-family:'Courier New',monospace;line-height:1.7;
+  direction:ltr;text-align:left;overflow-y:auto;max-height:280px;
+  white-space:pre-wrap;word-break:break-all;
+}
+.o-out{color:#a8f0b8}.o-err{color:#f0a0b8}.o-sys{color:var(--t3);font-style:italic}.o-ok{color:var(--green)}.o-fail{color:var(--red)}
+
+/* ════════════════════════════════
+   SNIPPETS
+════════════════════════════════ */
+.snippets-list{padding:12px;display:flex;flex-direction:column;gap:10px}
+.snip-card{
+  background:var(--ink2);border:1px solid var(--rim);
+  border-radius:var(--r);overflow:hidden;cursor:pointer;
+  transition:border-color var(--trans),transform var(--trans);
+}
+.snip-card:active{border-color:var(--violet);transform:scale(.98)}
+.snip-top{
+  padding:12px 14px;display:flex;align-items:center;justify-content:space-between;
+}
+.snip-name{font-size:13px;color:var(--t1);font-weight:700}
+.snip-tag{
+  font-size:8px;padding:2px 8px;border-radius:20px;font-weight:700;
+  background:rgba(139,111,245,.15);color:var(--violet);
+  border:1px solid rgba(139,111,245,.25);
+}
+.snip-desc{padding:0 14px 10px;font-size:11px;color:var(--t2);line-height:1.5}
+.snip-code{
+  background:#070711;padding:10px 14px;
+  font-size:10px;color:var(--t3);
+  font-family:'Courier New',monospace;direction:ltr;text-align:left;
+  line-height:1.5;overflow:hidden;max-height:56px;
+  border-top:1px solid var(--rim);
+}
+
+/* ════════════════════════════════
+   SCHEDULER
+════════════════════════════════ */
+.sched-pad{padding:14px}
+.job-card{
+  background:var(--ink2);border:1px solid var(--rim);
+  border-radius:var(--r);padding:14px;margin-bottom:10px;
+  transition:border-color var(--trans);
+}
+.job-card.disabled{opacity:.55}
+.job-card:not(.disabled){border-color:rgba(139,111,245,.2)}
+.j-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.j-name{font-size:14px;color:var(--t1);font-weight:700;flex:1;line-height:1.3}
+.j-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0}
+.j-badge.success{background:rgba(61,232,152,.1);color:var(--green);border:1px solid rgba(61,232,152,.2)}
+.j-badge.error{background:rgba(240,85,117,.1);color:var(--red);border:1px solid rgba(240,85,117,.2)}
+.j-badge.pending{background:rgba(80,80,122,.1);color:var(--t3);border:1px solid var(--rim)}
+.j-sched{font-size:10px;color:var(--violet);margin-bottom:3px;display:flex;align-items:center;gap:4px}
+.j-last{font-size:9px;color:var(--t3);font-family:'Courier New',monospace}
+.j-out{
+  background:#050510;border-radius:8px;padding:8px 10px;
+  font-size:10px;color:var(--t3);direction:ltr;text-align:left;
+  white-space:pre-wrap;max-height:70px;overflow-y:auto;margin-top:10px;
+  font-family:'Courier New',monospace;border:1px solid var(--rim);
+}
+.j-acts{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.j-btn{
+  padding:6px 11px;border-radius:7px;font-size:9px;
+  font-weight:700;font-family:inherit;cursor:pointer;
+  border:none;letter-spacing:.04em;transition:all var(--trans);
+}
+.j-btn:active{transform:scale(.94)}
+.j-btn.run{background:var(--violet2);color:#fff}
+.j-btn.pon{background:rgba(61,232,152,.1);border:1px solid rgba(61,232,152,.3);color:var(--green)}
+.j-btn.poff{background:rgba(240,85,117,.1);border:1px solid rgba(240,85,117,.3);color:var(--red)}
+.j-btn.ed{background:var(--panel);border:1px solid var(--rim);color:var(--t2)}
+.j-btn.del{background:rgba(240,85,117,.08);border:1px solid rgba(240,85,117,.2);color:var(--red)}
+
+/* ════════════════════════════════
+   SETTINGS
+════════════════════════════════ */
+.settings-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.s-section{font-size:9px;color:var(--t3);font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:10px 0 4px}
+.s-card{
+  background:var(--ink2);border:1px solid var(--rim);
+  border-radius:var(--r);overflow:hidden;
+}
+.s-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px;border-bottom:1px solid var(--rim);
+}
+.s-row:last-child{border-bottom:none}
+.s-lbl{font-size:13px;color:var(--t1);font-weight:600}
+.s-sub{font-size:10px;color:var(--t3);margin-top:2px}
+.s-inp{
+  background:var(--ink3);border:1px solid var(--rim);
+  border-radius:7px;padding:6px 10px;color:var(--t1);
+  font-size:11px;font-family:'Courier New',monospace;
+  outline:none;width:130px;text-align:center;direction:ltr;
+  transition:border-color var(--trans);
+}
+.s-inp:focus{border-color:var(--violet)}
+.s-danger{color:var(--red) !important}
+.uses-bar-wrap{height:3px;background:var(--rim);border-radius:3px;margin-top:5px;overflow:hidden;width:120px}
+.uses-fill{height:100%;background:linear-gradient(90deg,var(--violet2),var(--violet));border-radius:3px;transition:width .5s ease}
+.acct-block{padding:14px 16px}
+.acct-user{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.acct-role{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700;display:inline-block}
+.acct-uses{font-size:11px;color:var(--t2);margin-top:8px}
+.divider{height:1px;background:var(--rim);margin:0}
+.btn-sync{
+  width:100%;background:var(--ink2);border:1px solid var(--rim);
+  border-radius:10px;padding:13px;color:var(--t2);
+  font-size:12px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all var(--trans);display:flex;
+  align-items:center;justify-content:center;gap:6px;
+}
+.btn-sync:active{border-color:var(--violet);color:var(--violet)}
+.btn-sync.gold{color:var(--gold);border-color:rgba(240,192,96,.2)}
+.btn-sync.gold:active{border-color:var(--gold)}
+.btn-logout{
+  width:100%;background:rgba(240,85,117,.08);
+  border:1px solid rgba(240,85,117,.2);
+  border-radius:10px;padding:13px;color:var(--red);
+  font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
+  transition:all var(--trans);
+}
+.btn-logout:active{background:rgba(240,85,117,.15)}
+
+/* ════════════════════════════════
+   ADMIN
+════════════════════════════════ */
+.u-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--rim);
+}
+.u-row:last-child{border-bottom:none}
+.u-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--violet2),var(--violet));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.u-info{flex:1;min-width:0}
+.u-name{font-size:13px;font-weight:700;color:var(--t1)}
+.u-meta{font-size:9px;color:var(--t3);margin-top:2px}
+.u-acts{display:flex;flex-direction:column;gap:5px}
+
+/* ════════════════════════════════
+   MODALS
+════════════════════════════════ */
+.overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  align-items:flex-end;justify-content:center;
+}
+.overlay.open{display:flex;animation:ovIn .2s ease both}
+.overlay.center{align-items:center}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--ink2);
+  border:1px solid var(--rim);border-radius:20px 20px 0 0;
+  padding:20px 18px calc(20px + env(safe-area-inset-bottom));
+  width:100%;max-height:92vh;overflow-y:auto;
+  animation:slideUp .25s cubic-bezier(.4,0,.2,1) both;
+}
+.overlay.center .modal{border-radius:20px;max-width:380px;width:calc(100% - 32px);max-height:82vh}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.modal-handle{width:36px;height:4px;background:var(--rim2);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:16px;font-weight:800;color:var(--t1);margin-bottom:18px}
+.m-label{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
+.m-input{
+  width:100%;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:11px 13px;color:var(--t1);
+  font-size:12px;font-family:inherit;outline:none;
+  direction:ltr;text-align:left;margin-bottom:12px;
+  transition:border-color var(--trans);
+}
+.m-input:focus{border-color:var(--violet)}
+.m-input::placeholder{color:var(--t3)}
+.m-select{
+  width:100%;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:11px 13px;color:var(--t1);
+  font-size:13px;font-family:inherit;outline:none;margin-bottom:12px;cursor:pointer;
+}
+.code-modal{
+  width:100%;min-height:100px;background:#070711;
+  border:1px solid var(--rim);border-radius:var(--r-sm);
+  color:#d4d4e8;font-size:11px;font-family:'Courier New',monospace;
+  padding:12px;outline:none;resize:vertical;
+  direction:ltr;text-align:left;line-height:1.6;margin-bottom:12px;
+}
+.ev-row{display:flex;gap:7px;margin-bottom:7px;align-items:center}
+.ev-row .m-input{margin-bottom:0;flex:1}
+.ev-row .m-input.dl{width:80px;flex:none}
+.ev-del{
+  width:34px;height:34px;border-radius:7px;flex-shrink:0;
+  background:rgba(240,85,117,.08);border:1px solid rgba(240,85,117,.2);
+  color:var(--red);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background var(--trans);
+}
+.ev-del:hover{background:rgba(240,85,117,.15)}
+.btn-ev-add{
+  width:100%;background:transparent;border:1px dashed var(--rim2);
+  border-radius:var(--r-sm);padding:10px;color:var(--t3);
+  font-size:12px;font-family:inherit;cursor:pointer;margin-bottom:14px;
+  transition:all var(--trans);
+}
+.btn-ev-add:hover{border-color:var(--violet);color:var(--violet)}
+
+.m-row{display:flex;gap:10px}
+.btn-ok{
+  flex:2;background:linear-gradient(135deg,var(--violet2),var(--violet));
+  border:none;border-radius:var(--r-sm);padding:13px;
+  color:#fff;font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;box-shadow:0 4px 16px rgba(139,111,245,.3);
+  transition:transform var(--trans),box-shadow var(--trans);
+}
+.btn-ok:active{transform:scale(.97)}
+.btn-cancel{
+  flex:1;background:var(--ink3);border:1px solid var(--rim);
+  border-radius:var(--r-sm);padding:13px;color:var(--t2);
+  font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
+  transition:border-color var(--trans);
+}
+.btn-cancel:active{border-color:var(--rim2)}
+.btn-gold-ok{
+  flex:2;background:linear-gradient(135deg,var(--gold2),var(--gold));
+  border:none;border-radius:var(--r-sm);padding:13px;
+  color:#000;font-size:13px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:transform var(--trans);
+}
+.btn-gold-ok:active{transform:scale(.97)}
+
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
+.toast{
+  position:fixed;bottom:82px;left:14px;right:14px;z-index:700;
+  background:var(--ink2);border:1px solid var(--rim);
+  border-radius:var(--r);padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(12px);opacity:0;
+  transition:all .22s cubic-bezier(.4,0,.2,1);pointer-events:none;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.toast.show{transform:none;opacity:1}
+.toast.success{border-color:rgba(61,232,152,.3)}
+.toast.error{border-color:rgba(240,85,117,.3)}
+.toast.loading{border-color:rgba(139,111,245,.3)}
+.t-ico{font-size:18px;flex-shrink:0}
+.t-info{flex:1;min-width:0}
+.t-title{font-size:12px;font-weight:700;color:var(--t1)}
+.t-detail{font-size:10px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spinner{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--rim2);border-top-color:var(--violet);
+  animation:spin .6s linear infinite;flex-shrink:0;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ════════════════════════════════
+   EMPTY STATE
+════════════════════════════════ */
+.empty{text-align:center;padding:50px 20px;color:var(--t3)}
+.empty-ico{font-size:32px;margin-bottom:8px;opacity:.5}
+.empty-msg{font-size:13px}
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════════════ */
+.full{width:100%}
+.mt8{margin-top:8px}
 </style>
 </head>
 <body>
 
-<!-- ════ LOGIN ════ -->
+<!-- ═══════════ LOGIN ═══════════ -->
 <div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">⚡ online</div>
-    <div class="login-sub">SECURE ACCESS — v17.0</div>
-    <div class="login-field">
-      <label class="login-label">USERNAME</label>
-      <input class="login-input" id="inp-user" type="text" autocomplete="username" placeholder="username"
-        onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
+  <div class="login-card">
+    <div class="login-glyph">⚡</div>
+    <div class="login-title">ONLINE</div>
+    <div class="login-sub">Secure Access Portal</div>
+    <label class="f-label">اسم المستخدم</label>
+    <input class="f-input" id="inp-user" type="text" autocomplete="username" placeholder="username"
+      onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()">
+    <label class="f-label">كلمة المرور</label>
+    <input class="f-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-err" id="login-error"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">الدخول ←</button>
+    <div class="login-server">
+      <div class="srv-dot" id="login-dot"></div>
+      <span id="login-status">جاري الاتصال...</span>
     </div>
-    <div class="login-field">
-      <label class="login-label">PASSWORD</label>
-      <input class="login-input" id="inp-pass" type="password" autocomplete="current-password" placeholder="password"
-        onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="login-error" id="login-error"></div>
-    <button class="login-btn" id="login-btn" onclick="doLogin()">SIGN IN →</button>
-    <div class="login-status" id="login-status">جاري الاتصال...</div>
   </div>
 </div>
 
-<!-- ════ MAIN APP ════ -->
+<!-- ═══════════ MAIN APP ═══════════ -->
 <div id="main-app" style="display:none">
 
   <div class="header">
-    <div class="header-title">⚡ online</div>
-    <div class="header-right">
-      <span class="py-badge" id="py-badge">🐍 Loading...</span>
-      <span class="header-badge badge-green" id="hdr-uses" style="display:none">-- uses</span>
-      <span class="header-badge badge-gold" id="hdr-user">--</span>
-      <button class="user-btn" onclick="doLogout()">EXIT</button>
+    <div class="hdr-logo">⚡ ONLINE</div>
+    <div class="hdr-right">
+      <span class="pill pill-py" id="py-badge">🐍 Loading</span>
+      <span class="pill pill-green" id="hdr-uses" style="display:none">-- uses</span>
+      <span class="pill pill-gold" id="hdr-user">--</span>
+      <button class="hdr-exit" onclick="doLogout()">خروج</button>
     </div>
   </div>
 
-  <!-- ════ PAGE: GAMES ════ -->
-<div class="page active" id="page-games">
+  <!-- ── PAGE: GAMES ── -->
+  <div class="page active" id="page-games">
     <div class="ids-bar">
       <div class="id-chip" onclick="openIdModal()">
-        <span class="id-label">GAID</span>
-        <span id="display-gaid">...</span>
+        <div class="id-lbl">GAID</div>
+        <div class="id-val" id="display-gaid">...</div>
       </div>
       <div class="id-chip" onclick="openIdModal()">
-        <span class="id-label">AF ID</span>
-        <span id="display-afid">...</span>
+        <div class="id-lbl">AF ID</div>
+        <div class="id-val" id="display-afid">...</div>
       </div>
     </div>
 
+    <!-- View: List -->
     <div id="view-main" class="view active">
       <div class="tabs">
         <div class="tab active" onclick="filterGames('all',this)">الكل</div>
@@ -342,164 +788,181 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
         <div class="tab" onclick="filterGames('merge',this)">Merge</div>
         <div class="tab" onclick="filterGames('other',this)">Other</div>
       </div>
-      <div class="search-bar">
-        <input class="search-input" placeholder="ابحث باسم اللعبة أو Package..." oninput="searchGames(this.value)" dir="rtl">
+      <div class="search-wrap">
+        <input class="search-box" placeholder="ابحث باسم اللعبة أو Package..." oninput="searchGames(this.value)">
       </div>
       <div class="games-grid" id="games-grid"></div>
-      <div class="no-results" id="no-results">لا توجد نتائج</div>
+      <div class="no-results" id="no-results">
+        <div style="font-size:32px;margin-bottom:8px">🔍</div>
+        لا توجد نتائج
+      </div>
     </div>
 
+    <!-- View: Detail -->
     <div id="view-detail" class="view">
-      <div class="back-btn" onclick="goBack()">← رجوع</div>
-      <div class="detail-header">
-        <div class="detail-game-name" id="detail-game-name"></div>
+      <div class="back-row" onclick="goBack()">
+        <div class="back-ico">‹</div>
+        <div class="back-lbl">رجوع</div>
+      </div>
+      <div class="detail-hero">
+        <div class="detail-name" id="detail-game-name"></div>
         <div class="detail-pkg" id="detail-pkg"></div>
       </div>
       <div class="detail-body">
         <div>
-          <div class="field-label">EVENT TEMPLATE</div>
-          <div class="template-display" id="event-template-display"></div>
+          <div class="section-label">Event Template</div>
+          <div class="tmpl-display" id="event-template-display"></div>
         </div>
-        <div id="level-input-wrap">
-          <div class="field-label">LEVEL NUMBER</div>
-          <input class="level-input" id="level-input" type="number" min="1" placeholder="أدخل رقم المستوى..." oninput="updateEventPreview()">
-          <div class="preview-text" id="event-preview"></div>
+        <div>
+          <div class="section-label">رقم المستوى</div>
+          <input class="level-inp" id="level-input" type="number" min="1"
+            placeholder="0" oninput="updateEventPreview()">
+          <div class="preview-line" id="event-preview"></div>
         </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="sendLevelEvent()">📤 إرسال حدث</button>
-          <button class="btn btn-secondary" onclick="sendPurchase()">💰 شراء</button>
+        <div class="action-row">
+          <button class="btn-send" onclick="sendLevelEvent()">📤 إرسال حدث</button>
+          <button class="btn-buy" onclick="sendPurchase()">💰 شراء</button>
         </div>
-        
-        <button class="btn-schedule" onclick="openJobModalFromGame()">⏱ جدولة حدث تلقائي</button>
-
-        <div class="job-log-section">
-          <div class="log-section-title">SCHEDULED JOBS</div>
-          <div id="game-jobs-list" class="log-list">
-            <div class="log-empty">جاري تحميل المهام...</div>
+        <button class="btn-sched" onclick="openJobModalFromGame()">
+          <span>⏱</span> جدولة حدث تلقائي
+        </button>
+        <div class="log-section">
+          <div class="log-head">SCHEDULED JOBS</div>
+          <div class="log-body" id="game-jobs-list">
+            <div class="log-empty">جاري التحميل...</div>
           </div>
         </div>
-
-        <div>
-          <div class="log-section-title">EVENT LOG</div>
-          <div class="log-list" id="event-log"><div class="log-empty">لا توجد أحداث بعد</div></div>
+        <div class="log-section">
+          <div class="log-head">EVENT LOG</div>
+          <div class="log-body" id="event-log">
+            <div class="log-empty">لا توجد أحداث بعد</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- ════ PAGE: PYTHON ════ -->
+
+  <!-- ── PAGE: PYTHON ── -->
   <div class="page" id="page-python">
-    <div class="page-titlebar">🐍 PYTHON TERMINAL — Pyodide + Server</div>
-    <div class="py-toolbar">
-      <span class="py-status loading" id="py-status">جاري تحميل Python...</span>
-      <button class="py-btn primary" id="btn-run" onclick="runPython()" disabled>▶ تشغيل</button>
-      <button class="py-btn" onclick="clearEditor()">مسح الكود</button>
-      <button class="py-btn" onclick="clearOutput()">مسح النتائج</button>
+    <div class="page-bar">
+      <div class="page-bar-icon">🐍</div>
+      <div class="page-bar-title">Python Terminal</div>
     </div>
-    <div class="server-bar">
-      <span style="font-size:10px;color:var(--accent);white-space:nowrap">🌐</span>
-      <input class="server-input" id="server-url" placeholder="https://web-production-42c2c.up.railway.app">
-      <button class="server-connect-btn" onclick="connectServer()">اتصال</button>
-      <div class="server-dot" id="server-dot"></div>
+    <div class="py-topbar">
+      <span class="py-status loading" id="py-status">تحميل Python...</span>
+      <button class="py-act primary" id="btn-run" onclick="runPython()" disabled>▶ تشغيل</button>
+      <button class="py-act" onclick="clearEditor()">مسح</button>
+      <button class="py-act" onclick="clearOutput()">مسح النتائج</button>
     </div>
-    <div class="pip-bar">
-      <span style="font-size:10px;color:var(--py2);white-space:nowrap">pip install</span>
-      <input class="pip-input" id="pip-input" placeholder="اسم المكتبة (مثال: numpy, pandas...)" dir="ltr">
+    <div class="srv-row">
+      <span class="srv-lbl">🌐</span>
+      <input class="srv-inp" id="server-url" placeholder="https://web-production-42c2c.up.railway.app">
+      <button class="srv-btn" onclick="connectServer()">اتصال</button>
+      <div class="srv-dot" id="server-dot"></div>
+    </div>
+    <div class="pip-row">
+      <span class="pip-lbl">pip install</span>
+      <input class="pip-inp" id="pip-input" placeholder="numpy, pandas, requests..." dir="ltr">
       <button class="pip-btn" id="btn-pip" onclick="installPackage()" disabled>تثبيت</button>
     </div>
-    <div class="pkg-chips" id="pkg-chips">
-      <span class="pkg-empty" id="pkg-empty">لا توجد مكتبات مثبتة بعد</span>
+    <div class="pkg-row" id="pkg-chips">
+      <span class="pkg-empty" id="pkg-empty">لا توجد مكتبات مثبتة</span>
     </div>
-    <div class="editor-container">
+    <div class="code-wrap">
       <textarea class="code-editor" id="code-editor"
-        placeholder="# اكتب كود Python هنا...&#10;print('مرحباً من online!')"
-        spellcheck="false" onkeydown="handleTab(event)"></textarea>
+        placeholder="# اكتب كود Python هنا..." spellcheck="false" onkeydown="handleTab(event)"></textarea>
     </div>
-    <div class="py-toolbar" style="padding:8px 12px">
-      <span style="font-size:10px;color:var(--muted)">OUTPUT</span>
-      <button class="py-btn green" id="btn-run2" onclick="runPython()" disabled>▶ تشغيل الكود</button>
+    <div class="py-topbar" style="justify-content:space-between">
+      <span style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.08em">OUTPUT</span>
+      <button class="py-act primary" id="btn-run2" onclick="runPython()" disabled>▶ تشغيل الكود</button>
     </div>
-    <div class="output-area" id="output-area"><span class="out-line-sys">// في انتظار تشغيل الكود...</span></div>
+    <div class="output-wrap" id="output-area"><span class="o-sys">// في انتظار تشغيل الكود...</span></div>
   </div>
 
-  <!-- ════ PAGE: SNIPPETS ════ -->
+  <!-- ── PAGE: SNIPPETS ── -->
   <div class="page" id="page-snippets">
-    <div class="page-titlebar">📦 SNIPPETS — أمثلة جاهزة</div>
-    <div class="snippet-list" id="snippet-list"></div>
+    <div class="page-bar">
+      <div class="page-bar-icon">📦</div>
+      <div class="page-bar-title">Code Snippets</div>
+    </div>
+    <div class="snippets-list" id="snippet-list"></div>
   </div>
 
-  <!-- ════ PAGE: SCHEDULER ════ -->
+  <!-- ── PAGE: SCHEDULER ── -->
   <div class="page" id="page-scheduler">
-    <div class="page-titlebar">⏱ SCHEDULER — مهام تلقائية</div>
-    <div class="section-pad">
-      <button class="btn-admin btn-primary-admin btn-full" onclick="openNewJobModal()" style="margin-bottom:14px">+ مهمة جديدة</button>
-      <div id="jobs-list"><div class="empty-state">لا توجد مهام مجدولة</div></div>
+    <div class="page-bar">
+      <div class="page-bar-icon">⏱</div>
+      <div class="page-bar-title">Scheduler — مهام تلقائية</div>
+    </div>
+    <div class="sched-pad">
+      <button class="btn-sync gold full mt8" onclick="openNewJobModal()" style="margin-bottom:14px;border-radius:var(--r)">
+        ＋ &nbsp;مهمة جديدة
+      </button>
+      <div id="jobs-list"><div class="empty"><div class="empty-ico">⏱</div><div class="empty-msg">لا توجد مهام مجدولة</div></div></div>
     </div>
   </div>
 
-  <!-- ════ PAGE: SETTINGS ════ -->
+  <!-- ── PAGE: SETTINGS ── -->
   <div class="page" id="page-settings">
-    <div class="page-titlebar">⚙️ SETTINGS</div>
-    <div class="settings-list">
-      <div class="settings-section">SERVER</div>
-      <div class="settings-item">
-        <div>
-          <div class="settings-label">رابط Railway</div>
-          <div class="settings-sublabel">خادم الباك أند والوسيط</div>
+    <div class="page-bar">
+      <div class="page-bar-icon">⚙️</div>
+      <div class="page-bar-title">Settings</div>
+    </div>
+    <div class="settings-body">
+      <div class="s-section">Server</div>
+      <div class="s-card">
+        <div class="s-row">
+          <div><div class="s-lbl">رابط Railway</div><div class="s-sub">Backend URL</div></div>
+          <input class="s-inp" id="settings-server" dir="ltr" placeholder="https://..." oninput="document.getElementById('server-url').value=this.value">
         </div>
-        <input class="settings-input" id="settings-server" dir="ltr"
-          placeholder="https://..."
-          oninput="document.getElementById('server-url').value=this.value">
       </div>
-      <div class="settings-section">DEVICE IDs</div>
-      <div class="settings-item">
-        <div>
-          <div class="settings-label">GAID</div>
-          <div class="settings-sublabel">Google Advertising ID</div>
+
+      <div class="s-section">Device IDs</div>
+      <div class="s-card">
+        <div class="s-row">
+          <div><div class="s-lbl">GAID</div><div class="s-sub">Google Advertising ID</div></div>
+          <input class="s-inp" id="settings-gaid" dir="ltr" oninput="autoSaveId('gaid')">
         </div>
-        <input class="settings-input" id="settings-gaid" dir="ltr" oninput="autoSaveId('gaid')">
-      </div>
-      <div class="settings-item">
-        <div>
-          <div class="settings-label">AppsFlyer ID</div>
-          <div class="settings-sublabel">AppsFlyer Identifier</div>
+        <div class="s-row">
+          <div><div class="s-lbl">AppsFlyer ID</div><div class="s-sub">AF Identifier</div></div>
+          <input class="s-inp" id="settings-afid" dir="ltr" oninput="autoSaveId('afid')">
         </div>
-        <input class="settings-input" id="settings-afid" dir="ltr" oninput="autoSaveId('afid')">
       </div>
-      <div class="settings-section">ACCOUNT</div>
-      <div class="card-block" style="margin:0">
-        <div id="account-info" style="font-size:12px;color:var(--muted)">Loading...</div>
+
+      <div class="s-section">Account</div>
+      <div class="s-card">
+        <div class="acct-block" id="account-info">Loading...</div>
         <div class="divider"></div>
-        <button class="btn-admin btn-red-admin" onclick="doLogout()">تسجيل الخروج</button>
-      </div>
-      <div class="settings-section">SYNC</div>
-      <button class="btn-admin btn-gold-admin btn-full" onclick="syncToServer()" style="margin-bottom:8px">↑ رفع الإعدادات للسيرفر</button>
-      <button class="btn-admin btn-gray-admin btn-full" onclick="syncFromServer()">↓ تحميل الإعدادات من السيرفر</button>
-      <div class="settings-section">INFO</div>
-      <div class="settings-item">
-        <div class="settings-label">الإصدار</div>
-        <div style="font-size:11px;color:var(--muted)">v17.0 — online</div>
-      </div>
-      <div class="settings-item">
-        <div class="settings-label">محرك Python</div>
-        <div style="font-size:11px;color:var(--muted)">Pyodide 0.26 (WASM)</div>
-      </div>
-      <div class="settings-item" style="cursor:pointer" onclick="clearAllData()">
-        <div>
-          <div class="settings-label" style="color:var(--red)">مسح جميع البيانات</div>
-          <div class="settings-sublabel">إعادة ضبط التطبيق</div>
+        <div style="padding:12px 16px">
+          <button class="btn-logout" onclick="doLogout()">تسجيل الخروج</button>
         </div>
-        <span style="color:var(--red)">🗑</span>
+      </div>
+
+      <div class="s-section">Sync</div>
+      <button class="btn-sync gold" onclick="syncToServer()">↑ &nbsp;رفع الإعدادات للسيرفر</button>
+      <button class="btn-sync mt8" onclick="syncFromServer()">↓ &nbsp;تحميل الإعدادات من السيرفر</button>
+
+      <div class="s-section">Info</div>
+      <div class="s-card">
+        <div class="s-row"><div class="s-lbl">الإصدار</div><div style="font-size:11px;color:var(--t3)">v1.0 — online</div></div>
+        <div class="s-row"><div class="s-lbl">محرك Python</div><div style="font-size:11px;color:var(--t3)">Pyodide 0.26 WASM</div></div>
+        <div class="s-row" onclick="clearAllData()" style="cursor:pointer">
+          <div><div class="s-lbl s-danger">مسح جميع البيانات</div><div class="s-sub">إعادة ضبط التطبيق</div></div>
+          <span style="color:var(--red)">🗑</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ════ PAGE: ADMIN ════ -->
+  <!-- ── PAGE: ADMIN ── -->
   <div class="page" id="page-admin">
-    <div class="page-titlebar">🔑 ADMIN — إدارة المستخدمين</div>
-    <div class="section-pad">
-      <button class="btn-admin btn-gold-admin btn-full" onclick="openAddUserModal()" style="margin-bottom:14px">+ إضافة مستخدم</button>
-      <div id="users-list"><div class="empty-state">Loading...</div></div>
+    <div class="page-bar">
+      <div class="page-bar-icon">🔑</div>
+      <div class="page-bar-title">Admin — إدارة المستخدمين</div>
+    </div>
+    <div style="padding:14px">
+      <button class="btn-sync gold full" onclick="openAddUserModal()" style="margin-bottom:12px;border-radius:var(--r)">＋ &nbsp;إضافة مستخدم</button>
+      <div class="s-card" id="users-list"><div class="empty"><div class="empty-ico">👤</div><div class="empty-msg">Loading...</div></div></div>
     </div>
   </div>
 
@@ -508,158 +971,150 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
     <div class="nav-item active" id="nav-games" onclick="switchPage('games')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
-      </svg>
-      ألعاب
+      </svg>ألعاب
     </div>
     <div class="nav-item" id="nav-python" onclick="switchPage('python')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-      </svg>
-      Python
+      </svg>Python
     </div>
     <div class="nav-item" id="nav-snippets" onclick="switchPage('snippets')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-      </svg>
-      Snippets
+      </svg>Snippets
     </div>
     <div class="nav-item" id="nav-scheduler" onclick="switchPage('scheduler');loadJobs()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-      </svg>
-      Scheduler
+      </svg>Tasks
     </div>
     <div class="nav-item" id="nav-settings" onclick="switchPage('settings');loadAccountInfo()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-      إعدادات
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>Settings
     </div>
     <div class="nav-item" id="nav-admin" onclick="switchPage('admin');loadUsers()" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
         <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-      Admin
+      </svg>Admin
     </div>
   </nav>
 </div>
 
-<!-- ════ MODALS ════ -->
-
-<!-- IDs Modal -->
-<div class="modal-overlay center" id="id-modal">
+<!-- ═══ MODAL: IDs ═══ -->
+<div class="overlay center" id="id-modal">
   <div class="modal">
+    <div class="modal-handle"></div>
     <div class="modal-title">✏️ تعديل Device IDs</div>
-    <div class="modal-label">GAID (Google Advertising ID)</div>
-    <input class="modal-input" id="modal-gaid-input" dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
-    <div class="modal-label">AppsFlyer ID</div>
-    <input class="modal-input" id="modal-afid-input" dir="ltr" placeholder="xxxxxxxxxx-xxxxxxxxxxxxxxxxxx">
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveIds()">💾 حفظ</button>
-      <button class="btn btn-secondary" onclick="closeIdModal()">إلغاء</button>
+    <div class="m-label">GAID — Google Advertising ID</div>
+    <input class="m-input" id="modal-gaid-input" dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+    <div class="m-label">AppsFlyer ID</div>
+    <input class="m-input" id="modal-afid-input" dir="ltr" placeholder="1234567890-0987654321098765432">
+    <div class="m-row">
+      <button class="btn-gold-ok" onclick="saveIds()">💾 حفظ</button>
+      <button class="btn-cancel" onclick="closeIdModal()">إلغاء</button>
     </div>
   </div>
 </div>
 
-<!-- Job Modal -->
-<div class="modal-overlay" id="job-modal">
+<!-- ═══ MODAL: Job ═══ -->
+<div class="overlay" id="job-modal">
   <div class="modal">
+    <div class="modal-handle"></div>
     <div class="modal-title" id="job-modal-title">➕ مهمة جديدة</div>
     <input type="hidden" id="job-modal-id">
-    
-    <div class="modal-label">اسم المهمة</div>
-    <input class="modal-input" id="job-name" placeholder="مثال: تسلسل أحداث المستوى 100">
-    
-    <div class="modal-label">نوع الجدول</div>
-    <select class="modal-select" id="job-sched-type" onchange="updateSchedHelper()">
+
+    <div class="m-label">اسم المهمة</div>
+    <input class="m-input" id="job-name" placeholder="مثال: إرسال أحداث يومية">
+
+    <div class="m-label">IP Address</div>
+    <input class="m-input" id="job-ip" dir="ltr" placeholder="سيتم جلبه تلقائياً...">
+
+    <div class="m-label">الجدولة</div>
+    <select class="m-select" id="job-sched-type" onchange="updateSchedHelper()">
       <option value="interval">كل X ثانية</option>
       <option value="daily">يومياً في وقت محدد</option>
       <option value="cron">Cron مخصص</option>
     </select>
-    
+
     <div id="sched-helper-interval">
-      <div class="modal-label">الفترة (ثانية)</div>
-      <input class="modal-input" id="sched-seconds" type="number" min="10" value="3600" dir="ltr">
+      <div class="m-label">الفترة (ثانية)</div>
+      <input class="m-input" id="sched-seconds" type="number" min="10" value="3600" dir="ltr">
     </div>
     <div id="sched-helper-daily" style="display:none">
-      <div class="modal-label">الوقت (UTC)</div>
-      <input class="modal-input" id="sched-time" type="time" dir="ltr" value="08:00">
+      <div class="m-label">الوقت (UTC)</div>
+      <input class="m-input" id="sched-time" type="time" dir="ltr" value="08:00">
     </div>
     <div id="sched-helper-cron" style="display:none">
-      <div class="modal-label">تعبير Cron (دقيقة ساعة يوم شهر أسبوع)</div>
-      <input class="modal-input" id="sched-cron" dir="ltr" placeholder="0 8 * * *">
+      <div class="m-label">تعبير Cron</div>
+      <input class="m-input" id="sched-cron" dir="ltr" placeholder="0 8 * * *">
     </div>
 
-    <div class="modal-label" style="margin-top:15px">IP Address المخصص</div>
-    <input class="modal-input" id="job-ip" placeholder="أدخل الـ IP هنا...">
+    <div class="m-label" style="margin-top:4px">سلسلة الأحداث <span style="color:var(--t3);font-size:9px">(اسم الحدث + تأخير بالدقائق)</span></div>
+    <div id="event-list"></div>
+    <button class="btn-ev-add" onclick="addEventRow()">＋ إضافة حدث</button>
 
-    <div class="modal-label" style="margin-top:15px">سلسلة الأحداث (Events Sequence)</div>
-    <div id="event-list" style="margin-bottom:10px;"></div>
-    <button class="btn btn-secondary" style="width:100%; margin-bottom:15px;" onclick="addEventRow()">+ إضافة حدث جديد</button>
+    <div class="m-label">كود Python إضافي (اختياري)</div>
+    <textarea class="code-modal" id="job-code" placeholder="# كود إضافي..."></textarea>
 
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveJob()">💾 حفظ المهمة</button>
-      <button class="btn btn-secondary" onclick="closeJobModal()">إلغاء</button>
+    <div class="m-row">
+      <button class="btn-ok" onclick="saveJob()">💾 حفظ المهمة</button>
+      <button class="btn-cancel" onclick="closeJobModal()">إلغاء</button>
     </div>
   </div>
 </div>
-  
-<!-- Logs Modal -->
-<div class="modal-overlay" id="logs-modal">
+
+<!-- ═══ MODAL: Logs ═══ -->
+<div class="overlay" id="logs-modal">
   <div class="modal">
+    <div class="modal-handle"></div>
     <div class="modal-title">📋 سجل التنفيذ</div>
-    <div id="logs-content" style="font-size:11px;color:var(--muted)">Loading...</div>
-    <div style="margin-top:14px">
-      <button class="btn btn-secondary btn-full" onclick="document.getElementById('logs-modal').classList.remove('open')">إغلاق</button>
+    <div id="logs-content" style="font-size:11px;color:var(--t3)">Loading...</div>
+    <div style="margin-top:16px">
+      <button class="btn-cancel full" onclick="document.getElementById('logs-modal').classList.remove('open')">إغلاق</button>
     </div>
   </div>
 </div>
 
-<!-- Add/Edit User Modal -->
-<div class="modal-overlay" id="adduser-modal">
+<!-- ═══ MODAL: Add/Edit User ═══ -->
+<div class="overlay" id="adduser-modal">
   <div class="modal">
-    <div class="modal-title">➕ إضافة / تعديل مستخدم</div>
+    <div class="modal-handle"></div>
+    <div class="modal-title">👤 إضافة / تعديل مستخدم</div>
     <input type="hidden" id="edit-uid">
-    <div class="modal-label">اسم المستخدم</div>
-    <input class="modal-input" id="new-username" dir="ltr" placeholder="username">
-    <div class="modal-label">كلمة المرور</div>
-    <input class="modal-input" id="new-password" type="password" dir="ltr" placeholder="(اتركها فارغة للإبقاء على الحالية)">
-    <div class="modal-label">الدور</div>
-    <select class="modal-select" id="new-role">
-      <option value="user">User</option>
-      <option value="admin">Admin</option>
-    </select>
-    <div class="modal-label">الحد الأقصى للاستخدام</div>
-    <input class="modal-input" id="new-maxuses" type="number" min="1" dir="ltr" placeholder="100">
-    <div class="modal-label">المتبقي من الاستخدام</div>
-    <input class="modal-input" id="new-usesleft" type="number" min="0" dir="ltr" placeholder="100">
-    <div class="modal-label">الحالة</div>
-    <select class="modal-select" id="new-active">
-      <option value="1">مفعّل</option>
-      <option value="0">معطّل</option>
-    </select>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveUser()">💾 حفظ</button>
-      <button class="btn btn-secondary" onclick="document.getElementById('adduser-modal').classList.remove('open')">إلغاء</button>
+    <div class="m-label">اسم المستخدم</div>
+    <input class="m-input" id="new-username" dir="ltr" placeholder="username">
+    <div class="m-label">كلمة المرور</div>
+    <input class="m-input" id="new-password" type="password" dir="ltr" placeholder="(اتركها فارغة للإبقاء على الحالية)">
+    <div class="m-label">الدور</div>
+    <select class="m-select" id="new-role"><option value="user">User</option><option value="admin">Admin</option></select>
+    <div class="m-label">الحد الأقصى للاستخدام</div>
+    <input class="m-input" id="new-maxuses" type="number" min="1" dir="ltr" placeholder="100">
+    <div class="m-label">المتبقي</div>
+    <input class="m-input" id="new-usesleft" type="number" min="0" dir="ltr" placeholder="100">
+    <div class="m-label">الحالة</div>
+    <select class="m-select" id="new-active"><option value="1">مفعّل ✓</option><option value="0">معطّل ✗</option></select>
+    <div class="m-row">
+      <button class="btn-ok" onclick="saveUser()">💾 حفظ</button>
+      <button class="btn-cancel" onclick="document.getElementById('adduser-modal').classList.remove('open')">إلغاء</button>
     </div>
   </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast">
-  <div class="toast-icon" id="toast-icon"></div>
-  <div class="toast-body">
-    <div class="toast-title" id="toast-title"></div>
-    <div class="toast-detail" id="toast-detail"></div>
+  <div class="t-ico" id="toast-icon"></div>
+  <div class="t-info">
+    <div class="t-title" id="toast-title"></div>
+    <div class="t-detail" id="toast-detail"></div>
   </div>
 </div>
-  
+
 <script>
-/* ════════════════════════════════════════
-   GAMES DATA
-════════════════════════════════════════ */
-const GAMES_DATA = [
+/* ════ GAMES DATA ════ */
+const GAMES_DATA=[
   {name:"Color Sort Woody Puzzle",package:"games.burny.color.sort.woody.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed"}],cat:"puzzle"},
   {name:"Wooden Word Puzzle",package:"games.burny.wooden.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"puzzle"},
   {name:"Associations Word Puzzle",package:"games.burny.associations.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"puzzle"},
@@ -693,64 +1148,47 @@ const GAMES_DATA = [
   {name:"Yarn Loop",package:"com.combo.yarnflow",dev_key:"TGm97uKTJF7qFCvREggWtf",level_events:[{display:"Level completed",template:"level_complete_{}"}],cat:"other"}
 ];
 
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-const DEFAULT_SERVER = 'https://web-production-42c2c.up.railway.app';
-let API = localStorage.getItem('ol_server') || DEFAULT_SERVER;
-let TOKEN = localStorage.getItem('ol_token') || '';
-let CURRENT_USER = null;
-let serverConnected = false;
-let pyodide = null, pyReady = false;
-let isRunning = false;
-let installedPkgs = [];
-try { installedPkgs = JSON.parse(localStorage.getItem('pp_pkgs') || '[]'); } catch { installedPkgs = []; }
-let curGaid = localStorage.getItem('pp_gaid') || '70ebe327-e224-4b1e-adb0-b09a27f78a0f';
-let curAfid = localStorage.getItem('pp_afid') || '1779417828531-7129893952045055065';
-let activeGame = null;
-let eventLog = [];
-let activeFilter = 'all';
-let toastTimer = null;
+/* ════ STATE ════ */
+const DEFAULT_SERVER='https://web-production-42c2c.up.railway.app';
+let API=localStorage.getItem('ol_server')||DEFAULT_SERVER;
+let TOKEN=localStorage.getItem('ol_token')||'';
+let CURRENT_USER=null;
+let serverConnected=false;
+let pyodide=null,pyReady=false,isRunning=false;
+let installedPkgs=[];
+try{installedPkgs=JSON.parse(localStorage.getItem('pp_pkgs')||'[]');}catch{installedPkgs=[];}
+let curGaid=localStorage.getItem('pp_gaid')||'70ebe327-e224-4b1e-adb0-b09a27f78a0f';
+let curAfid=localStorage.getItem('pp_afid')||'1779417828531-7129893952045055065';
+let activeGame=null,eventLog=[],activeFilter='all',toastTimer=null;
 
-/* ════════════════════════════════════════
-   BOOT
-════════════════════════════════════════ */
-window.onload = async () => {
-  document.getElementById('login-status').textContent = '🟢 ' + API;
-  if (TOKEN) {
-    await restoreSession();
-  } else {
-    document.getElementById('login-screen').style.display = 'flex';
-  }
+/* ════ BOOT ════ */
+window.onload=async()=>{
+  document.getElementById('login-status').textContent=API;document.getElementById('login-dot').style.background='var(--green)';
+  if(TOKEN){await restoreSession();}
+  else{document.getElementById('login-screen').style.display='flex';}
 };
 
-async function restoreSession() {
-  try {
-    const res = await apiFetch('/auth/me');
-    if (res.ok) {
-      CURRENT_USER = await res.json();
-      enterApp();
-    } else {
-      localStorage.removeItem('ol_token');
-      TOKEN = '';
-      document.getElementById('login-screen').style.display = 'flex';
-    }
-  } catch { document.getElementById('login-screen').style.display = 'flex'; }
+async function restoreSession(){
+  try{
+    const res=await apiFetch('/auth/me');
+    if(res.ok){CURRENT_USER=await res.json();enterApp();}
+    else{localStorage.removeItem('ol_token');TOKEN='';document.getElementById('login-screen').style.display='flex';}
+  }catch{document.getElementById('login-screen').style.display='flex';}
 }
 
-function enterApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
-  document.getElementById('hdr-user').textContent = CURRENT_USER.username;
-  if (CURRENT_USER.role === 'admin') {
-    document.getElementById('hdr-uses').style.display = 'none';
-    document.getElementById('nav-admin').style.display = 'flex';
-  } else {
-    document.getElementById('hdr-uses').style.display = 'inline-block';
-    document.getElementById('hdr-uses').textContent = CURRENT_USER.uses_left + ' uses';
+function enterApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('hdr-user').textContent=CURRENT_USER.username;
+  if(CURRENT_USER.role==='admin'){
+    document.getElementById('hdr-uses').style.display='none';
+    document.getElementById('nav-admin').style.display='flex';
+  }else{
+    document.getElementById('hdr-uses').style.display='inline-block';
+    document.getElementById('hdr-uses').textContent=CURRENT_USER.uses_left+' uses';
   }
-  document.getElementById('server-url').value = API;
-  document.getElementById('settings-server').value = API;
+  document.getElementById('server-url').value=API;
+  document.getElementById('settings-server').value=API;
   connectServer(true);
   updateIdDisplay();
   renderGames(GAMES_DATA);
@@ -759,961 +1197,508 @@ function enterApp() {
   loadPyodideRuntime();
 }
 
-/* ════════════════════════════════════════
-   AUTH
-════════════════════════════════════════ */
-async function doLogin() {
-  const user = document.getElementById('inp-user').value.trim();
-  const pass = document.getElementById('inp-pass').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
-  if (!user || !pass) { err.textContent = '⚠ أدخل اسم المستخدم وكلمة المرور'; return; }
-  btn.disabled = true; btn.textContent = 'جاري الدخول...'; err.textContent = '';
-  try {
-    const res = await fetch(API + '/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: user, password: pass })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      TOKEN = data.token;
-      CURRENT_USER = data;
-      localStorage.setItem('ol_token', TOKEN);
-      enterApp();
-    } else {
-      err.textContent = '❌ ' + (data.error || 'فشل تسجيل الدخول');
-    }
-  } catch { err.textContent = '🔌 تعذر الوصول للسيرفر'; }
-  finally { btn.disabled = false; btn.textContent = 'SIGN IN →'; }
+/* ════ AUTH ════ */
+async function doLogin(){
+  const user=document.getElementById('inp-user').value.trim();
+  const pass=document.getElementById('inp-pass').value;
+  const btn=document.getElementById('login-btn');
+  const err=document.getElementById('login-error');
+  if(!user||!pass){err.textContent='⚠ أدخل اسم المستخدم وكلمة المرور';return;}
+  btn.disabled=true;btn.textContent='جاري الدخول...';err.textContent='';
+  try{
+    const res=await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});
+    const data=await res.json();
+    if(res.ok){TOKEN=data.token;CURRENT_USER=data;localStorage.setItem('ol_token',TOKEN);enterApp();}
+    else{err.textContent='❌ '+(data.error||'فشل تسجيل الدخول');}
+  }catch{err.textContent='🔌 تعذر الوصول للسيرفر';}
+  finally{btn.disabled=false;btn.textContent='SIGN IN →';}
 }
 
-async function doLogout() {
-  if (API && TOKEN) { try { await apiFetch('/auth/logout', 'POST', {}); } catch {} }
-  TOKEN = ''; CURRENT_USER = null;
+async function doLogout(){
+  if(API&&TOKEN){try{await apiFetch('/auth/logout','POST',{});}catch{}}
+  TOKEN='';CURRENT_USER=null;
   localStorage.removeItem('ol_token');
-  document.getElementById('main-app').style.display = 'none';
-  document.getElementById('nav-admin').style.display = 'none';
-  document.getElementById('inp-pass').value = '';
-  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('nav-admin').style.display='none';
+  document.getElementById('inp-pass').value='';
+  document.getElementById('login-screen').style.display='flex';
 }
 
-/* ════════════════════════════════════════
-   API HELPER
-════════════════════════════════════════ */
-async function apiFetch(path, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json', 'X-Token': TOKEN } };
-  if (body !== null) opts.body = JSON.stringify(body);
-  return fetch(API + path, opts);
+async function apiFetch(path,method='GET',body=null){
+  const opts={method,headers:{'Content-Type':'application/json','X-Token':TOKEN}};
+  if(body!==null)opts.body=JSON.stringify(body);
+  return fetch(API+path,opts);
 }
 
-/* ════════════════════════════════════════
-   NAVIGATION
-════════════════════════════════════════ */
-function switchPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'games' && !document.getElementById('view-main').classList.contains('active') && !document.getElementById('view-detail').classList.contains('active')) {
-    showView('view-main');
-  }
+/* ════ NAVIGATION ════ */
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='games'&&!document.getElementById('view-main').classList.contains('active')&&!document.getElementById('view-detail').classList.contains('active'))showView('view-main');
 }
 
-/* ════════════════════════════════════════
-   SERVER CONNECTION
-════════════════════════════════════════ */
-async function connectServer(silent = false) {
-  let url = document.getElementById('server-url').value.trim();
-  if (!url) url = DEFAULT_SERVER;
-  if (!url.startsWith('http')) url = 'https://' + url;
-  url = url.replace(/\/$/, '');
-  API = url;
-  localStorage.setItem('ol_server', url);
-  document.getElementById('server-url').value = url;
-  document.getElementById('settings-server').value = url;
-  if (!silent) showToast('loading', null, 'جاري الاتصال...', url);
-  try {
-    const res = await fetch(url + '/', { signal: AbortSignal.timeout(8000) });
-    if (res.ok) {
-      serverConnected = true;
-      setServerDot('ok');
-      document.getElementById('btn-run').disabled = false;
-      document.getElementById('btn-run2').disabled = false;
-      document.getElementById('btn-pip').disabled = false;
-      document.getElementById('py-badge').textContent = '🌐 Server';
-      document.getElementById('py-badge').style.background = '#1a3020';
-      document.getElementById('py-badge').style.color = '#5de8a0';
-      if (!silent) showToast('success', '✅', 'متصل بالخادم!', 'Railway جاهز');
-    } else { setServerDot('err'); }
-  } catch { setServerDot('err'); if (!silent) showToast('error', '❌', 'فشل الاتصال', 'تحقق من الرابط'); }
+/* ════ SERVER ════ */
+async function connectServer(silent=false){
+  let url=document.getElementById('server-url').value.trim();
+  if(!url)url=DEFAULT_SERVER;
+  if(!url.startsWith('http'))url='https://'+url;
+  url=url.replace(/\/$/,'');
+  API=url;localStorage.setItem('ol_server',url);
+  document.getElementById('server-url').value=url;
+  document.getElementById('settings-server').value=url;
+  if(!silent)showToast('loading',null,'جاري الاتصال...',url);
+  try{
+    const res=await fetch(url+'/',{signal:AbortSignal.timeout(8000)});
+    if(res.ok){
+      serverConnected=true;setServerDot('ok');
+      document.getElementById('btn-run').disabled=false;
+      document.getElementById('btn-run2').disabled=false;
+      document.getElementById('btn-pip').disabled=false;
+      document.getElementById('py-badge').textContent='🌐 Server';
+      document.getElementById('py-badge').style.background='#1a3020';
+      document.getElementById('py-badge').style.color='#5de8a0';
+      if(!silent)showToast('success','✅','متصل بالخادم!','Railway جاهز');
+    }else{setServerDot('err');}
+  }catch{setServerDot('err');if(!silent)showToast('error','❌','فشل الاتصال','تحقق من الرابط');}
 }
+function setServerDot(cls){document.getElementById('server-dot').className='server-dot'+(cls?' '+cls:'');}
 
-function setServerDot(cls) {
-  const d = document.getElementById('server-dot');
-  d.className = 'server-dot' + (cls ? ' ' + cls : '');
+/* ════ GAMES ════ */
+function updateIdDisplay(){
+  document.getElementById('display-gaid').textContent=curGaid.substring(0,18)+'...';
+  document.getElementById('display-afid').textContent=curAfid.substring(0,18)+'...';
+  document.getElementById('settings-gaid').value=curGaid;
+  document.getElementById('settings-afid').value=curAfid;
 }
-
-/* ════════════════════════════════════════
-   GAMES
-════════════════════════════════════════ */
-function updateIdDisplay() {
-  document.getElementById('display-gaid').textContent = curGaid.substring(0, 18) + '...';
-  document.getElementById('display-afid').textContent = curAfid.substring(0, 18) + '...';
-  document.getElementById('settings-gaid').value = curGaid;
-  document.getElementById('settings-afid').value = curAfid;
+function renderGames(list){
+  const grid=document.getElementById('games-grid');
+  const noR=document.getElementById('no-results');
+  if(!list.length){grid.innerHTML='';noR.style.display='block';return;}
+  noR.style.display='none';
+  grid.innerHTML=list.map(g=>{const i=GAMES_DATA.indexOf(g);return`<div class="game-card" onclick="openGame(${i})"><div class="game-num">#${String(i+1).padStart(2,'0')}</div><div class="game-name">${escHtml(g.name)}</div><div class="game-pkg">${escHtml(g.package)}</div></div>`;}).join('');
 }
-
-function renderGames(list) {
-  const grid = document.getElementById('games-grid');
-  const noResults = document.getElementById('no-results');
-  if (!list.length) { grid.innerHTML = ''; noResults.style.display = 'block'; return; }
-  noResults.style.display = 'none';
-  grid.innerHTML = list.map(g => {
-    const i = GAMES_DATA.indexOf(g);
-    return `<div class="game-card" onclick="openGame(${i})">
-      <div class="game-num">#${String(i+1).padStart(2,'0')}</div>
-      <div class="game-name">${escHtml(g.name)}</div>
-      <div class="game-pkg">${escHtml(g.package)}</div>
-    </div>`;
-  }).join('');
-}
-
-function filterGames(cat, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  activeFilter = cat;
-  applyFilters();
-}
-
-function searchGames(q) { applyFilters(q); }
-
-function applyFilters(q) {
-  q = q !== undefined ? q : document.querySelector('.search-input').value;
-  let list = GAMES_DATA;
-  if (activeFilter !== 'all') list = list.filter(g => g.cat === activeFilter);
-  if (q) list = list.filter(g => g.name.toLowerCase().includes(q.toLowerCase()) || g.package.toLowerCase().includes(q.toLowerCase()));
+function filterGames(cat,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');activeFilter=cat;applyFilters();}
+function searchGames(q){applyFilters(q);}
+function applyFilters(q){
+  q=q!==undefined?q:document.querySelector('.search-input').value;
+  let list=GAMES_DATA;
+  if(activeFilter!=='all')list=list.filter(g=>g.cat===activeFilter);
+  if(q)list=list.filter(g=>g.name.toLowerCase().includes(q.toLowerCase())||g.package.toLowerCase().includes(q.toLowerCase()));
   renderGames(list);
 }
-
-function openGame(idx) {
-  activeGame = GAMES_DATA[idx];
-  const hasNumber = activeGame.level_events[0].template.includes('{}');
-  document.getElementById('detail-game-name').textContent = activeGame.name;
-  document.getElementById('detail-pkg').textContent = activeGame.package;
-  document.getElementById('event-template-display').textContent = activeGame.level_events[0].template;
-  const lvlInput = document.getElementById('level-input');
-  lvlInput.style.display = hasNumber ? 'block' : 'none';
-  lvlInput.value = '';
-  document.getElementById('event-preview').textContent = hasNumber ? '' : activeGame.level_events[0].template;
-  document.getElementById('event-log').innerHTML = '<div class="log-empty">لا توجد أحداث بعد</div>';
-  eventLog = [];
+function openGame(idx){
+  activeGame=GAMES_DATA[idx];
+  const hasNum=activeGame.level_events[0].template.includes('{}');
+  document.getElementById('detail-game-name').textContent=activeGame.name;
+  document.getElementById('detail-pkg').textContent=activeGame.package;
+  document.getElementById('event-template-display').textContent=activeGame.level_events[0].template;
+  const lvl=document.getElementById('level-input');
+  lvl.style.display=hasNum?'block':'none';lvl.value='';
+  document.getElementById('event-preview').textContent=hasNum?'':activeGame.level_events[0].template;
+  document.getElementById('event-log').innerHTML='<div class="log-empty">لا توجد أحداث بعد</div>';
+  eventLog=[];
   showView('view-detail');
-  
-  // إضافة استدعاء دالة جلب مهام اللعبة الحالية
   loadGameJobs();
 }
-
-function goBack() { showView('view-main'); }
-
-function showView(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
+function goBack(){showView('view-main');}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function updateEventPreview(){
+  const tmpl=activeGame.level_events[0].template;
+  const val=document.getElementById('level-input').value;
+  document.getElementById('event-preview').textContent=(tmpl.includes('{}')&&val)?'→ '+tmpl.replace('{}',val):'';
 }
 
-function updateEventPreview() {
-  const tmpl = activeGame.level_events[0].template;
-  const val = document.getElementById('level-input').value;
-  document.getElementById('event-preview').textContent = (tmpl.includes('{}') && val) ? '→ ' + tmpl.replace('{}', val) : '';
+async function loadGameJobs(){
+  const container=document.getElementById('game-jobs-list');
+  if(!container||!activeGame)return;
+  container.innerHTML='<div class="log-empty">جاري التحميل...</div>';
+  try{
+    const res=await apiFetch('/jobs');
+    if(!res.ok)throw new Error();
+    const all=await res.json();
+    const mine=all.filter(j=>j.code&&j.code.includes(activeGame.package));
+    if(!mine.length){container.innerHTML='<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';return;}
+    container.innerHTML=mine.map(j=>`<div class="log-entry"><div class="log-dot ${j.enabled?'ok':'err'}"></div><div class="log-text">${escHtml(j.name)}</div><div class="log-status">${escHtml(formatSchedule(j.schedule))}</div></div>`).join('');
+  }catch{container.innerHTML='<div class="log-empty">فشل التحميل</div>';}
 }
 
-async function loadGameJobs() {
-    const container = document.getElementById('game-jobs-list');
-    if (!container) return;
-    
-    container.innerHTML = '<div class="log-empty">جاري تحميل المهام...</div>';
-    try {
-        const res = await apiFetch('/jobs');
-        if (!res.ok) throw new Error();
-        const allJobs = await res.json();
-        
-        // التصحيح: البحث في حقل الـ package وليس الـ code
-        const myJobs = allJobs.filter(j => j.package === activeGame.package);
-        
-        if (myJobs.length === 0) {
-            container.innerHTML = '<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';
-        } else {
-            container.innerHTML = myJobs.map(j => `
-                <div class="log-entry">
-                    <div class="log-dot ${j.enabled ? 'success' : 'error'}"></div>
-                    <div class="log-text">${escHtml(j.name)}</div>
-                    <div class="log-status">${formatSchedule(j.schedule)}</div>
-                </div>`).join('');
-        }
-    } catch {
-        container.innerHTML = '<div class="log-empty">فشل تحميل السجل</div>';
-    }
+async function sendLevelEvent(){
+  const tmpl=activeGame.level_events[0].template;
+  const hasNum=tmpl.includes('{}');
+  const val=document.getElementById('level-input').value;
+  if(hasNum&&!val){showToast('error','⚠','خطأ','أدخل رقم المستوى أولاً');return;}
+  await sendEvent('level',hasNum?tmpl.replace('{}',val):tmpl);
+}
+async function sendPurchase(){await sendEvent('purchase','af_purchase');}
+async function sendEvent(type,evName){
+  if(!activeGame)return;
+  if(!serverConnected){showToast('error','🌐','غير متصل','يرجى الاتصال بـ Railway أولاً');addLog(evName,'NO SERVER',false);return;}
+  showToast('loading',null,'إرسال عبر Railway...',evName);
+  const body={package:activeGame.package,dev_key:activeGame.dev_key,body:{appsflyer_id:curAfid,advertising_id:curGaid,eventName:evName,eventTime:new Date().toISOString(),eventValue:type==='purchase'?JSON.stringify({af_revenue:"4.99",af_currency:"USD"}):"{}"}};
+  try{
+    const res=await apiFetch('/api/send-event','POST',body);
+    const data=await res.json();
+    if(res.ok&&data.success){addLog(evName,`${data.status_code}`,true);showToast('success','✅',`تم الإرسال (${data.status_code})`,evName);}
+    else{addLog(evName,`ERR: ${res.status}`,false);showToast('error','❌',`فشل: ${data.error||res.status}`,evName);}
+  }catch(e){addLog(evName,'NET ERR',false);showToast('error','🔌','خطأ في الاتصال',e.message);}
+}
+function addLog(name,status,ok){
+  const now=new Date();
+  const time=[now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+  eventLog.unshift({name,status,ok,time});
+  document.getElementById('event-log').innerHTML=eventLog.map(e=>`<div class="log-entry"><div class="log-dot ${e.ok?'success':'error'}"></div><div class="log-time">${e.time}</div><div class="log-text">${escHtml(e.name)}</div><div class="log-status">${escHtml(e.status)}</div></div>`).join('');
 }
 
-async function sendLevelEvent() {
-  const tmpl = activeGame.level_events[0].template;
-  const hasNum = tmpl.includes('{}');
-  const val = document.getElementById('level-input').value;
-  if (hasNum && !val) { showToast('error', '⚠', 'خطأ', 'أدخل رقم المستوى أولاً'); return; }
-  await sendEvent('level', hasNum ? tmpl.replace('{}', val) : tmpl);
+/* ════ IDs MODAL ════ */
+function openIdModal(){document.getElementById('modal-gaid-input').value=curGaid;document.getElementById('modal-afid-input').value=curAfid;document.getElementById('id-modal').classList.add('open');}
+function closeIdModal(){document.getElementById('id-modal').classList.remove('open');}
+function saveIds(){
+  const g=document.getElementById('modal-gaid-input').value.trim();
+  const a=document.getElementById('modal-afid-input').value.trim();
+  if(g){curGaid=g;localStorage.setItem('pp_gaid',g);}
+  if(a){curAfid=a;localStorage.setItem('pp_afid',a);}
+  updateIdDisplay();closeIdModal();showToast('success','✅','تم الحفظ','تم تحديث IDs');
 }
+document.getElementById('id-modal').addEventListener('click',function(e){if(e.target===this)closeIdModal();});
 
-async function sendPurchase() { await sendEvent('purchase', 'af_purchase'); }
-
-async function sendEvent(type, evName) {
-  if (!activeGame) return;
-  if (!serverConnected) {
-    showToast('error', '🌐', 'غير متصل بالسيرفر', 'يرجى الاتصال بـ Railway أولاً');
-    addLog(evName, 'NO SERVER', false);
-    return;
-  }
-  showToast('loading', null, 'إرسال عبر Railway...', evName);
-  const body = {
-    package: activeGame.package,
-    dev_key: activeGame.dev_key,
-    body: {
-      appsflyer_id: curAfid,
-      advertising_id: curGaid,
-      eventName: evName,
-      eventTime: new Date().toISOString(),
-      eventValue: type === 'purchase' ? JSON.stringify({af_revenue:"4.99",af_currency:"USD"}) : "{}"
-    }
-  };
-  try {
-    const res = await apiFetch('/api/send-event', 'POST', body);
-    const data = await res.json();
-    if (res.ok && data.success) {
-      addLog(evName, `${data.status_code}`, true);
-      showToast('success', '✅', `تم الإرسال (${data.status_code})`, evName);
-    } else {
-      addLog(evName, `ERR: ${res.status}`, false);
-      showToast('error', '❌', `فشل: ${data.error || res.status}`, evName);
-    }
-  } catch(e) {
-    addLog(evName, 'NET ERR', false);
-    showToast('error', '🔌', 'خطأ في الاتصال', e.message);
-  }
-}
-
-function addLog(name, status, ok) {
-  const now = new Date();
-  const time = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
-  eventLog.unshift({name, status, ok, time});
-  document.getElementById('event-log').innerHTML = eventLog.map(e => `
-    <div class="log-entry">
-      <div class="log-dot ${e.ok ? 'success' : 'error'}"></div>
-      <div class="log-time">${e.time}</div>
-      <div class="log-text">${escHtml(e.name)}</div>
-      <div class="log-status">${escHtml(e.status)}</div>
-    </div>`).join('');
-}
-
-/* ════════════════════════════════════════
-   IDs MODAL
-════════════════════════════════════════ */
-function openIdModal() {
-  document.getElementById('modal-gaid-input').value = curGaid;
-  document.getElementById('modal-afid-input').value = curAfid;
-  document.getElementById('id-modal').classList.add('open');
-}
-function closeIdModal() { document.getElementById('id-modal').classList.remove('open'); }
-function saveIds() {
-  const g = document.getElementById('modal-gaid-input').value.trim();
-  const a = document.getElementById('modal-afid-input').value.trim();
-  if (g) { curGaid = g; localStorage.setItem('pp_gaid', g); }
-  if (a) { curAfid = a; localStorage.setItem('pp_afid', a); }
-  updateIdDisplay();
-  closeIdModal();
-  showToast('success', '✅', 'تم الحفظ', 'تم تحديث IDs');
-}
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('id-modal').addEventListener('click', function(e) { if (e.target === this) closeIdModal(); });
-});
-
-/* ════════════════════════════════════════
-   SETTINGS
-════════════════════════════════════════ */
-function autoSaveId(type) {
-  const val = document.getElementById('settings-' + type).value.trim();
-  if (type === 'gaid') { curGaid = val; localStorage.setItem('pp_gaid', val); }
-  else { curAfid = val; localStorage.setItem('pp_afid', val); }
+/* ════ SETTINGS ════ */
+function autoSaveId(type){
+  const val=document.getElementById('settings-'+type).value.trim();
+  if(type==='gaid'){curGaid=val;localStorage.setItem('pp_gaid',val);}
+  else{curAfid=val;localStorage.setItem('pp_afid',val);}
   updateIdDisplay();
 }
-
-function clearAllData() {
-  if (confirm('هل أنت متأكد؟ سيتم حذف جميع البيانات المحفوظة.')) {
-    localStorage.clear();
-    location.reload();
-  }
-}
-
-async function loadAccountInfo() {
-  if (!API || !TOKEN) return;
-  try {
-    const res = await apiFetch('/auth/me');
-    if (res.ok) {
-      const u = await res.json();
-      CURRENT_USER = u;
-      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses, 1)) * 100);
-      document.getElementById('account-info').innerHTML = `
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-          <span>${escHtml(u.username)}</span>
-          <span class="role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}">${u.role.toUpperCase()}</span>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">
-          ${u.role === 'admin' ? '∞ غير محدود' : u.uses_left + ' / ' + u.max_uses + ' استخدام'}
-        </div>
-        <div class="uses-bar"><div class="uses-fill" style="width:${pct}%"></div></div>`;
-      if (u.role !== 'admin') document.getElementById('hdr-uses').textContent = u.uses_left + ' uses';
+function clearAllData(){if(confirm('هل أنت متأكد؟ سيتم حذف جميع البيانات.')){localStorage.clear();location.reload();}}
+async function loadAccountInfo(){
+  if(!API||!TOKEN)return;
+  try{
+    const res=await apiFetch('/auth/me');
+    if(res.ok){
+      const u=await res.json();CURRENT_USER=u;
+      const pct=u.role==='admin'?100:Math.round((u.uses_left/Math.max(u.max_uses,1))*100);
+      document.getElementById('account-info').innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>${escHtml(u.username)}</span><span class="role-badge ${u.role==='admin'?'acct-role role-admin':'acct-role role-user'}">${u.role.toUpperCase()}</span></div><div style="font-size:10px;color:var(--muted);margin-bottom:4px">${u.role==='admin'?'∞ غير محدود':u.uses_left+' / '+u.max_uses+' استخدام'}</div><div class="uses-bar-wrap"><div class="uses-fill" style="width:${pct}%"></div></div>`;
+      if(u.role!=='admin')document.getElementById('hdr-uses').textContent=u.uses_left+' uses';
     }
-  } catch {}
+  }catch{}
 }
+async function syncToServer(){if(!API||!TOKEN){showToast('error','⚠','غير متصل','');return;}try{const res=await apiFetch('/data','POST',{server:API,pkgs:JSON.stringify(installedPkgs)});if(res.ok)showToast('success','✅','تم الرفع','');else showToast('error','❌','فشل','');}catch{showToast('error','🔌','خطأ','');}}
+async function syncFromServer(){if(!API||!TOKEN){showToast('error','⚠','غير متصل','');return;}try{const res=await apiFetch('/data');if(res.ok){const data=await res.json();for(const[k,o]of Object.entries(data))localStorage.setItem('ol_'+k,o.value);showToast('success','✅','تم التحميل','');}}catch{showToast('error','🔌','خطأ','');}}
 
-async function syncToServer() {
-  if (!API || !TOKEN) { showToast('error', '⚠', 'غير متصل', ''); return; }
-  try {
-    const res = await apiFetch('/data', 'POST', { server: API, pkgs: JSON.stringify(installedPkgs) });
-    if (res.ok) showToast('success', '✅', 'تم الرفع', 'الإعدادات محفوظة على السيرفر');
-    else showToast('error', '❌', 'فشل', '');
-  } catch { showToast('error', '🔌', 'خطأ في الشبكة', ''); }
-}
-
-async function syncFromServer() {
-  if (!API || !TOKEN) { showToast('error', '⚠', 'غير متصل', ''); return; }
-  try {
-    const res = await apiFetch('/data');
-    if (res.ok) {
-      const data = await res.json();
-      for (const [key, obj] of Object.entries(data)) localStorage.setItem('ol_' + key, obj.value);
-      showToast('success', '✅', 'تم التحميل', 'الإعدادات مُستعادة');
-    }
-  } catch { showToast('error', '🔌', 'خطأ في الشبكة', ''); }
-}
-
-/* ════════════════════════════════════════
-   PYTHON
-════════════════════════════════════════ */
-async function loadPyodideRuntime() {
-  setPyStatus('loading', '🐍 تحميل Python...');
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
-  document.head.appendChild(script);
-  script.onload = async () => {
-    try {
-      setPyStatus('loading', '⚙️ تهيئة البيئة...');
-      pyodide = await loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/',
-        stdout: (t) => appendOutput(t + '\n', 'stdout'),
-        stderr: (t) => appendOutput(t + '\n', 'stderr'),
-      });
-      pyReady = true;
-      setPyStatus('ready', '✅ Python جاهز');
-      if (!serverConnected) {
-        document.getElementById('btn-run').disabled = false;
-        document.getElementById('btn-run2').disabled = false;
-        document.getElementById('btn-pip').disabled = false;
-        document.getElementById('py-badge').textContent = '🐍 Ready';
-        document.getElementById('py-badge').style.background = '#1a3020';
-        document.getElementById('py-badge').style.color = '#5de8a0';
-      }
-      for (const pkg of installedPkgs) {
-        try { await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`); } catch {}
-      }
-      clearOutput();
-      appendOutput('// Python ' + pyodide.runPython('import sys; sys.version') + '\n', 'sys');
-      appendOutput('// جاهز! اكتب كودك ثم اضغط ▶ تشغيل\n', 'sys');
-    } catch(e) {
-      setPyStatus('error', '❌ فشل التهيئة');
-    }
+/* ════ PYTHON ════ */
+async function loadPyodideRuntime(){
+  setPyStatus('loading','🐍 تحميل Python...');
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+  document.head.appendChild(s);
+  s.onload=async()=>{
+    try{
+      setPyStatus('loading','⚙️ تهيئة البيئة...');
+      pyodide=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/',stdout:(t)=>appendOutput(t+'\n','stdout'),stderr:(t)=>appendOutput(t+'\n','stderr')});
+      pyReady=true;setPyStatus('ready','✅ Python جاهز');
+      if(!serverConnected){document.getElementById('btn-run').disabled=false;document.getElementById('btn-run2').disabled=false;document.getElementById('btn-pip').disabled=false;document.getElementById('py-badge').textContent='🐍 Ready';document.getElementById('py-badge').style.background='#1a3020';document.getElementById('py-badge').style.color='#5de8a0';}
+      for(const pkg of installedPkgs){try{await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`);}catch{}}
+      clearOutput();appendOutput('// Python '+pyodide.runPython('import sys; sys.version')+'\n','sys');appendOutput('// جاهز! اكتب كودك ثم اضغط ▶ تشغيل\n','sys');
+    }catch{setPyStatus('error','❌ فشل التهيئة');}
   };
-  script.onerror = () => setPyStatus('error', '❌ فشل التحميل');
+  s.onerror=()=>setPyStatus('error','❌ فشل التحميل');
 }
+function setPyStatus(cls,text){const el=document.getElementById('py-status');el.className='py-status '+cls;el.textContent=text;}
+async function runPython(){
+  if(isRunning)return;
+  const code=document.getElementById('code-editor').value.trim();
+  if(!code){showToast('error','⚠','الكود فارغ','');return;}
+  clearOutput();appendOutput('// ▶ جاري التشغيل...\n','sys');
+  isRunning=true;document.getElementById('btn-run').disabled=true;document.getElementById('btn-run2').disabled=true;
+  try{
+    if(serverConnected){
+      const start=Date.now();const res=await apiFetch('/run','POST',{code});const data=await res.json();const el=((Date.now()-start)/1000).toFixed(2);
+      if(data.error){appendOutput('❌ '+data.error+'\n','error');}
+      else{if(data.stdout)appendOutput(data.stdout,'stdout');if(data.stderr)appendOutput(data.stderr,'stderr');appendOutput(data.returncode===0?`\n// ✅ اكتمل في ${el}ث\n`:'\n// ❌ خطأ\n',data.returncode===0?'success':'error');loadAccountInfo();}
+    }else if(pyReady){
+      const r=await pyodide.runPythonAsync(code);
+      if(r!==undefined&&r!==null)appendOutput(String(r)+'\n','stdout');
+      appendOutput('\n// ✅ اكتمل التشغيل\n','success');
+    }else{showToast('error','⏳','غير جاهز','انتظر اكتمال تحميل Python');}
+  }catch(e){appendOutput(e.message+'\n','error');}
+  finally{isRunning=false;document.getElementById('btn-run').disabled=false;document.getElementById('btn-run2').disabled=false;}
+}
+async function installPackage(){
+  const pkg=document.getElementById('pip-input').value.trim().toLowerCase();
+  if(!pkg)return;
+  if(!/^[a-zA-Z0-9_\-\.]+$/.test(pkg)){showToast('error','⚠','اسم غير صالح','');return;}
+  const btn=document.getElementById('btn-pip');btn.disabled=true;btn.textContent='⏳';
+  showToast('loading',null,'pip install '+pkg,'جاري التثبيت...');
+  try{
+    if(serverConnected){const res=await apiFetch('/pip','POST',{package:pkg});const data=await res.json();if(data.success){if(!installedPkgs.includes(pkg)){installedPkgs.push(pkg);localStorage.setItem('pp_pkgs',JSON.stringify(installedPkgs));}renderInstalledPkgs();document.getElementById('pip-input').value='';showToast('success','✅','تم التثبيت',pkg+' جاهز!');}else{showToast('error','❌','فشل',data.message||'');}}
+    else if(pyReady){await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`);if(!installedPkgs.includes(pkg)){installedPkgs.push(pkg);localStorage.setItem('pp_pkgs',JSON.stringify(installedPkgs));}renderInstalledPkgs();document.getElementById('pip-input').value='';showToast('success','✅','تم التثبيت',pkg);}
+  }catch(e){showToast('error','❌','فشل',e.message.split('\n')[0]);}
+  finally{btn.disabled=false;btn.textContent='تثبيت';}
+}
+function renderInstalledPkgs(){
+  const c=document.getElementById('pkg-chips');const empty=document.getElementById('pkg-empty');
+  c.querySelectorAll('.pkg-chip').forEach(x=>x.remove());
+  if(!installedPkgs.length){empty.style.display='block';return;}
+  empty.style.display='none';
+  installedPkgs.forEach(pkg=>{const chip=document.createElement('div');chip.className='pkg-chip';const sp=document.createElement('span');sp.textContent=pkg;const x=document.createElement('span');x.className='pkg-chip-remove';x.textContent='×';x.onclick=()=>{installedPkgs=installedPkgs.filter(p=>p!==pkg);localStorage.setItem('pp_pkgs',JSON.stringify(installedPkgs));renderInstalledPkgs();showToast('success','🗑','تمت الإزالة',pkg);};chip.appendChild(sp);chip.appendChild(x);c.appendChild(chip);});
+}
+function appendOutput(text,kind){const area=document.getElementById('output-area');const span=document.createElement('span');span.className='o-'+kind;span.textContent=text;area.appendChild(span);area.scrollTop=area.scrollHeight;}
+function clearOutput(){document.getElementById('output-area').innerHTML='';}
+function clearEditor(){document.getElementById('code-editor').value='';}
+function handleTab(e){if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);t.selectionStart=t.selectionEnd=s+2;}}
 
-function setPyStatus(cls, text) {
-  const el = document.getElementById('py-status');
-  el.className = 'py-status ' + cls;
-  el.textContent = text;
-}
-
-async function runPython() {
-  if (isRunning) return;
-  const code = document.getElementById('code-editor').value.trim();
-  if (!code) { showToast('error', '⚠', 'الكود فارغ', ''); return; }
-  clearOutput();
-  appendOutput('// ▶ جاري التشغيل...\n', 'sys');
-  isRunning = true;
-  document.getElementById('btn-run').disabled = true;
-  document.getElementById('btn-run2').disabled = true;
-  try {
-    if (serverConnected) {
-      const start = Date.now();
-      const res = await apiFetch('/run', 'POST', { code });
-      const data = await res.json();
-      const elapsed = ((Date.now() - start) / 1000).toFixed(2);
-      if (data.error) { appendOutput('❌ ' + data.error + '\n', 'error'); }
-      else {
-        if (data.stdout) appendOutput(data.stdout, 'stdout');
-        if (data.stderr) appendOutput(data.stderr, 'stderr');
-        appendOutput(data.returncode === 0 ? `\n// ✅ اكتمل في ${elapsed}ث\n` : '\n// ❌ خطأ في الكود\n',
-          data.returncode === 0 ? 'success' : 'error');
-        loadAccountInfo();
-      }
-    } else if (pyReady) {
-      const result = await pyodide.runPythonAsync(code);
-      if (result !== undefined && result !== null) appendOutput(String(result) + '\n', 'stdout');
-      appendOutput('\n// ✅ اكتمل التشغيل\n', 'success');
-    } else {
-      showToast('error', '⏳', 'غير جاهز', 'انتظر اكتمال تحميل Python');
-    }
-  } catch(e) {
-    appendOutput(e.message + '\n', 'error');
-  } finally {
-    isRunning = false;
-    document.getElementById('btn-run').disabled = false;
-    document.getElementById('btn-run2').disabled = false;
-  }
-}
-
-async function installPackage() {
-  const pkg = document.getElementById('pip-input').value.trim().toLowerCase();
-  if (!pkg) return;
-  if (!/^[a-zA-Z0-9_\-\.]+$/.test(pkg)) { showToast('error', '⚠', 'اسم مكتبة غير صالح', ''); return; }
-  const btn = document.getElementById('btn-pip');
-  btn.disabled = true; btn.textContent = '⏳';
-  showToast('loading', null, 'pip install ' + pkg, 'جاري التثبيت...');
-  try {
-    if (serverConnected) {
-      const res = await apiFetch('/pip', 'POST', { package: pkg });
-      const data = await res.json();
-      if (data.success) {
-        if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('pp_pkgs', JSON.stringify(installedPkgs)); }
-        renderInstalledPkgs();
-        document.getElementById('pip-input').value = '';
-        showToast('success', '✅', 'تم التثبيت', pkg + ' جاهز!');
-      } else { showToast('error', '❌', 'فشل التثبيت', data.message || ''); }
-    } else if (pyReady) {
-      await pyodide.runPythonAsync(`import micropip\nawait micropip.install('${pkg}')`);
-      if (!installedPkgs.includes(pkg)) { installedPkgs.push(pkg); localStorage.setItem('pp_pkgs', JSON.stringify(installedPkgs)); }
-      renderInstalledPkgs();
-      document.getElementById('pip-input').value = '';
-      showToast('success', '✅', 'تم التثبيت', pkg);
-    }
-  } catch(e) { showToast('error', '❌', 'فشل التثبيت', e.message.split('\n')[0]); }
-  finally { btn.disabled = false; btn.textContent = 'تثبيت'; }
-}
-
-function renderInstalledPkgs() {
-  const c = document.getElementById('pkg-chips');
-  const empty = document.getElementById('pkg-empty');
-  c.querySelectorAll('.pkg-chip').forEach(x => x.remove());
-  if (!installedPkgs.length) { empty.style.display = 'block'; return; }
-  empty.style.display = 'none';
-  installedPkgs.forEach(pkg => {
-    const chip = document.createElement('div');
-    chip.className = 'pkg-chip';
-    const s = document.createElement('span'); s.textContent = pkg;
-    const x = document.createElement('span');
-    x.className = 'pkg-chip-remove'; x.textContent = '×';
-    x.onclick = () => { installedPkgs = installedPkgs.filter(p => p !== pkg); localStorage.setItem('pp_pkgs', JSON.stringify(installedPkgs)); renderInstalledPkgs(); showToast('success','🗑','تمت الإزالة',pkg); };
-    chip.appendChild(s); chip.appendChild(x);
-    c.appendChild(chip);
-  });
-}
-
-function appendOutput(text, kind) {
-  const area = document.getElementById('output-area');
-  const span = document.createElement('span');
-  span.className = 'out-line-' + kind;
-  span.textContent = text;
-  area.appendChild(span);
-  area.scrollTop = area.scrollHeight;
-}
-function clearOutput() { document.getElementById('output-area').innerHTML = ''; }
-function clearEditor() { document.getElementById('code-editor').value = ''; }
-function handleTab(e) {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    const t = e.target, s = t.selectionStart;
-    t.value = t.value.substring(0, s) + '  ' + t.value.substring(t.selectionEnd);
-    t.selectionStart = t.selectionEnd = s + 2;
-  }
-}
-
-/* ════════════════════════════════════════
-   SNIPPETS
-════════════════════════════════════════ */
-const SNIPPETS = [
-  {title:'مرحبا بالعالم',tag:'Python',desc:'أول كود Python — طباعة رسالة وتاريخ اليوم',
-   code:`from datetime import datetime\nprint("مرحباً من online! 🐍")\nprint(f"التاريخ الآن: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")`},
-  {title:'حساب إحصائي',tag:'math',desc:'حسابات رياضية بدون مكتبات خارجية',
-   code:`import math, statistics\nnums = [10,25,33,47,52,61,78,90]\nprint(f"المجموع: {sum(nums)}")\nprint(f"المتوسط: {statistics.mean(nums):.2f}")\nprint(f"الوسيط: {statistics.median(nums)}")\nprint(f"الانحراف: {statistics.stdev(nums):.2f}")`},
-  {title:'معالجة JSON',tag:'json',desc:'تحليل وبناء بيانات JSON',
-   code:`import json\ndata = {"game":"Coin Master","package":"com.moonactive.coinmaster","events":[{"name":"village_5_complete","status":200}]}\nprint(json.dumps(data, indent=2, ensure_ascii=False))`},
-  {title:'توليد IDs عشوائية',tag:'utils',desc:'توليد GAID و AppsFlyer IDs جديدة',
-   code:`import uuid, random, time\ndef gen_gaid(): return str(uuid.uuid4())\ndef gen_afid(): return f"{int(time.time()*1000)}-{random.randint(10**18,10**19-1)}"\nfor i in range(3):\n    print(f"--- مجموعة {i+1} ---")\n    print(f"GAID: {gen_gaid()}")\n    print(f"AFID: {gen_afid()}")`},
-  {title:'AppsFlyer Event Builder',tag:'AF',desc:'بناء بيانات الأحداث بصيغة JSON للإرسال',
-   code:`import json\nfrom datetime import datetime, timezone\ndef build_event(package, dev_key, afid, gaid, event_name):\n    return {"url":f"https://api2.appsflyer.com/inappevent/{package}","headers":{"authentication":dev_key},"body":{"appsflyer_id":afid,"advertising_id":gaid,"eventName":event_name,"eventTime":datetime.now(timezone.utc).isoformat()}}\nreq = build_event("com.moonactive.coinmaster","H3KjoCRVTiVgA5mWSAHtCe","1779417828531-7","70ebe327-e224","village_5_complete")\nprint(json.dumps(req, indent=2, ensure_ascii=False))`},
-  {title:'تحليل نصوص',tag:'re',desc:'استخراج بيانات من نصوص باستخدام Regex',
-   code:`import re\ntext = "GAID: 70ebe327-e224-4b1e-adb0-b09a27f78a0f\\nPackage: com.moonactive.coinmaster\\nStatus: 200 OK"\ngaid = re.search(r'GAID: ([0-9a-f-]{36})', text)\nprint(f"GAID: {gaid.group(1) if gaid else 'لم يُوجد'}")\nstatus = re.search(r'Status: (\\d+)', text)\nprint(f"Status: {status.group(1) if status else 'لم يُوجد'}")`},
+/* ════ SNIPPETS ════ */
+const SNIPPETS=[
+  {title:'مرحبا بالعالم',tag:'Python',desc:'طباعة رسالة وتاريخ اليوم',code:`from datetime import datetime\nprint("مرحباً من online! 🐍")\nprint(f"التاريخ: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")`},
+  {title:'حساب إحصائي',tag:'math',desc:'حسابات رياضية',code:`import math,statistics\nnums=[10,25,33,47,52,61,78,90]\nprint(f"المجموع: {sum(nums)}")\nprint(f"المتوسط: {statistics.mean(nums):.2f}")`},
+  {title:'معالجة JSON',tag:'json',desc:'تحليل وبناء بيانات JSON',code:`import json\ndata={"game":"Coin Master","events":[{"name":"village_5","status":200}]}\nprint(json.dumps(data,indent=2,ensure_ascii=False))`},
+  {title:'توليد IDs عشوائية',tag:'utils',desc:'توليد GAID و AppsFlyer IDs',code:`import uuid,random,time\nfor i in range(3):\n    print(f"GAID: {uuid.uuid4()}")\n    print(f"AFID: {int(time.time()*1000)}-{random.randint(10**18,10**19-1)}")`},
+  {title:'AppsFlyer Event Builder',tag:'AF',desc:'بناء بيانات الأحداث JSON',code:`import json\nfrom datetime import datetime,timezone\nbody={"appsflyer_id":"AFID","advertising_id":"GAID","eventName":"village_5_complete","eventTime":datetime.now(timezone.utc).isoformat(),"eventValue":"{}"}\nprint(json.dumps(body,indent=2))`},
+  {title:'تحليل نصوص Regex',tag:'re',desc:'استخراج بيانات من نصوص',code:`import re\ntext="GAID: 70ebe327-e224-4b1e-adb0-b09a27f78a0f\\nStatus: 200 OK"\ngaid=re.search(r'GAID: ([0-9a-f-]{36})',text)\nprint(f"GAID: {gaid.group(1) if gaid else 'لم يُوجد'}")`},
 ];
-
-function renderSnippets() {
-  const list = document.getElementById('snippet-list');
-  list.innerHTML = SNIPPETS.map((s, i) => `
-    <div class="snippet-card" onclick="loadSnippet(${i})">
-      <div class="snippet-header">
-        <div class="snippet-title">${escHtml(s.title)}</div>
-        <span class="snippet-tag">${escHtml(s.tag)}</span>
-      </div>
-      <div class="snippet-desc">${escHtml(s.desc)}</div>
-      <div class="snippet-preview">${escHtml(s.code.substring(0,120))}...</div>
-    </div>`).join('');
+function renderSnippets(){
+  document.getElementById('snippet-list').innerHTML=SNIPPETS.map((s,i)=>`<div class="snippet-card" onclick="loadSnippet(${i})"><div class="snippet-header"><div class="snippet-title">${escHtml(s.title)}</div><span class="snippet-tag">${escHtml(s.tag)}</span></div><div class="snippet-desc">${escHtml(s.desc)}</div><div class="snippet-preview">${escHtml(s.code.substring(0,120))}...</div></div>`).join('');
 }
+function loadSnippet(i){document.getElementById('code-editor').value=SNIPPETS[i].code;switchPage('python');showToast('success','📋','تم التحميل',SNIPPETS[i].title+' — اضغط ▶');}
 
-function loadSnippet(i) {
-  document.getElementById('code-editor').value = SNIPPETS[i].code;
-  switchPage('python');
-  showToast('success', '📋', 'تم التحميل', SNIPPETS[i].title + ' — اضغط ▶ للتشغيل');
-}
-
-/* ════════════════════════════════════════
-   SCHEDULER
-════════════════════════════════════════ */
-async function loadJobs() {
-  if (!API || !TOKEN) return;
-  const list = document.getElementById('jobs-list');
-  list.innerHTML = '<div class="empty-state">Loading...</div>';
-  try {
-    const res = await apiFetch('/jobs');
-    if (!res.ok) { list.innerHTML = '<div class="empty-state">فشل التحميل</div>'; return; }
-    const jobs = await res.json();
-    if (!jobs.length) { list.innerHTML = '<div class="empty-state">لا توجد مهام مجدولة<br><span style="font-size:10px">اضغط + لإنشاء مهمة</span></div>'; return; }
-    list.innerHTML = '';
-    jobs.forEach(j => {
-      const sCls = j.last_status || 'pending';
-      const sLabel = j.last_status ? (j.last_status === 'success' ? '✅ نجح' : '❌ خطأ') : '⏳ لم يعمل';
-      const card = document.createElement('div');
-      card.className = 'job-card' + (j.enabled ? '' : ' disabled');
-      card.innerHTML = `
-        <div class="job-header">
-          <div class="job-name"></div>
-          <span class="job-status-badge ${sCls}">${sLabel}</span>
-        </div>
-        <div class="job-schedule">⏱ ${escHtml(formatSchedule(j.schedule))}</div>
-        <div class="job-lastrun">${j.last_run ? 'آخر تشغيل: '+escHtml(j.last_run.substring(0,19).replace('T',' '))+' UTC' : 'لم يعمل بعد'}</div>
-        ${j.last_output ? `<div class="job-output-preview">${escHtml(j.last_output.substring(0,300))}</div>` : ''}
-        <div class="job-actions">
-          <button class="job-btn run" data-id="${j.id}" data-a="run">▶ تشغيل</button>
-          <button class="job-btn ${j.enabled ? 'toggle-on' : 'toggle-off'}" data-id="${j.id}" data-en="${j.enabled}" data-a="toggle">${j.enabled ? '⏸ إيقاف' : '▶ تفعيل'}</button>
-          <button class="job-btn edit" data-id="${j.id}" data-a="edit">✏ تعديل</button>
-          <button class="job-btn edit" data-id="${j.id}" data-a="logs">📋 سجل</button>
-          <button class="job-btn del" data-id="${j.id}" data-a="delete">🗑</button>
-        </div>`;
-      card.querySelector('.job-name').textContent = j.name;
+/* ════ SCHEDULER ════ */
+async function loadJobs(){
+  if(!API||!TOKEN)return;
+  const list=document.getElementById('jobs-list');
+  list.innerHTML='<div class="empty">Loading...</div>';
+  try{
+    const res=await apiFetch('/jobs');
+    if(!res.ok){list.innerHTML='<div class="empty">فشل التحميل</div>';return;}
+    const jobs=await res.json();
+    if(!jobs.length){list.innerHTML='<div class="empty">لا توجد مهام مجدولة<br><span style="font-size:10px">اضغط + لإنشاء مهمة</span></div>';return;}
+    list.innerHTML='';
+    jobs.forEach(j=>{
+      const sCls=j.last_status||'pending';
+      const sLabel=j.last_status?(j.last_status==='success'?'✅ نجح':'❌ خطأ'):'⏳ لم يعمل';
+      const card=document.createElement('div');
+      card.className='job-card'+(j.enabled?'':' disabled');
+      card.innerHTML=`<div class="j-top"><div class="j-name"></div><span class="job-status-badge ${sCls}">${sLabel}</span></div><div class="j-sched">⏱ ${escHtml(formatSchedule(j.schedule))}</div><div class="j-last">${j.last_run?'آخر تشغيل: '+escHtml(j.last_run.substring(0,19).replace('T',' '))+' UTC':'لم يعمل بعد'}</div>${j.last_output?`<div class="j-out">${escHtml(j.last_output.substring(0,300))}</div>`:''}<div class="job-actions"><button class="j-btn run" data-id="${j.id}" data-a="run">▶ تشغيل</button><button class="job-btn ${j.enabled?'toggle-on':'toggle-off'}" data-id="${j.id}" data-en="${j.enabled}" data-a="toggle">${j.enabled?'⏸ إيقاف':'▶ تفعيل'}</button><button class="j-btn ed" data-id="${j.id}" data-a="edit">✏ تعديل</button><button class="j-btn ed" data-id="${j.id}" data-a="logs">📋 سجل</button><button class="j-btn del" data-id="${j.id}" data-a="delete">🗑</button></div>`;
+      card.querySelector('.job-name').textContent=j.name;
       list.appendChild(card);
     });
-    list.onclick = e => {
-      const btn = e.target.closest('[data-a]');
-      if (!btn) return;
-      const id = parseInt(btn.dataset.id), a = btn.dataset.a;
-      if (a === 'run') runJobNow(id);
-      else if (a === 'toggle') toggleJob(id, parseInt(btn.dataset.en));
-      else if (a === 'edit') openEditJobModal(id);
-      else if (a === 'logs') viewLogs(id);
-      else if (a === 'delete') deleteJob(id);
-    };
-  } catch { list.innerHTML = '<div class="empty-state">فشل التحميل</div>'; }
+    list.onclick=e=>{const btn=e.target.closest('[data-a]');if(!btn)return;const id=parseInt(btn.dataset.id),a=btn.dataset.a;if(a==='run')runJobNow(id);else if(a==='toggle')toggleJob(id,parseInt(btn.dataset.en));else if(a==='edit')openEditJobModal(id);else if(a==='logs')viewLogs(id);else if(a==='delete')deleteJob(id);};
+  }catch{list.innerHTML='<div class="empty">فشل التحميل</div>';}
 }
-
-function formatSchedule(s) {
-  if (s.startsWith('interval:')) return 'كل ' + s.split(':')[1] + ' ثانية';
-  if (s.startsWith('daily:')) { const p = s.split(':'); return 'يومياً الساعة ' + p[1] + ':' + p[2] + ' UTC'; }
-  if (s.startsWith('cron:')) return 'Cron: ' + s.substring(5);
+function formatSchedule(s){
+  if(s.startsWith('interval:'))return'كل '+s.split(':')[1]+' ثانية';
+  if(s.startsWith('daily:')){const p=s.split(':');return'يومياً '+p[1]+':'+p[2]+' UTC';}
+  if(s.startsWith('cron:'))return'Cron: '+s.substring(5);
   return s;
 }
-
-function updateSchedHelper() {
-  const t = document.getElementById('job-sched-type').value;
-  document.getElementById('sched-helper-interval').style.display = t === 'interval' ? 'block' : 'none';
-  document.getElementById('sched-helper-daily').style.display = t === 'daily' ? 'block' : 'none';
-  document.getElementById('sched-helper-cron').style.display = t === 'cron' ? 'block' : 'none';
+function updateSchedHelper(){
+  const t=document.getElementById('job-sched-type').value;
+  document.getElementById('sched-helper-interval').style.display=t==='interval'?'block':'none';
+  document.getElementById('sched-helper-daily').style.display=t==='daily'?'block':'none';
+  document.getElementById('sched-helper-cron').style.display=t==='cron'?'block':'none';
 }
-
-function getScheduleStr() {
-  const t = document.getElementById('job-sched-type').value;
-  if (t === 'interval') {
-    const s = parseInt(document.getElementById('sched-seconds').value);
-    if (!s || s < 10) { showToast('error', '⚠', 'الحد الأدنى 10 ثوانٍ', ''); return null; }
-    return 'interval:' + s;
-  }
-  if (t === 'daily') {
-    const [h, m] = document.getElementById('sched-time').value.split(':');
-    return 'daily:' + h + ':' + m;
-  }
-  if (t === 'cron') {
-    const expr = document.getElementById('sched-cron').value.trim();
-    if (!expr) { showToast('error', '⚠', 'أدخل تعبير Cron', ''); return null; }
-    return 'cron:' + expr;
-  }
+function getScheduleStr(){
+  const t=document.getElementById('job-sched-type').value;
+  if(t==='interval'){const s=parseInt(document.getElementById('sched-seconds').value);if(!s||s<10){showToast('error','⚠','الحد الأدنى 10 ثوانٍ','');return null;}return'interval:'+s;}
+  if(t==='daily'){const[h,m]=document.getElementById('sched-time').value.split(':');return'daily:'+h+':'+m;}
+  if(t==='cron'){const expr=document.getElementById('sched-cron').value.trim();if(!expr){showToast('error','⚠','أدخل تعبير Cron','');return null;}return'cron:'+expr;}
   return null;
 }
 
-async function openNewJobModal() {
-  document.getElementById('job-modal-title').textContent = '➕ مهمة جديدة';
-  document.getElementById('job-modal-id').value = '';
-  document.getElementById('job-name').value = '';
-  
-  // تصفير حقل الـ IP الجديد
-  document.getElementById('job-ip').value = '';
-  
-  // محاولة جلب الـ IP الحالي للمستخدم تلقائياً عند فتح المودال
-  try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      document.getElementById('job-ip').value = data.ip;
-  } catch(e) {
-      console.error("تعذر جلب الـ IP تلقائياً");
-  }
-  
-  // إعدادات الجدول الافتراضية
-  document.getElementById('job-sched-type').value = 'interval';
-  document.getElementById('sched-seconds').value = '3600';
-  document.getElementById('sched-time').value = '08:00';
-  document.getElementById('sched-cron').value = '';
-  
-  // تفريغ قائمة الأحداث الديناميكية وإضافة صف فارغ للبدء
-  document.getElementById('event-list').innerHTML = '';
-  addEventRow(); 
-  
+/* ════ EVENT ROWS ════ */
+function addEventRow(name='',delay=0){
+  const container=document.getElementById('event-list');
+  const row=document.createElement('div');
+  row.className='event-row';
+  const nameIn=document.createElement('input');nameIn.className='modal-input event-name';nameIn.value=name;nameIn.placeholder='Event Name';nameIn.dir='ltr';
+  const delayIn=document.createElement('input');delayIn.className='modal-input event-delay delay-field';delayIn.type='number';delayIn.value=delay;delayIn.placeholder='دقيقة';delayIn.dir='ltr';
+  const delBtn=document.createElement('button');delBtn.className='btn btn-secondary';delBtn.style.cssText='width:36px;padding:6px;flex:none';delBtn.textContent='🗑';delBtn.onclick=()=>row.remove();
+  row.appendChild(nameIn);row.appendChild(delayIn);row.appendChild(delBtn);
+  container.appendChild(row);
+}
+function getEventsSequence(){
+  return Array.from(document.querySelectorAll('#event-list .event-row')).map(row=>({name:row.querySelector('.event-name').value.trim(),delay:parseInt(row.querySelector('.event-delay').value)||0})).filter(e=>e.name);
+}
+
+async function openNewJobModal(){
+  document.getElementById('job-modal-title').textContent='➕ مهمة جديدة';
+  document.getElementById('job-modal-id').value='';
+  document.getElementById('job-name').value='';
+  document.getElementById('job-ip').value='';
+  document.getElementById('job-code').value='';
+  document.getElementById('job-sched-type').value='interval';
+  document.getElementById('sched-seconds').value='3600';
+  document.getElementById('sched-time').value='08:00';
+  document.getElementById('sched-cron').value='';
+  document.getElementById('event-list').innerHTML='';
+  addEventRow();
   updateSchedHelper();
+  // جلب IP تلقائياً
+  try{const r=await fetch('https://api.ipify.org?format=json');const d=await r.json();document.getElementById('job-ip').value=d.ip;}catch{}
   document.getElementById('job-modal').classList.add('open');
 }
 
-async function openEditJobModal(id) {
-  try {
-    const res = await apiFetch('/jobs');
-    const jobs = await res.json();
-    const j = jobs.find(x => x.id === id);
-    if (!j) return;
-    document.getElementById('job-modal-title').textContent = '✏ تعديل المهمة';
-    document.getElementById('job-modal-id').value = id;
-    document.getElementById('job-name').value = j.name;
-    document.getElementById('job-code').value = j.code;
-    if (j.schedule.startsWith('interval:')) {
-      document.getElementById('job-sched-type').value = 'interval';
-      document.getElementById('sched-seconds').value = j.schedule.split(':')[1];
-    } else if (j.schedule.startsWith('daily:')) {
-      document.getElementById('job-sched-type').value = 'daily';
-      const p = j.schedule.split(':');
-      document.getElementById('sched-time').value = p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');
-    } else if (j.schedule.startsWith('cron:')) {
-      document.getElementById('job-sched-type').value = 'cron';
-      document.getElementById('sched-cron').value = j.schedule.substring(5);
-    }
+function openJobModalFromGame(){
+  if(!activeGame){showToast('error','⚠','خطأ','يرجى اختيار لعبة أولاً');return;}
+  document.getElementById('job-modal-title').textContent='⏱ جدولة: '+activeGame.name;
+  document.getElementById('job-modal-id').value='';
+  document.getElementById('job-name').value='Auto: '+activeGame.name;
+  document.getElementById('job-ip').value='';
+  document.getElementById('job-code').value='';
+  document.getElementById('job-sched-type').value='interval';
+  document.getElementById('sched-seconds').value='3600';
+  document.getElementById('event-list').innerHTML='';
+  const defEv=activeGame.level_events[0].template;
+  addEventRow(defEv,0);
+  updateSchedHelper();
+  // جلب IP تلقائياً
+  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{document.getElementById('job-ip').value=d.ip;}).catch(()=>{});
+  document.getElementById('job-modal').classList.add('open');
+}
+
+async function openEditJobModal(id){
+  try{
+    const res=await apiFetch('/jobs');const jobs=await res.json();const j=jobs.find(x=>x.id===id);if(!j)return;
+    document.getElementById('job-modal-title').textContent='✏ تعديل المهمة';
+    document.getElementById('job-modal-id').value=id;
+    document.getElementById('job-name').value=j.name;
+    document.getElementById('job-code').value=j.code||'';
+    document.getElementById('job-ip').value='';
+    document.getElementById('event-list').innerHTML='';
+    // محاولة استخراج الأحداث من الكود إن وجدت
+    addEventRow('',0);
+    if(j.schedule.startsWith('interval:')){document.getElementById('job-sched-type').value='interval';document.getElementById('sched-seconds').value=j.schedule.split(':')[1];}
+    else if(j.schedule.startsWith('daily:')){document.getElementById('job-sched-type').value='daily';const p=j.schedule.split(':');document.getElementById('sched-time').value=p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');}
+    else if(j.schedule.startsWith('cron:')){document.getElementById('job-sched-type').value='cron';document.getElementById('sched-cron').value=j.schedule.substring(5);}
     updateSchedHelper();
     document.getElementById('job-modal').classList.add('open');
-  } catch {}
+  }catch{}
 }
 
-async function saveJob() {
-    const id = document.getElementById('job-modal-id').value;
-    const name = document.getElementById('job-name').value.trim();
-    const schedule = getScheduleStr();
-    const rawEvents = getEventsSequence(); // [ {name: '...', delay: 5}, ... ]
-    const userIP = document.getElementById('job-ip').value.trim();
+async function saveJob(){
+  const id=document.getElementById('job-modal-id').value;
+  const name=document.getElementById('job-name').value.trim();
+  const schedule=getScheduleStr();
+  const userIP=document.getElementById('job-ip').value.trim();
+  const extraCode=document.getElementById('job-code').value.trim();
+  const events=getEventsSequence();
 
-    if (!name || rawEvents.length === 0 || !schedule || !userIP) { 
-        showToast('error', '⚠', 'تنبيه', 'أكمل جميع الحقول المطلوبة (بما فيها الـ IP)'); 
-        return; 
+  if(!name||!schedule){showToast('error','⚠','أكمل الحقول المطلوبة','الاسم والجدول مطلوبان');return;}
+  if(events.length===0){showToast('error','⚠','أضف حدثاً واحداً على الأقل','');return;}
+
+  // بناء كود Python من سلسلة الأحداث
+  const game=activeGame||{package:'',dev_key:''};
+  let evLines=[];
+  let prevDelay=0;
+  events.forEach(ev=>{
+    const sleepSec=Math.max(0,(ev.delay-prevDelay))*60;
+    if(sleepSec>0)evLines.push(`time.sleep(${sleepSec})`);
+    evLines.push(`send_event("${ev.name.replace(/"/g,'\\"')}")`);
+    prevDelay=ev.delay;
+  });
+
+  const code=`import time, requests, json
+from datetime import datetime, timezone
+
+API="${API}"
+TOKEN="${TOKEN}"
+PACKAGE="${game.package}"
+DEV_KEY="${game.dev_key}"
+GAID="${curGaid}"
+AFID="${curAfid}"
+IP="${userIP}"
+
+def send_event(event_name, ev_type="level"):
+    body = {
+        "appsflyer_id": AFID,
+        "advertising_id": GAID,
+        "eventName": event_name,
+        "eventTime": datetime.now(timezone.utc).isoformat(),
+        "eventValue": json.dumps({"af_revenue":"4.99","af_currency":"USD"}) if ev_type=="purchase" else "{}"
     }
+    payload = {"package": PACKAGE, "dev_key": DEV_KEY, "body": body}
+    headers = {"Content-Type": "application/json", "X-Token": TOKEN}
+    try:
+        r = requests.post(API + "/api/send-event", json=payload, headers=headers, timeout=15)
+        d = r.json()
+        status = d.get("status_code", r.status_code)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] {event_name} -> {status}")
+    except Exception as e:
+        print(f"Error: {e}")
 
-    // تجهيز الأحداث للسيرفر
-    const formattedEvents = rawEvents.map(ev => ({
-        name: ev.name,
-        delay: ev.delay // السيرفر سيقوم بـ sleep بناءً على هذه القيمة
-    }));
+${evLines.join('\n')}
+${extraCode}
+print("✅ تمت سلسلة الأحداث")`;
 
-    const payload = { 
-        name, 
-        events: formattedEvents, 
-        schedule,
-        user_ip: userIP,
-        package: activeGame.package,
-        dev_key: activeGame.dev_key,
-        gaid: curGaid,
-        afid: curAfid
-    };
-
-    try {
-        const url = id ? `/jobs/${id}` : '/jobs';
-        const method = id ? 'PUT' : 'POST';
-
-        const res = await apiFetch(url, method, payload);
-        if (res.ok) {
-            showToast('success', '✅', 'تم الحفظ', 'تمت جدولة المهمة بنجاح');
-            closeJobModal();
-            loadJobs(); 
-        } else {
-            const data = await res.json();
-            showToast('error', '❌', 'فشل الحفظ', data.error || 'خطأ في السيرفر');
-        }
-    } catch (err) {
-        showToast('error', '🔌', 'خطأ في الاتصال', 'تعذر الوصول للسيرفر');
-        console.error(err);
-    }
-}
-  
-function closeJobModal() { 
-  document.getElementById('job-modal').classList.remove('open'); 
+  try{
+    let res;
+    if(id)res=await apiFetch('/jobs/'+id,'PUT',{name,code,schedule});
+    else res=await apiFetch('/jobs','POST',{name,code,schedule});
+    if(res.ok){
+      closeJobModal();
+      showToast('success','✅',id?'تم التعديل':'تم الإنشاء',name);
+      loadJobs();
+      if(activeGame)loadGameJobs();
+    }else{const d=await res.json();showToast('error','❌','فشل',d.error||'');}
+  }catch{showToast('error','🔌','خطأ في الشبكة','');}
 }
 
-async function runJobNow(id) {
-  showToast('loading', null, 'جاري التشغيل...', '');
-  try {
-    const res = await apiFetch('/jobs/'+id+'/run', 'POST', {});
-    if (res.ok) { 
-      showToast('success', '✅', 'تم التشغيل!', 'راجع السجل للنتائج'); 
-      setTimeout(() => {
-        loadJobs(); 
-        if (typeof loadGameJobs === 'function') loadGameJobs(); // تحديث السجل بعد التشغيل
-      }, 2500); 
-    } else {
-      showToast('error', '❌', 'فشل', '');
-    }
-  } catch { 
-    showToast('error', '❌', 'فشل', ''); 
-  }
-}
+function closeJobModal(){document.getElementById('job-modal').classList.remove('open');}
 
-async function toggleJob(id, enabled) {
-  try {
-    const res = await apiFetch('/jobs/'+id, 'PUT', {enabled: enabled ? 0 : 1});
-    if (res.ok) { loadJobs(); showToast('success','✅', enabled?'تم الإيقاف':'تم التفعيل',''); }
-  } catch {}
+async function runJobNow(id){
+  showToast('loading',null,'جاري التشغيل...','');
+  try{
+    const res=await apiFetch('/jobs/'+id+'/run','POST',{});
+    if(res.ok){showToast('success','✅','تم التشغيل!','راجع السجل للنتائج');setTimeout(()=>{loadJobs();if(activeGame)loadGameJobs();},2500);}
+    else showToast('error','❌','فشل','');
+  }catch{showToast('error','❌','فشل','');}
 }
-
-async function deleteJob(id) {
-  if (!confirm('حذف هذه المهمة؟')) return;
-  try {
-    const res = await apiFetch('/jobs/'+id, 'DELETE');
-    if (res.ok) { loadJobs(); showToast('success','🗑','تم الحذف',''); }
-  } catch {}
-}
-
-async function viewLogs(id) {
+async function toggleJob(id,enabled){try{const res=await apiFetch('/jobs/'+id,'PUT',{enabled:enabled?0:1});if(res.ok){loadJobs();showToast('success','✅',enabled?'تم الإيقاف':'تم التفعيل','');}}catch{}}
+async function deleteJob(id){if(!confirm('حذف هذه المهمة؟'))return;try{const res=await apiFetch('/jobs/'+id,'DELETE');if(res.ok){loadJobs();showToast('success','🗑','تم الحذف','');}}catch{}}
+async function viewLogs(id){
   document.getElementById('logs-modal').classList.add('open');
-  document.getElementById('logs-content').innerHTML = 'Loading...';
-  try {
-    const res = await apiFetch('/jobs/'+id+'/logs');
-    if (!res.ok) { document.getElementById('logs-content').innerHTML = 'غير مصرح'; return; }
-    const logs = await res.json();
-    if (!logs.length) { document.getElementById('logs-content').innerHTML = '<div class="empty-state">لا توجد سجلات بعد</div>'; return; }
-    document.getElementById('logs-content').innerHTML = logs.map(l => `
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-          <span style="font-size:9px;color:var(--muted)">${l.ran_at ? escHtml(l.ran_at.substring(0,19).replace('T',' '))+' UTC' : ''}</span>
-          <span style="font-size:9px;font-weight:bold;color:${l.status==='success'?'var(--green)':'var(--red)'}">${l.status==='success'?'✅ OK':'❌ Error'}</span>
-        </div>
-        <pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">${escHtml(l.output||'(لا يوجد ناتج)')}</pre>
-      </div>`).join('');
-  } catch { document.getElementById('logs-content').innerHTML = 'فشل التحميل'; }
+  document.getElementById('logs-content').innerHTML='Loading...';
+  try{
+    const res=await apiFetch('/jobs/'+id+'/logs');
+    if(!res.ok){document.getElementById('logs-content').innerHTML='غير مصرح';return;}
+    const logs=await res.json();
+    if(!logs.length){document.getElementById('logs-content').innerHTML='<div class="empty">لا توجد سجلات بعد</div>';return;}
+    document.getElementById('logs-content').innerHTML=logs.map(l=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:9px;color:var(--muted)">${l.ran_at?escHtml(l.ran_at.substring(0,19).replace('T',' '))+' UTC':''}</span><span style="font-size:9px;font-weight:bold;color:${l.status==='success'?'var(--green)':'var(--red)'}">${l.status==='success'?'✅ OK':'❌ Error'}</span></div><pre style="font-size:10px;color:var(--muted);direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow:auto">${escHtml(l.output||'(لا يوجد ناتج)')}</pre></div>`).join('');
+  }catch{document.getElementById('logs-content').innerHTML='فشل التحميل';}
 }
 
-/* ════════════════════════════════════════
-   ADMIN
-════════════════════════════════════════ */
-async function loadUsers() {
-  if (!API || !TOKEN) return;
-  const list = document.getElementById('users-list');
-  list.innerHTML = '<div class="empty-state">Loading...</div>';
-  try {
-    const res = await apiFetch('/admin/users');
-    if (res.status === 403) { list.innerHTML = '<div class="empty-state">للمدراء فقط</div>'; return; }
-    const users = await res.json();
-    list.innerHTML = users.map(u => {
-      const pct = u.role === 'admin' ? 100 : Math.round((u.uses_left / Math.max(u.max_uses,1)) * 100);
-      return `<div class="user-row">
-        <div class="user-info">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="user-name-admin">${escHtml(u.username)}</div>
-            <span class="role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>
-            ${!u.active?'<span style="font-size:8px;color:var(--red)">DISABLED</span>':''}
-          </div>
-          <div class="user-meta">${u.role==='admin'?'∞ غير محدود':u.uses_left+'/'+u.max_uses+' استخدام'} • ${u.created?escHtml(u.created.substring(0,10)):''}</div>
-          <div class="uses-bar" style="width:120px"><div class="uses-fill" style="width:${pct}%"></div></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:5px">
-          <button class="job-btn edit" onclick="openEditUser(${u.id},${JSON.stringify(u.username)},${JSON.stringify(u.role)},${u.max_uses},${u.uses_left},${u.active})">✏</button>
-          <button class="job-btn del" onclick="deleteUser(${u.id},${JSON.stringify(u.username)})">🗑</button>
-        </div>
-      </div>`;
-    }).join('');
-  } catch { list.innerHTML = '<div class="empty-state">فشل التحميل</div>'; }
+/* ════ ADMIN ════ */
+async function loadUsers(){
+  if(!API||!TOKEN)return;
+  const list=document.getElementById('users-list');list.innerHTML='<div class="empty">Loading...</div>';
+  try{
+    const res=await apiFetch('/admin/users');
+    if(res.status===403){list.innerHTML='<div class="empty">للمدراء فقط</div>';return;}
+    const users=await res.json();
+    list.innerHTML=users.map(u=>{const pct=u.role==='admin'?100:Math.round((u.uses_left/Math.max(u.max_uses,1))*100);return`<div class="u-row"><div class="u-info"><div style="display:flex;align-items:center;gap:8px"><div class="u-name">${escHtml(u.username)}</div><span class="role-badge ${u.role==='admin'?'acct-role role-admin':'acct-role role-user'}">${u.role}</span>${!u.active?'<span style="font-size:8px;color:var(--red)">DISABLED</span>':''}</div><div class="u-meta">${u.role==='admin'?'∞ غير محدود':u.uses_left+'/'+u.max_uses+' استخدام'} • ${u.created?escHtml(u.created.substring(0,10)):''}</div><div class="uses-bar-wrap" style="width:120px"><div class="uses-fill" style="width:${pct}%"></div></div></div><div style="display:flex;flex-direction:column;gap:5px"><button class="j-btn ed" onclick="openEditUser(${u.id},${JSON.stringify(u.username)},${JSON.stringify(u.role)},${u.max_uses},${u.uses_left},${u.active})">✏</button><button class="j-btn del" onclick="deleteUser(${u.id},${JSON.stringify(u.username)})">🗑</button></div></div>`;}).join('');
+  }catch{list.innerHTML='<div class="empty">فشل التحميل</div>';}
 }
-
-function openAddUserModal() {
-  document.getElementById('edit-uid').value = '';
-  document.getElementById('new-username').value = '';
-  document.getElementById('new-username').disabled = false;
-  document.getElementById('new-password').value = '';
-  document.getElementById('new-role').value = 'user';
-  document.getElementById('new-maxuses').value = '100';
-  document.getElementById('new-usesleft').value = '100';
-  document.getElementById('new-active').value = '1';
-  document.getElementById('adduser-modal').classList.add('open');
+function openAddUserModal(){document.getElementById('edit-uid').value='';document.getElementById('new-username').value='';document.getElementById('new-username').disabled=false;document.getElementById('new-password').value='';document.getElementById('new-role').value='user';document.getElementById('new-maxuses').value='100';document.getElementById('new-usesleft').value='100';document.getElementById('new-active').value='1';document.getElementById('adduser-modal').classList.add('open');}
+function openEditUser(id,username,role,max,left,active){document.getElementById('edit-uid').value=id;document.getElementById('new-username').value=username;document.getElementById('new-username').disabled=true;document.getElementById('new-password').value='';document.getElementById('new-role').value=role;document.getElementById('new-maxuses').value=max;document.getElementById('new-usesleft').value=left;document.getElementById('new-active').value=active;document.getElementById('adduser-modal').classList.add('open');}
+async function saveUser(){
+  const id=document.getElementById('edit-uid').value;
+  const body={username:document.getElementById('new-username').value.trim(),role:document.getElementById('new-role').value,max_uses:parseInt(document.getElementById('new-maxuses').value)||100,uses_left:parseInt(document.getElementById('new-usesleft').value)||0,active:parseInt(document.getElementById('new-active').value)};
+  const pw=document.getElementById('new-password').value;if(pw)body.password=pw;
+  if(!id&&!pw){showToast('error','⚠','كلمة المرور مطلوبة','للمستخدمين الجدد');return;}
+  if(!id&&!body.username){showToast('error','⚠','اسم المستخدم مطلوب','');return;}
+  try{const res=id?await apiFetch('/admin/users/'+id,'PUT',body):await apiFetch('/admin/users','POST',body);if(res.ok){document.getElementById('adduser-modal').classList.remove('open');showToast('success','✅',id?'تم التعديل':'تم الإنشاء',body.username);loadUsers();}else{const d=await res.json();showToast('error','❌','فشل',d.error||'');}}catch{showToast('error','🔌','خطأ في الشبكة','');}
 }
+async function deleteUser(id,name){if(!confirm('حذف المستخدم '+name+'؟'))return;try{const res=await apiFetch('/admin/users/'+id,'DELETE');if(res.ok){loadUsers();showToast('success','🗑','تم الحذف',name);}else{const d=await res.json();showToast('error','❌','فشل',d.error||'');}}catch{}}
 
-function openEditUser(id, username, role, max, left, active) {
-  document.getElementById('edit-uid').value = id;
-  document.getElementById('new-username').value = username;
-  document.getElementById('new-username').disabled = true;
-  document.getElementById('new-password').value = '';
-  document.getElementById('new-role').value = role;
-  document.getElementById('new-maxuses').value = max;
-  document.getElementById('new-usesleft').value = left;
-  document.getElementById('new-active').value = active;
-  document.getElementById('adduser-modal').classList.add('open');
+/* ════ TOAST & HELPERS ════ */
+function showToast(type,icon,title,detail){
+  const t=document.getElementById('toast');t.className='toast '+type;
+  document.getElementById('toast-icon').innerHTML=type==='loading'?'<div class="spinner"></div>':(icon||'');
+  document.getElementById('toast-title').textContent=title;document.getElementById('toast-detail').textContent=detail;
+  t.classList.add('show');if(toastTimer)clearTimeout(toastTimer);
+  if(type!=='loading')toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
 }
-
-async function saveUser() {
-  const id = document.getElementById('edit-uid').value;
-  const body = {
-    username: document.getElementById('new-username').value.trim(),
-    role: document.getElementById('new-role').value,
-    max_uses: parseInt(document.getElementById('new-maxuses').value) || 100,
-    uses_left: parseInt(document.getElementById('new-usesleft').value) || 0,
-    active: parseInt(document.getElementById('new-active').value)
-  };
-  const pw = document.getElementById('new-password').value;
-  if (pw) body.password = pw;
-  if (!id && !pw) { showToast('error','⚠','كلمة المرور مطلوبة','للمستخدمين الجدد'); return; }
-  if (!id && !body.username) { showToast('error','⚠','اسم المستخدم مطلوب',''); return; }
-  try {
-    const res = id ? await apiFetch('/admin/users/'+id, 'PUT', body) : await apiFetch('/admin/users', 'POST', body);
-    if (res.ok) {
-      document.getElementById('adduser-modal').classList.remove('open');
-      showToast('success','✅',id?'تم التعديل':'تم الإنشاء',body.username);
-      loadUsers();
-    } else { const d = await res.json(); showToast('error','❌','فشل',d.error||''); }
-  } catch { showToast('error','🔌','خطأ في الشبكة',''); }
-}
-
-async function deleteUser(id, name) {
-  if (!confirm('حذف المستخدم ' + name + '؟')) return;
-  try {
-    const res = await apiFetch('/admin/users/'+id, 'DELETE');
-    if (res.ok) { loadUsers(); showToast('success','🗑','تم الحذف',name); }
-    else { const d = await res.json(); showToast('error','❌','فشل',d.error||''); }
-  } catch {}
-}
-
-/* ════════════════════════════════════════
-   TOAST & HELPERS
-════════════════════════════════════════ */
-function showToast(type, icon, title, detail) {
-  const t = document.getElementById('toast');
-  t.className = 'toast ' + type;
-  document.getElementById('toast-icon').innerHTML = type === 'loading' ? '<div class="spinner"></div>' : (icon || '');
-  document.getElementById('toast-title').textContent = title;
-  document.getElementById('toast-detail').textContent = detail;
-  t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  if (type !== 'loading') toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function escHtml(s) {
-  if (s === null || s === undefined) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-}
-
-if ('serviceWorker' in navigator) {
-    // التحقق من وجود الملف قبل محاولة التسجيل لمنع انهيار الصفحة
-    fetch('sw.js').then(response => {
-        if (response.ok) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
-        }
-    }).catch(err => {
-        console.log("Service Worker file not found, skipping...");
-    });
-}
-
-/* دالة ربط زر "جدولة حدث تلقائي" بمودال المهام المحدث */
-function openJobModalFromGame() {
-  if (!activeGame) {
-    showToast('error', '⚠', 'خطأ', 'يرجى اختيار لعبة أولاً');
-    return;
-  }
-
-  // 1. تحديث عنوان المودال
-  document.getElementById('job-modal-title').textContent = '⏱ جدولة: ' + activeGame.name;
-  
-  // 2. تعبئة بيانات المهمة
-  document.getElementById('job-modal-id').value = '';
-  document.getElementById('job-name').value = "Auto: " + activeGame.name;
-  
-  // 3. مسح قائمة الأحداث القديمة وإضافة صف افتراضي للبدء
-  const eventList = document.getElementById('event-list');
-  eventList.innerHTML = ''; // تفريغ الحاوية
-  
-  // إضافة صف أول افتراضي
-  const defaultEvent = (activeGame.level_events && activeGame.level_events.length > 0) 
-                        ? activeGame.level_events[0].template 
-                        : "level_1";
-  addEventRow(defaultEvent, 0); 
-  
-  // 4. ضبط الإعدادات الافتراضية للجدولة
-  document.getElementById('job-sched-type').value = 'interval';
-  document.getElementById('sched-seconds').value = '3600'; 
-  
-  // 5. تحديث المساعد وفتح المودال
-  updateSchedHelper();
-  document.getElementById('job-modal').classList.add('open');
-}
-
-/* ════════════════════════════════════════
-   إضافات نظام تسلسل الأحداث الديناميكي
-════════════════════════════════════════ */
-
-// دالة إضافة صف حدث جديد - معدلة لتكون أكثر استقراراً
-function addEventRow(name = '', delay = 0) {
-    const container = document.getElementById('event-list');
-    const rowId = 'row-' + Date.now(); // معرف فريد لكل صف
-    const row = document.createElement('div');
-    row.className = 'btn-row';
-    row.style.marginBottom = '5px';
-    row.id = rowId;
-    row.innerHTML = `
-        <input class="modal-input event-name" name="event_name" placeholder="Event Name" value="${escHtml(name)}">
-        <input class="modal-input event-delay" name="event_delay" type="number" value="${delay}" placeholder="دقيقة" style="width:80px">
-        <button class="btn btn-secondary" style="width:40px" onclick="document.getElementById('${rowId}').remove()">🗑</button>
-    `;
-    container.appendChild(row);
-}
-
-// ... (نفس دالة getEventsSequence الموجودة لديك)
-function getEventsSequence() {
-    const rows = document.querySelectorAll('#event-list > div');
-    const sequence = [];
-    rows.forEach(row => {
-        const nameInput = row.querySelector('input[name="event_name"]');
-        const delayInput = row.querySelector('input[name="event_delay"]');
-        
-        if (nameInput && delayInput) {
-            sequence.push({
-                name: nameInput.value.trim(),
-                delay: parseInt(delayInput.value) || 0
-            });
-        }
-    });
-    return sequence;
-}
-</script>
+function escHtml(s){if(s===null||s===undefined)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+if('serviceWorker' in navigator){fetch('sw.js').then(r=>{if(r.ok)navigator.serviceWorker.register('sw.js').catch(()=>{});}).catch(()=>{});}</script>
 </body>
 </html>
-
