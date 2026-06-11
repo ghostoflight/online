@@ -1311,17 +1311,35 @@ function updateEventPreview(){
 }
 
 async function loadGameJobs(){
-  const container=document.getElementById('game-jobs-list');
-  if(!container||!activeGame)return;
-  container.innerHTML='<div class="log-empty">جاري التحميل...</div>';
-  try{
-    const res=await apiFetch('/jobs');
-    if(!res.ok)throw new Error();
-    const all=await res.json();
-    const mine=all.filter(j=>j.code&&j.code.includes(activeGame.package));
-    if(!mine.length){container.innerHTML='<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';return;}
-    container.innerHTML=mine.map(j=>`<div class="log-entry"><div class="log-dot ${j.enabled?'ok':'err'}"></div><div class="log-text">${escHtml(j.name)}</div><div class="log-status">${escHtml(formatSchedule(j.schedule))}</div></div>`).join('');
-  }catch{container.innerHTML='<div class="log-empty">فشل التحميل</div>';}
+  const container = document.getElementById('game-jobs-list');
+  if(!container || !activeGame) return;
+  
+  container.innerHTML = '<div class="log-empty">جاري التحميل...</div>';
+  
+  try {
+    const res = await apiFetch('/jobs');
+    if(!res.ok) throw new Error();
+    const all = await res.json();
+    
+    // التعديل هنا: البحث باستخدام j.package بدلاً من j.code
+    const mine = all.filter(j => j.package === activeGame.package);
+    
+    if(!mine.length){
+        container.innerHTML = '<div class="log-empty">لا توجد مهام مجدولة لهذه اللعبة</div>';
+        return;
+    }
+    
+    container.innerHTML = mine.map(j => `
+        <div class="log-entry">
+            <div class="log-dot ${j.enabled ? 'ok' : 'err'}"></div>
+            <div class="log-text">${escHtml(j.name)}</div>
+            <div class="log-status">${escHtml(formatSchedule(j.schedule))}</div>
+        </div>
+    `).join('');
+    
+  } catch {
+      container.innerHTML = '<div class="log-empty">فشل التحميل</div>';
+  }
 }
 
 async function sendLevelEvent(){
