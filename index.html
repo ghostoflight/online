@@ -568,17 +568,20 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
   <div class="modal">
     <div class="modal-title" id="job-modal-title">➕ مهمة جديدة</div>
     <input type="hidden" id="job-modal-id">
+    
     <div class="modal-label">اسم المهمة</div>
-    <input class="modal-input" id="job-name" placeholder="مثال: تقرير يومي">
+    <input class="modal-input" id="job-name" placeholder="مثال: تسلسل أحداث المستوى 100">
+    
     <div class="modal-label">نوع الجدول</div>
     <select class="modal-select" id="job-sched-type" onchange="updateSchedHelper()">
       <option value="interval">كل X ثانية</option>
       <option value="daily">يومياً في وقت محدد</option>
       <option value="cron">Cron مخصص</option>
     </select>
+    
     <div id="sched-helper-interval">
       <div class="modal-label">الفترة (ثانية)</div>
-      <input class="modal-input" id="sched-seconds" type="number" min="10" placeholder="مثال: 3600 = كل ساعة" dir="ltr">
+      <input class="modal-input" id="sched-seconds" type="number" min="10" value="3600" dir="ltr">
     </div>
     <div id="sched-helper-daily" style="display:none">
       <div class="modal-label">الوقت (UTC)</div>
@@ -588,17 +591,21 @@ body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;
       <div class="modal-label">تعبير Cron (دقيقة ساعة يوم شهر أسبوع)</div>
       <input class="modal-input" id="sched-cron" dir="ltr" placeholder="0 8 * * *">
     </div>
-    <div class="modal-label">كود Python</div>
-    <textarea class="code-editor" id="job-code"
-      style="min-height:130px;border-radius:9px;border:1px solid var(--border);margin-bottom:12px"
-      placeholder="# كود Python يعمل تلقائياً&#10;import datetime&#10;print('تم التشغيل:', datetime.datetime.now())"></textarea>
+
+    <div class="modal-label" style="margin-top:15px">IP Address المخصص</div>
+    <input class="modal-input" id="job-ip" placeholder="أدخل الـ IP هنا...">
+
+    <div class="modal-label" style="margin-top:15px">سلسلة الأحداث (Events Sequence)</div>
+    <div id="event-list" style="margin-bottom:10px;"></div>
+    <button class="btn btn-secondary" style="width:100%; margin-bottom:15px;" onclick="addEventRow()">+ إضافة حدث جديد</button>
+
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveJob()">💾 حفظ</button>
+      <button class="btn btn-primary" onclick="saveJob()">💾 حفظ المهمة</button>
       <button class="btn btn-secondary" onclick="closeJobModal()">إلغاء</button>
     </div>
   </div>
 </div>
-
+  
 <!-- Logs Modal -->
 <div class="modal-overlay" id="logs-modal">
   <div class="modal">
@@ -1358,15 +1365,33 @@ function getScheduleStr() {
   return null;
 }
 
-function openNewJobModal() {
+async function openNewJobModal() {
   document.getElementById('job-modal-title').textContent = '➕ مهمة جديدة';
   document.getElementById('job-modal-id').value = '';
   document.getElementById('job-name').value = '';
-  document.getElementById('job-code').value = '';
+  
+  // تصفير حقل الـ IP الجديد
+  document.getElementById('job-ip').value = '';
+  
+  // محاولة جلب الـ IP الحالي للمستخدم تلقائياً عند فتح المودال
+  try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      document.getElementById('job-ip').value = data.ip;
+  } catch(e) {
+      console.error("تعذر جلب الـ IP تلقائياً");
+  }
+  
+  // إعدادات الجدول الافتراضية
   document.getElementById('job-sched-type').value = 'interval';
   document.getElementById('sched-seconds').value = '3600';
   document.getElementById('sched-time').value = '08:00';
   document.getElementById('sched-cron').value = '';
+  
+  // تفريغ قائمة الأحداث الديناميكية وإضافة صف فارغ للبدء
+  document.getElementById('event-list').innerHTML = '';
+  addEventRow(); 
+  
   updateSchedHelper();
   document.getElementById('job-modal').classList.add('open');
 }
@@ -1401,19 +1426,21 @@ async function saveJob() {
   const id = document.getElementById('job-modal-id').value;
   const name = document.getElementById('job-name').value.trim();
   const schedule = getScheduleStr();
-  const events = getEventsSequence(); // تجميع الأحداث من الحقول الديناميكية الجديدة
+  const events = getEventsSequence(); // تجميع الأحداث من الحقول الديناميكية
+  const userIP = document.getElementById('job-ip').value.trim(); // سحب الـ IP المدخل
   
-  // التحقق من أن جميع البيانات المطلوبة موجودة
-  if (!name || events.length === 0 || !schedule) { 
-    showToast('error', '⚠', 'أكمل جميع الحقول والأحداث', ''); 
+  // التحقق من أن جميع البيانات المطلوبة موجودة (بما فيها الـ IP)
+  if (!name || events.length === 0 || !schedule || !userIP) { 
+    showToast('error', '⚠', 'أكمل جميع الحقول (بما فيها الـ IP)', ''); 
     return; 
   }
   
-  // تجهيز البيانات لإرسالها (إرسال الأحداث بدل كود البايثون)
+  // تجهيز البيانات لإرسالها
   const payload = { 
     name, 
     events, 
-    schedule, 
+    schedule,
+    user_ip: userIP, // إرسال الـ IP للسيرفر
     package: activeGame.package,
     dev_key: activeGame.dev_key,
     gaid: curGaid,
