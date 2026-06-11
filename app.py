@@ -422,6 +422,28 @@ def execute_job(job_id):
     conn.commit()
     conn.close()
 
+def register_job_in_scheduler(job_id, schedule_str, enabled):
+    # إزالة المهمة القديمة إذا كانت موجودة لمنع التكرار
+    if job_id in scheduled_jobs:
+        try:
+            scheduled_jobs[job_id].remove()
+        except:
+            pass
+        del scheduled_jobs[job_id]
+    
+    if not enabled:
+        return
+        
+    try:
+        if schedule_str.startswith("interval:"):
+            seconds = max(10, int(schedule_str.split(":")[1]))
+            scheduled_jobs[job_id] = scheduler.add_job(execute_job, "interval", seconds=seconds, args=[job_id])
+        elif schedule_str.startswith("daily:"):
+            parts = schedule_str.split(":")
+            scheduled_jobs[job_id] = scheduler.add_job(execute_job, "cron", hour=int(parts[1]), minute=int(parts[2]), args=[job_id])
+    except Exception as e:
+        print(f"Scheduler registration error for job {job_id}: {e}")
+      
 def load_all_jobs():
   conn = get_db()
   jobs = conn.execute("SELECT id,schedule,enabled FROM scheduled_jobs").fetchall()
