@@ -1575,72 +1575,70 @@ async function openEditJobModal(id){
   }catch{}
 }
 
-async function saveJob(){
-  const id=document.getElementById('job-modal-id').value;
-  const name=document.getElementById('job-name').value.trim();
-  const schedule=getScheduleStr();
-  const userIP=document.getElementById('job-ip').value.trim();
-  const extraCode=document.getElementById('job-code').value.trim();
-  const events=getEventsSequence();
+async function saveJob() {
+    const id = document.getElementById('job-modal-id').value;
+    const name = document.getElementById('job-name').value.trim();
+    const schedule = getScheduleStr();
+    const userIP = document.getElementById('job-ip').value.trim();
+    const rawEvents = getEventsSequence();
 
-  if(!name||!schedule){showToast('error','⚠','أكمل الحقول المطلوبة','الاسم والجدول مطلوبان');return;}
-  if(events.length===0){showToast('error','⚠','أضف حدثاً واحداً على الأقل','');return;}
-
-  // بناء كود Python من سلسلة الأحداث
-  const game=activeGame||{package:'',dev_key:''};
-  let evLines=[];
-  let prevDelay=0;
-  events.forEach(ev=>{
-    const sleepSec=Math.max(0,(ev.delay-prevDelay))*60;
-    if(sleepSec>0)evLines.push(`time.sleep(${sleepSec})`);
-    evLines.push(`send_event("${ev.name.replace(/"/g,'\\"')}")`);
-    prevDelay=ev.delay;
-  });
-
-  const code=`import time, requests, json
-from datetime import datetime, timezone
-
-API="${API}"
-TOKEN="${TOKEN}"
-PACKAGE="${game.package}"
-DEV_KEY="${game.dev_key}"
-GAID="${curGaid}"
-AFID="${curAfid}"
-IP="${userIP}"
-
-def send_event(event_name, ev_type="level"):
-    body = {
-        "appsflyer_id": AFID,
-        "advertising_id": GAID,
-        "eventName": event_name,
-        "eventTime": datetime.now(timezone.utc).isoformat(),
-        "eventValue": json.dumps({"af_revenue":"4.99","af_currency":"USD"}) if ev_type=="purchase" else "{}"
+    // 1. التحقق من الحقول الأساسية
+    if (!name || !schedule || !userIP) {
+        showToast('error', '⚠', 'أكمل الحقول المطلوبة', 'الاسم، الجدول، والـ IP مطلوبان');
+        return;
     }
-    payload = {"package": PACKAGE, "dev_key": DEV_KEY, "body": body}
-    headers = {"Content-Type": "application/json", "X-Token": TOKEN}
-    try:
-        r = requests.post(API + "/api/send-event", json=payload, headers=headers, timeout=15)
-        d = r.json()
-        status = d.get("status_code", r.status_code)
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] {event_name} -> {status}")
-    except Exception as e:
-        print(f"Error: {e}")
 
-${evLines.join('\n')}
-${extraCode}
-print("✅ تمت سلسلة الأحداث")`;
+    // 2. التحقق من وجود حدث واحد على الأقل
+    if (rawEvents.length === 0) {
+        showToast('error', '⚠', 'خطأ في الأحداث', 'أضف حدثاً واحداً على الأقل للمهمة');
+        return;
+    }
 
-  try{
-    let res;
-    if(id)res=await apiFetch('/jobs/'+id,'PUT',{name,code,schedule});
-    else res=await apiFetch('/jobs','POST',{name,code,schedule});
-    if(res.ok){
-      closeJobModal();
-      showToast('success','✅',id?'تم التعديل':'تم الإنشاء',name);
-      loadJobs();
-      if(activeGame)loadGameJobs();
-    }else{const d=await res.json();showToast('error','❌','فشل',d.error||'');}
-  }catch{showToast('error','🔌','خطأ في الشبكة','');}
+    // 3. تنسيق مصفوفة الأحداث
+    const formattedEvents = rawEvents.map(ev => ({
+        name: ev.name,
+        delay: ev.delay
+    }));
+
+    // 4. تأمين بيانات اللعبة (في حال تم الفتح من خارج صفحة اللعبة)
+    const game = activeGame || { package: "", dev_key: "" };
+
+    // 5. بناء الـ Payload ليتطابق بنسبة 100% مع ما يتوقعه Flask
+    const payload = {
+        name: name,
+        events: formattedEvents, // نرسلها كمصفوفة ليقوم السيرفر بعمل json.dumps لها
+        schedule: schedule,
+        user_ip: userIP,
+        package: game.package,
+        dev_key: game.dev_key,
+        gaid: curGaid,
+        afid: curAfid,
+        enabled: 1 // ضروري في حالة التعديل (PUT) لضمان بقاء المهمة مفعلة
+    };
+
+    try {
+        let res;
+        // توجيه الطلب: إنشاء جديد (POST) أو تعديل (PUT)
+        if (id) {
+            res = await apiFetch('/jobs/' + id, 'PUT', payload);
+        } else {
+            res = await apiFetch('/jobs', 'POST', payload);
+        }
+
+        if (res.ok) {
+            closeJobModal();
+            showToast('success', '✅', id ? 'تم التعديل' : 'تم الإنشاء', name);
+            loadJobs(); // تحديث القائمة الشاملة
+            if (activeGame && typeof loadGameJobs === 'function') {
+                loadGameJobs(); // تحديث قائمة مهام اللعبة الحالية
+            }
+        } else {
+            const d = await res.json();
+            showToast('error', '❌', 'فشل الحفظ', d.error || 'السيرفر رفض الطلب (تحقق من البيانات)');
+        }
+    } catch (e) {
+        showToast('error', '🔌', 'خطأ في الشبكة', 'فشل الاتصال بالسيرفر: ' + e.message);
+    }
 }
 
 function closeJobModal(){document.getElementById('job-modal').classList.remove('open');}
