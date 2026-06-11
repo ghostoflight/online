@@ -39,7 +39,7 @@ def init_db():
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     
-    # تنفيذ إنشاء الجداول
+    # تنفيذ إنشاء الجداول (تمت إزالة سطر الحذف الكارثي من هنا)
     c.executescript("""
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
@@ -49,7 +49,6 @@ def init_db():
         CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created TEXT DEFAULT (datetime('now')), FOREIGN KEY(user_id) REFERENCES users(id));
         CREATE TABLE IF NOT EXISTS user_data (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, key TEXT NOT NULL, value TEXT, updated TEXT DEFAULT (datetime('now')), UNIQUE(user_id, key), FOREIGN KEY(user_id) REFERENCES users(id));
         
-        DROP TABLE IF EXISTS scheduled_jobs;
         CREATE TABLE IF NOT EXISTS scheduled_jobs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           user_id INTEGER NOT NULL,
@@ -75,7 +74,7 @@ def init_db():
     
     conn.commit()
     conn.close()
-
+  
 # ═══════════════════════════════════════
 # AUTH HELPERS
 # ═══════════════════════════════════════
