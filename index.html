@@ -1694,7 +1694,7 @@ function addEventRow(name = '', delay = 0) {
   container.appendChild(row);
 }
 
-// دالة تجميع الأحداث من الحقول عند الحفظ
+// ... (نفس دالة getEventsSequence الموجودة لديك)
 function getEventsSequence() {
   const rows = document.querySelectorAll('#event-list > div');
   return Array.from(rows).map(row => ({
@@ -1703,6 +1703,9 @@ function getEventsSequence() {
   }));
 }
 </script>
+
+</div> 
+
 </body>
 </html>
 ENDOFFILE
