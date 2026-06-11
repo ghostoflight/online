@@ -23,8 +23,13 @@ self.addEventListener('activate', e => {
     ).then(() => self.clients.claim())
   );
 });
-
 self.addEventListener('fetch', e => {
+  // 1. استثناء طلبات السيرفر من الكاش تماماً لكي لا يظهر خطأ 404
+  if (e.request.url.includes('/api/')) {
+    return; // هذا السطر يخبر المتصفح أن يترك الطلب ليمر عبر الإنترنت مباشرة
+  }
+
+  // 2. باقي الملفات (HTML, CSS) نبحث عنها في الكاش كالمعتاد
   e.respondWith(
     caches.match(e.request).then(response => {
       return response || fetch(e.request);
