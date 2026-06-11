@@ -1030,8 +1030,8 @@ body{background:var(--ink);color:var(--t1);font-family:-apple-system,BlinkMacSys
     <input class="m-input" id="job-name" placeholder="مثال: إرسال أحداث يومية">
 
     <div class="m-label">IP Address</div>
-    <input class="m-input" id="job-ip" dir="ltr" placeholder="سيتم جلبه تلقائياً...">
-
+    <input class="m-input" id="job-ip" dir="ltr" placeholder="أدخل البروكسي: username:pass@ip:port">
+    
     <div class="m-label">الجدولة</div>
     <select class="m-select" id="job-sched-type" onchange="updateSchedHelper()">
       <option value="interval">كل X ثانية</option>
@@ -1521,41 +1521,49 @@ function getEventsSequence(){
 }
 
 async function openNewJobModal(){
-  document.getElementById('job-modal-title').textContent='➕ مهمة جديدة';
-  document.getElementById('job-modal-id').value='';
-  document.getElementById('job-name').value='';
-  document.getElementById('job-ip').value='';
-  document.getElementById('job-code').value='';
-  document.getElementById('job-sched-type').value='interval';
-  document.getElementById('sched-seconds').value='3600';
-  document.getElementById('sched-time').value='08:00';
-  document.getElementById('sched-cron').value='';
-  document.getElementById('event-list').innerHTML='';
+  document.getElementById('job-modal-title').textContent = '➕ مهمة جديدة';
+  document.getElementById('job-modal-id').value = '';
+  document.getElementById('job-name').value = '';
+  
+  // تصفير حقل الـ IP ليقوم المستخدم بإدخاله يدوياً
+  document.getElementById('job-ip').value = '';
+  
+  document.getElementById('job-code').value = '';
+  document.getElementById('job-sched-type').value = 'interval';
+  document.getElementById('sched-seconds').value = '3600';
+  document.getElementById('sched-time').value = '08:00';
+  document.getElementById('sched-cron').value = '';
+  document.getElementById('event-list').innerHTML = '';
   addEventRow();
   updateSchedHelper();
-  // جلب IP تلقائياً
-  try{const r=await fetch('https://api.ipify.org?format=json');const d=await r.json();document.getElementById('job-ip').value=d.ip;}catch{}
+  
   document.getElementById('job-modal').classList.add('open');
 }
 
 function openJobModalFromGame(){
-  if(!activeGame){showToast('error','⚠','خطأ','يرجى اختيار لعبة أولاً');return;}
-  document.getElementById('job-modal-title').textContent='⏱ جدولة: '+activeGame.name;
-  document.getElementById('job-modal-id').value='';
-  document.getElementById('job-name').value='Auto: '+activeGame.name;
-  document.getElementById('job-ip').value='';
-  document.getElementById('job-code').value='';
-  document.getElementById('job-sched-type').value='interval';
-  document.getElementById('sched-seconds').value='3600';
-  document.getElementById('event-list').innerHTML='';
-  const defEv=activeGame.level_events[0].template;
-  addEventRow(defEv,0);
+  if(!activeGame){
+      showToast('error','⚠','خطأ','يرجى اختيار لعبة أولاً');
+      return;
+  }
+  document.getElementById('job-modal-title').textContent = '⏱ جدولة: ' + activeGame.name;
+  document.getElementById('job-modal-id').value = '';
+  document.getElementById('job-name').value = 'Auto: ' + activeGame.name;
+  
+  // تصفير حقل الـ IP ليقوم المستخدم بإدخاله يدوياً
+  document.getElementById('job-ip').value = '';
+  
+  document.getElementById('job-code').value = '';
+  document.getElementById('job-sched-type').value = 'interval';
+  document.getElementById('sched-seconds').value = '3600';
+  document.getElementById('event-list').innerHTML = '';
+  
+  const defEv = activeGame.level_events[0].template;
+  addEventRow(defEv, 0);
   updateSchedHelper();
-  // جلب IP تلقائياً
-  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{document.getElementById('job-ip').value=d.ip;}).catch(()=>{});
+  
   document.getElementById('job-modal').classList.add('open');
 }
-
+  
 async function openEditJobModal(id){
   try{
     const res=await apiFetch('/jobs');const jobs=await res.json();const j=jobs.find(x=>x.id===id);if(!j)return;
