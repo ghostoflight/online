@@ -1,15 +1,33 @@
 const CACHE = 'online-v1';
 const ASSETS = ['/', '/index.html', '/manifest.json'];
+
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE).then(cache => {
+      // استخدام حلقة تكرار لمحاولة تخزين كل ملف بشكل منفصل
+      return Promise.all(
+        ASSETS.map(url => {
+          return cache.add(url).catch(err => {
+            console.error(`فشل تخزين: ${url}`, err);
+          });
+        })
+      );
+    }).then(() => self.skipWaiting())
+  );
 });
+
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ).then(() => self.clients.claim()));
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
 });
+
 self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  if (url.hostname !== location.hostname) return;
-  e.respondWith(caches.match(e.request).then(c => c || fetch(e.request)));
+  e.respondWith(
+    caches.match(e.request).then(response => {
+      return response || fetch(e.request);
+    })
+  );
 });
