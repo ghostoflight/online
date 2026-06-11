@@ -14,7 +14,7 @@ DB = "online.db"
 scheduler = BackgroundScheduler(timezone="UTC", daemon=True)
 scheduler.start()
 
-scheduled_jobs = {}  # job_id -> apscheduler job
+scheduled_jobs = {}
 
 # ═══════════════════════════════════════
 # DATABASE SETUP
