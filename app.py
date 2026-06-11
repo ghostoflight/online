@@ -8,7 +8,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 CORS(app, origins="*")
 
-DB = "online.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB = os.path.join(BASE_DIR, "online.db")
 
 # BUG FIX #1: scheduler must be created before use, and daemon=True prevents blocking shutdown
 scheduler = BackgroundScheduler(timezone="UTC", daemon=True)
@@ -28,41 +29,52 @@ def get_db():
   return conn
 
 def init_db():
-  conn = get_db()
-  c = conn.cursor()
-  c.executescript("""
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
-      role TEXT DEFAULT 'user', max_uses INTEGER DEFAULT 100, uses_left INTEGER DEFAULT 100,
-      created TEXT DEFAULT (datetime('now')), active INTEGER DEFAULT 1
-    );
-    CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created TEXT DEFAULT (datetime('now')), FOREIGN KEY(user_id) REFERENCES users(id));
-    CREATE TABLE IF NOT EXISTS user_data (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, key TEXT NOT NULL, value TEXT, updated TEXT DEFAULT (datetime('now')), UNIQUE(user_id, key), FOREIGN KEY(user_id) REFERENCES users(id));
-  
-    -- تحديث الجدول ليدعم النظام الجديد
-    DROP TABLE IF EXISTS scheduled_jobs;
-    CREATE TABLE IF NOT EXISTS scheduled_jobs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      name TEXT NOT NULL,
-      events TEXT NOT NULL,
-      user_ip TEXT NOT NULL,
-      package TEXT, dev_key TEXT, gaid TEXT, afid TEXT,
-      schedule TEXT NOT NULL,
-      enabled INTEGER DEFAULT 1,
-      last_run TEXT, last_status TEXT, last_output TEXT,
-      created TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY(user_id) REFERENCES users(id)
-    );
-    CREATE TABLE IF NOT EXISTS job_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, ran_at TEXT DEFAULT (datetime('now')), status TEXT, output TEXT, FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id));
-  """)
-  # ... (بقية كود الـ admin_exists كما هو)
-  admin_exists = c.execute("SELECT id FROM users WHERE username='admin'").fetchone()
-  if not admin_exists:
-    pw_hash = hashlib.sha256("admin123".encode()).hexdigest()
-    c.execute("INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)", ("admin", pw_hash, "admin", 999999, 999999))
-  conn.commit()
-  conn.close()
+    # استخدام المسار المطلق لضمان أننا نكتب في المكان الصحيح دائماً
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(BASE_DIR, "online.db")
+    print(f"قاعدة البيانات تقع في: {db_path}")
+
+    # فتح اتصال واحد فقط
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    
+    # تنفيذ إنشاء الجداول
+    c.executescript("""
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
+          role TEXT DEFAULT 'user', max_uses INTEGER DEFAULT 100, uses_left INTEGER DEFAULT 100,
+          created TEXT DEFAULT (datetime('now')), active INTEGER DEFAULT 1
+        );
+        CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created TEXT DEFAULT (datetime('now')), FOREIGN KEY(user_id) REFERENCES users(id));
+        CREATE TABLE IF NOT EXISTS user_data (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, key TEXT NOT NULL, value TEXT, updated TEXT DEFAULT (datetime('now')), UNIQUE(user_id, key), FOREIGN KEY(user_id) REFERENCES users(id));
+        
+        DROP TABLE IF EXISTS scheduled_jobs;
+        CREATE TABLE IF NOT EXISTS scheduled_jobs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          events TEXT NOT NULL,
+          user_ip TEXT NOT NULL,
+          package TEXT, dev_key TEXT, gaid TEXT, afid TEXT,
+          schedule TEXT NOT NULL,
+          enabled INTEGER DEFAULT 1,
+          last_run TEXT, last_status TEXT, last_output TEXT,
+          created TEXT DEFAULT (datetime('now')),
+          FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE TABLE IF NOT EXISTS job_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, ran_at TEXT DEFAULT (datetime('now')), status TEXT, output TEXT, FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id));
+    """)
+    
+    # التحقق من وجود الأدمن
+    admin_exists = c.execute("SELECT id FROM users WHERE username='admin'").fetchone()
+    if not admin_exists:
+        pw_hash = hashlib.sha256("admin123".encode()).hexdigest()
+        c.execute("INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)", 
+                  ("admin", pw_hash, "admin", 999999, 999999))
+    
+    conn.commit()
+    conn.close()
 
 # ═══════════════════════════════════════
 # AUTH HELPERS
