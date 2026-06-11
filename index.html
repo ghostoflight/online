@@ -1422,44 +1422,47 @@ async function openEditJobModal(id) {
 }
 
 async function saveJob() {
-  const id = document.getElementById('job-modal-id').value;
-  const name = document.getElementById('job-name').value.trim();
-  const schedule = getScheduleStr();
-  
-  // 1. تجميع الأحداث وحساب الفوارق الزمنية تلقائياً
-  const rawEvents = getEventsSequence(); 
-  let eventsQueue = [];
-  let lastTotalSeconds = 0;
+    const id = document.getElementById('job-modal-id').value;
+    const name = document.getElementById('job-name').value.trim();
+    const schedule = getScheduleStr();
+    const rawEvents = getEventsSequence(); 
+    const userIP = document.getElementById('job-ip').value.trim();
 
-  rawEvents.forEach(ev => {
-    // ev.delay هنا قادم من حقل الإدخال (بالدقائق)
-    let totalSeconds = ev.delay * 60; 
-    let delayFromPrevious = totalSeconds - lastTotalSeconds;
-    if (delayFromPrevious < 0) delayFromPrevious = 0;
-    
-    eventsQueue.push({ name: ev.name, delay: delayFromPrevious });
-    lastTotalSeconds = totalSeconds;
-  });
+    if (!name || rawEvents.length === 0 || !schedule || !userIP) { 
+        showToast('error', '⚠', 'تنبيه', 'أكمل جميع الحقول المطلوبة'); 
+        return; 
+    }
 
-  const userIP = document.getElementById('job-ip').value.trim();
-  
-  if (!name || eventsQueue.length === 0 || !schedule || !userIP) { 
-    showToast('error', '⚠', 'أكمل جميع الحقول (بما فيها الـ IP)', ''); 
-    return; 
-  }
-  
-  const payload = { 
-    name, 
-    events: eventsQueue, // إرسال السلسلة المحسوبة
-    schedule,
-    user_ip: userIP,
-    package: activeGame.package,
-    dev_key: activeGame.dev_key,
-    gaid: curGaid,
-    afid: curAfid
-  };
-  
-  // ... (باقي كود الإرسال fetch كما هو موجود لديك)
+    const payload = { 
+        name, 
+        events: rawEvents, 
+        schedule,
+        user_ip: userIP,
+        package: activeGame.package,
+        dev_key: activeGame.dev_key,
+        gaid: curGaid,
+        afid: curAfid
+    };
+
+    try {
+        // تحديد المسار: إما إضافة (POST) أو تعديل (PUT)
+        const url = id ? `/jobs/${id}` : '/jobs';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await apiFetch(url, method, payload);
+        const data = await res.json();
+
+        if (res.ok) {
+            showToast('success', '✅', 'تم الحفظ', 'تمت جدولة المهمة بنجاح');
+            closeJobModal();
+            loadJobs(); // تحديث القائمة
+        } else {
+            showToast('error', '❌', 'فشل الحفظ', data.error || 'حدث خطأ غير معروف');
+        }
+    } catch (err) {
+        showToast('error', '🔌', 'خطأ في الاتصال', 'تعذر الوصول للسيرفر');
+        console.error(err);
+    }
 }
   
 function closeJobModal() { 
