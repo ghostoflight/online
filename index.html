@@ -1547,13 +1547,16 @@ function getEventsSequence(){
   return Array.from(document.querySelectorAll('#event-list .event-row')).map(row=>({name:row.querySelector('.event-name').value.trim(),delay:parseInt(row.querySelector('.event-delay').value)||0})).filter(e=>e.name);
 }
 
-async function openNewJobModal(){
+async function openNewJobModal() {
   document.getElementById('job-modal-title').textContent = '➕ مهمة جديدة';
   document.getElementById('job-modal-id').value = '';
   document.getElementById('job-name').value = '';
   
-  // تصفير حقل الـ IP ليقوم المستخدم بإدخاله يدوياً
-  document.getElementById('job-ip').value = '';
+  // تصفير حقول البروكسي الأربعة لضمان نافذة نظيفة
+  document.getElementById('proxy-ip').value = '';
+  document.getElementById('proxy-port').value = '';
+  document.getElementById('proxy-user').value = '';
+  document.getElementById('proxy-pass').value = '';
   
   document.getElementById('job-code').value = '';
   document.getElementById('job-sched-type').value = 'interval';
@@ -1561,25 +1564,28 @@ async function openNewJobModal(){
   document.getElementById('sched-time').value = '08:00';
   document.getElementById('sched-cron').value = '';
   document.getElementById('event-list').innerHTML = '';
+  
   addEventRow();
   updateSchedHelper();
   
   document.getElementById('job-modal').classList.add('open');
 }
 
-function openJobModalFromGame(){
-  if(!activeGame){
-      showToast('error','⚠','خطأ','يرجى اختيار لعبة أولاً');
+function openJobModalFromGame() {
+  if (!activeGame) {
+      showToast('error', '⚠', 'خطأ', 'يرجى اختيار لعبة أولاً');
       return;
   }
   document.getElementById('job-modal-title').textContent = '⏱ جدولة: ' + activeGame.name;
   document.getElementById('job-modal-id').value = '';
   document.getElementById('job-name').value = 'Auto: ' + activeGame.name;
   
-  // تصفير حقل الـ IP ليقوم المستخدم بإدخاله يدوياً
-  document.getElementById('job-ip').value = '';
+  // تصفير حقول البروكسي الأربعة لضمان نافذة نظيفة
+  document.getElementById('proxy-ip').value = '';
+  document.getElementById('proxy-port').value = '';
+  document.getElementById('proxy-user').value = '';
+  document.getElementById('proxy-pass').value = '';
   
-  document.getElementById('job-code').value = '';
   document.getElementById('job-sched-type').value = 'interval';
   document.getElementById('sched-seconds').value = '3600';
   document.getElementById('event-list').innerHTML = '';
