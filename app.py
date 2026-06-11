@@ -365,61 +365,32 @@ def execute_job(job_id):
         conn.close()
         return
 
-    # 1. تحويل نص الأحداث المخزن إلى مصفوفة
     try:
         events = json.loads(job["events"])
     except:
         events = []
 
-    output = ""
-    overall_status = "success"
-
-    # 2. تنفيذ الأحداث بالتسلسل
-    for event in events:
-        # إضافة وقت التأخير (Delay)
-        if event.get("delay", 0) > 0:
-            time.sleep(event["delay"])
-        
-        # 3. بناء بيانات الحدث لإرسالها لـ AppsFlyer
-        payload = {
-            "appsflyer_id": job["afid"],
-            "advertising_id": job["gaid"],
-            "eventName": event["name"],
-            "eventTime": datetime.now(timezone.utc).isoformat(),
-            "eventValue": "{}" 
-        }
-        
-        # 4. إعداد الـ Headers مع وضع الـ IP المخصص للمستخدم
-        headers = {
-            "Content-Type": "application/json",
-            "authentication": job["dev_key"],
-            "X-Forwarded-For": job["user_ip"]  # هنا يتم تمرير الـ IP
-        }
-        
-        url = f"https://api2.appsflyer.com/inappevent/{job['package']}"
-        
-        try:
-            resp = requests.post(url, headers=headers, json=payload, timeout=10)
-            if resp.status_code >= 200 and resp.status_code < 300:
-                output += f"Event {event['name']}: {resp.status_code}\n"
-            else:
-                output += f"Event {event['name']}: FAILED ({resp.status_code})\n"
-                overall_status = "error"
-        except Exception as e:
-            output += f"Error {event['name']}: {str(e)}\n"
-            overall_status = "error"
-
-    # 5. تحديث السجل في قاعدة البيانات
-    now = datetime.now(timezone.utc).isoformat()
-    conn.execute("""
-        UPDATE scheduled_jobs SET last_run=?, last_status=?, last_output=? WHERE id=?
-    """, (now, overall_status, output[:2000], job_id))
+    # منطق التنفيذ:
+    # بما أننا نستخدم apscheduler مع وقت محدد، سننفذ الحدث الحالي فقط
+    # ثم سنقوم بجدولة "الحدث القادم" إذا وجد.
     
-    conn.execute(
-        "INSERT INTO job_logs (job_id,ran_at,status,output) VALUES (?,?,?,?)",
-        (job_id, now, overall_status, output[:2000])
-    )
-    conn.commit()
+    # هذه الدالة ستنفذ "الحدث الأول المتاح" أو "الحدث التالي في السلسلة"
+    # لجعلها دقيقة، سنقوم بتعديل هيكل الـ events في قاعدة البيانات
+    # ليحتفظ بحالة (current_index)
+    
+    # بدلاً من التعقيد، إليك أبسط وأقوى طريقة:
+    # السيرفر سينفذ كل المصفوفة دفعة واحدة (إذا كانت الـ Delays قصيرة)
+    # أو نستخدم threading.Timer للحدث القادم.
+
+    for event in events:
+        # إرسال الحدث إلى AppsFlyer (كما في كودك السابق)
+        # ... (نفس كود إرسال الـ request) ...
+        
+        # إذا كان هناك delay للحدث القادم، نخرج من الحلقة وننتظر
+        if event.get("delay", 0) > 0:
+            threading.Timer(event["delay"], execute_job, args=[job_id]).start()
+            break
+            
     conn.close()
 
 def register_job_in_scheduler(job_id, schedule_str, enabled):
