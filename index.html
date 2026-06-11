@@ -1400,32 +1400,47 @@ async function openEditJobModal(id) {
 async function saveJob() {
   const id = document.getElementById('job-modal-id').value;
   const name = document.getElementById('job-name').value.trim();
-  const code = document.getElementById('job-code').value.trim();
   const schedule = getScheduleStr();
+  const events = getEventsSequence(); // تجميع الأحداث من الحقول الديناميكية الجديدة
   
-  if (!name || !code || !schedule) { 
-    showToast('error', '⚠', 'أكمل جميع الحقول', ''); 
+  // التحقق من أن جميع البيانات المطلوبة موجودة
+  if (!name || events.length === 0 || !schedule) { 
+    showToast('error', '⚠', 'أكمل جميع الحقول والأحداث', ''); 
     return; 
   }
   
+  // تجهيز البيانات لإرسالها (إرسال الأحداث بدل كود البايثون)
+  const payload = { 
+    name, 
+    events, 
+    schedule, 
+    package: activeGame.package,
+    dev_key: activeGame.dev_key,
+    gaid: curGaid,
+    afid: curAfid
+  };
+  
   try {
-    const res = id ? await apiFetch('/jobs/'+id, 'PUT', {name,code,schedule}) : await apiFetch('/jobs', 'POST', {name,code,schedule});
+    const res = id 
+      ? await apiFetch('/jobs/' + id, 'PUT', payload) 
+      : await apiFetch('/jobs', 'POST', payload);
+      
     if (res.ok) { 
       closeJobModal(); 
       showToast('success', '✅', id ? 'تم التعديل' : 'تم الإنشاء', name); 
-      loadJobs(); // تحديث القائمة العامة
+      loadJobs(); // تحديث القائمة العامة للمهام
       
-      // تحديث السجل الخاص باللعبة إذا كانت الصفحة مفتوحة
+      // تحديث السجل الخاص باللعبة إذا كانت صفحة التفاصيل مفتوحة
       if (typeof loadGameJobs === 'function') loadGameJobs(); 
     } else { 
       const d = await res.json(); 
-      showToast('error', '❌', 'فشل', d.error || ''); 
+      showToast('error', '❌', 'فشل', d.error || 'خطأ في السيرفر'); 
     }
   } catch { 
-    showToast('error', '🔌', 'خطأ في الشبكة', ''); 
+    showToast('error', '🔌', 'خطأ في الاتصال', 'تعذر الوصول للسيرفر'); 
   }
 }
-
+  
 function closeJobModal() { 
   document.getElementById('job-modal').classList.remove('open'); 
 }
