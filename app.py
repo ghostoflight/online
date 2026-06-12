@@ -694,10 +694,6 @@ def admin_delete_user(uid):
 # INITIALIZATION & RUN
 # ═══════════════════════════════════════
 
-# ═══════════════════════════════════════
-# التشغيل والتهيئة (Startup Logic)
-# ═══════════════════════════════════════
-
 def run_startup_tasks():
     """تهيئة آمنة ومنفصلة لضمان استقرار Gunicorn"""
     try:
@@ -708,9 +704,10 @@ def run_startup_tasks():
     except Exception as e:
         app.logger.error(f"Startup failed: {e}")
 
-# تشغيل التهيئة في خيط خلفي فور تحميل التطبيق
-# daemon=False يضمن بقاء السيرفر حياً حتى تنتهي هذه المهام
-threading.Thread(target=run_startup_tasks, daemon=True).start()
+# تشغيل التهيئة في خيط خلفي فور تحميل التطبيق.
+# هام جداً: جعلنا daemon=False لضمان عدم إغلاق العملية طالما التهيئة تعمل.
+startup_thread = threading.Thread(target=run_startup_tasks, daemon=False)
+startup_thread.start()
 
 @app.errorhandler(Exception)
 def handle_exception(e):
