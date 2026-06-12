@@ -781,15 +781,37 @@ try:
 except Exception as e:
     app.logger.error(f"Startup error: {e}")
 
-# 2. معالج الأخطاء (صحيح)
+# ═══════════════════════════════════════
+# تهيئة التطبيق بنظام Lazy Initialization
+# ═══════════════════════════════════════
+
+def run_startup_tasks():
+    """دالة لتهيئة النظام في الخلفية بعد تشغيل السيرفر"""
+    try:
+        init_db()
+        load_all_jobs()
+        app.logger.info("System initialized successfully in background.")
+    except Exception as e:
+        app.logger.error(f"Background startup error: {e}")
+
+# استخدام Flask before_first_request (أو تشغيله في خيط منفصل لضمان عدم حظر الإقلاع)
+# ملاحظة: في بيئة Gunicorn، هذه الطريقة هي الأكثر أماناً
+threading.Thread(target=run_startup_tasks, daemon=True).start()
+
+# ═══════════════════════════════════════
+# معالجة الأخطاء
+# ═══════════════════════════════════════
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f"حدث خطأ غير متوقع: {e}")
     return jsonify({"error": "Internal Server Error"}), 500
 
-# 3. إزالة app.run من الإنتاج
-# لا تلمس كود التشغيل في الأسفل، اتركه كما هو ليعمل السيرفر محلياً فقط
+# ═══════════════════════════════════════
+# التشغيل المحلي فقط
+# ═══════════════════════════════════════
+
 if __name__ == "__main__":
+    # تشغيل محلي فقط، Gunicorn سيتجاهل هذا الجزء في الإنتاج
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
-    
