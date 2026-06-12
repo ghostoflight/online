@@ -353,74 +353,6 @@ def proxy_send_event():
 # SCHEDULER
 # ═══════════════════════════════════════
 
-def init_db():
-    conn = get_db()
-    c = conn.cursor()
-    c.executescript("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            username TEXT UNIQUE NOT NULL, 
-            password TEXT NOT NULL,
-            role TEXT DEFAULT 'user', 
-            max_uses INTEGER DEFAULT 100, 
-            uses_left INTEGER DEFAULT 100,
-            created TEXT DEFAULT (datetime('now')), 
-            active INTEGER DEFAULT 1
-        );
-        CREATE TABLE IF NOT EXISTS sessions (
-            token TEXT PRIMARY KEY, 
-            user_id INTEGER NOT NULL, 
-            created TEXT DEFAULT (datetime('now')), 
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS user_data (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            user_id INTEGER NOT NULL, 
-            key TEXT NOT NULL, 
-            value TEXT, 
-            updated TEXT DEFAULT (datetime('now')), 
-            UNIQUE(user_id, key), 
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS scheduled_jobs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
-            events TEXT NOT NULL,
-            user_ip TEXT NOT NULL,
-            package TEXT, 
-            dev_key TEXT, 
-            gaid TEXT, 
-            afid TEXT,
-            schedule TEXT NOT NULL,
-            enabled INTEGER DEFAULT 1,
-            last_run TEXT, 
-            last_status TEXT, 
-            last_output TEXT,
-            created TEXT DEFAULT (datetime('now')),
-            FOREIGN KEY(user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS job_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            job_id INTEGER NOT NULL,
-            ran_at TEXT DEFAULT (datetime('now')),
-            status TEXT,
-            output TEXT,
-            FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id)
-        );
-    """)
-    
-    # التحقق من وجود الأدمن
-    admin_exists = c.execute("SELECT id FROM users WHERE username='admin'").fetchone()
-    if not admin_exists:
-        pw_hash = hashlib.sha256("admin123".encode()).hexdigest()
-        c.execute("INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)", 
-                  ("admin", pw_hash, "admin", 999999, 999999))
-    
-    conn.commit()
-    conn.close()
-    app.logger.info("قاعدة البيانات مهيأة بنجاح.")
-
 def execute_job(job_id):
     # فتح اتصال جديد ومستقل لهذه المهمة فقط
     conn = get_db()
@@ -778,7 +710,7 @@ def run_startup_tasks():
 
 # تشغيل التهيئة في خيط خلفي فور تحميل التطبيق
 # daemon=False يضمن بقاء السيرفر حياً حتى تنتهي هذه المهام
-threading.Thread(target=run_startup_tasks, daemon=False).start()
+threading.Thread(target=run_startup_tasks, daemon=True).start()
 
 @app.errorhandler(Exception)
 def handle_exception(e):
