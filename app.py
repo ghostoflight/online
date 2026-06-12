@@ -694,27 +694,27 @@ def admin_delete_user(uid):
 # INITIALIZATION & RUN
 # ═══════════════════════════════════════
 
+# ═══════════════════════════════════════
+# التشغيل والتهيئة (Startup Logic)
+# ═══════════════════════════════════════
+
 def run_startup_tasks():
-    """تهيئة آمنة ومنفصلة لضمان استقرار Gunicorn"""
     try:
-        # تنفيذ المهام مرة واحدة فقط
         init_db()
         load_all_jobs()
         app.logger.info("System fully initialized.")
     except Exception as e:
         app.logger.error(f"Startup failed: {e}")
 
-# تشغيل التهيئة في خيط خلفي فور تحميل التطبيق.
-# هام جداً: جعلنا daemon=False لضمان عدم إغلاق العملية طالما التهيئة تعمل.
-startup_thread = threading.Thread(target=run_startup_tasks, daemon=False)
-startup_thread.start()
+# التشغيل في خيط خلفي (بدون daemon حتى نضمن استقرار العملية)
+threading.Thread(target=run_startup_tasks, daemon=False).start()
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f"Unexpected error: {e}")
     return jsonify({"error": "Internal Server Error"}), 500
 
+# هذا الجزء يضمن عدم تداخل التشغيل المحلي مع Gunicorn
 if __name__ == "__main__":
-    # هذا الجزء للتشغيل المحلي فقط
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
