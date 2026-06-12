@@ -21,51 +21,71 @@ scheduled_jobs = {}
 # DATABASE SETUP
 # ═══════════════════════════════════════
 
-def get_db():
-  conn = sqlite3.connect(DB)
-  conn.row_factory = sqlite3.Row
-  # BUG FIX #2: Enable WAL mode for concurrent access (SQLite race conditions)
-  conn.execute("PRAGMA journal_mode=WAL")
-  return conn
-
 def init_db():
     # استخدام المسار المطلق لضمان أننا نكتب في المكان الصحيح دائماً
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(BASE_DIR, "online.db")
-    print(f"قاعدة البيانات تقع في: {db_path}")
-
+    
     # فتح اتصال واحد فقط
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     
-    # تنفيذ إنشاء الجداول (تمت إزالة سطر الحذف الكارثي من هنا)
+    # تنفيذ إنشاء الجداول (بدون DROP)
     c.executescript("""
         CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL,
-          role TEXT DEFAULT 'user', max_uses INTEGER DEFAULT 100, uses_left INTEGER DEFAULT 100,
-          created TEXT DEFAULT (datetime('now')), active INTEGER DEFAULT 1
+          id INTEGER PRIMARY KEY AUTOINCREMENT, 
+          username TEXT UNIQUE NOT NULL, 
+          password TEXT NOT NULL,
+          role TEXT DEFAULT 'user', 
+          max_uses INTEGER DEFAULT 100, 
+          uses_left INTEGER DEFAULT 100,
+          created TEXT DEFAULT (datetime('now')), 
+          active INTEGER DEFAULT 1
         );
-        CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id INTEGER NOT NULL, created TEXT DEFAULT (datetime('now')), FOREIGN KEY(user_id) REFERENCES users(id));
-        CREATE TABLE IF NOT EXISTS user_data (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, key TEXT NOT NULL, value TEXT, updated TEXT DEFAULT (datetime('now')), UNIQUE(user_id, key), FOREIGN KEY(user_id) REFERENCES users(id));
-        
+        CREATE TABLE IF NOT EXISTS sessions (
+          token TEXT PRIMARY KEY, 
+          user_id INTEGER NOT NULL, 
+          created TEXT DEFAULT (datetime('now')), 
+          FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE TABLE IF NOT EXISTS user_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, 
+          user_id INTEGER NOT NULL, 
+          key TEXT NOT NULL, 
+          value TEXT, 
+          updated TEXT DEFAULT (datetime('now')), 
+          UNIQUE(user_id, key), 
+          FOREIGN KEY(user_id) REFERENCES users(id)
+        );
         CREATE TABLE IF NOT EXISTS scheduled_jobs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           user_id INTEGER NOT NULL,
           name TEXT NOT NULL,
           events TEXT NOT NULL,
           user_ip TEXT NOT NULL,
-          package TEXT, dev_key TEXT, gaid TEXT, afid TEXT,
+          package TEXT, 
+          dev_key TEXT, 
+          gaid TEXT, 
+          afid TEXT,
           schedule TEXT NOT NULL,
           enabled INTEGER DEFAULT 1,
-          last_run TEXT, last_status TEXT, last_output TEXT,
+          last_run TEXT, 
+          last_status TEXT, 
+          last_output TEXT,
           created TEXT DEFAULT (datetime('now')),
           FOREIGN KEY(user_id) REFERENCES users(id)
         );
-        CREATE TABLE IF NOT EXISTS job_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, job_id INTEGER NOT NULL, ran_at TEXT DEFAULT (datetime('now')), status TEXT, output TEXT, FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id));
+        CREATE TABLE IF NOT EXISTS job_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, 
+          job_id INTEGER NOT NULL, 
+          ran_at TEXT DEFAULT (datetime('now')), 
+          status TEXT, 
+          output TEXT, 
+          FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id)
+        );
     """)
     
-    # التحقق من وجود الأدمن
+    # التحقق من وجود الأدمن (فقط إذا لم يكن موجوداً)
     admin_exists = c.execute("SELECT id FROM users WHERE username='admin'").fetchone()
     if not admin_exists:
         pw_hash = hashlib.sha256("admin123".encode()).hexdigest()
@@ -74,6 +94,7 @@ def init_db():
     
     conn.commit()
     conn.close()
+    print("قاعدة البيانات مهيأة وجاهزة للعمل.")
   
 # ═══════════════════════════════════════
 # AUTH HELPERS
@@ -370,52 +391,61 @@ def init_db():
     conn.close()
 
 def execute_job(job_id):
+    # فتح اتصال جديد ومستقل لهذه المهمة فقط
     conn = get_db()
     try:
-        # 1. جلب بيانات المهمة
         job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
         if not job or not job["enabled"]:
             return
 
-        events = json.loads(job["events"])
+        # 1. التحقق الآمن من بيانات الأحداث
+        try:
+            events = json.loads(job["events"]) if job["events"] else []
+        except json.JSONDecodeError:
+            app.logger.error(f"تلف بيانات المهمة {job_id}")
+            return
+            
         output_log = ""
         
-        # 2. إعداد البروكسي (في حال وجود IP)
-        # إذا كان البروكسي يحتاج توثيقاً: استخدم الصيغة "http://user:pass@ip:port"
+        # 2. إعداد البروكسي الآمن (تجنب الانهيار في حال كانت الحقول فارغة)
         proxies = None
-        if job["user_ip"]:
+        user_ip = job.get("user_ip", "").strip()
+        if user_ip:
+            # نتأكد أن العنوان يبدأ بـ http:// إن لم يكن موجوداً
+            formatted_ip = user_ip if user_ip.startswith("http") else f"http://{user_ip}"
             proxies = {
-                "http": f"http://{job['user_ip']}",
-                "https": f"http://{job['user_ip']}"
+                "http": formatted_ip,
+                "https": formatted_ip
             }
         
         # 3. تنفيذ سلسلة الأحداث
         for event in events:
             payload = {
-                "appsflyer_id": job["afid"],
-                "advertising_id": job["gaid"],
-                "eventName": event["name"],
+                "appsflyer_id": job.get("afid", ""),
+                "advertising_id": job.get("gaid", ""),
+                "eventName": event.get("name", "unknown_event"),
                 "eventTime": datetime.now(timezone.utc).isoformat(),
                 "eventValue": "{}"
             }
             
             try:
+                # استخدام timeout مناسب لتجنب تعليق السيرفر
                 res = requests.post(
-                    f"https://api2.appsflyer.com/inappevent/{job['package']}",
-                    headers={"authentication": job["dev_key"]},
+                    f"https://api2.appsflyer.com/inappevent/{job.get('package')}",
+                    headers={"authentication": job.get("dev_key", "")},
                     json=payload,
-                    proxies=proxies, # تفعيل البروكسي هنا
-                    timeout=15
+                    proxies=proxies,
+                    timeout=10 
                 )
-                output_log += f"Event: {event['name']} | Status: {res.status_code}\n"
-            except Exception as e:
-                output_log += f"Event: {event['name']} | Failed: {str(e)}\n"
+                output_log += f"Event: {event.get('name')} | Status: {res.status_code}\n"
+            except requests.exceptions.RequestException as e:
+                output_log += f"Event: {event.get('name')} | Failed: {str(e)[:50]}\n"
             
-            # تنفيذ التأخير (Delay) إذا وجد
+            # تنفيذ التأخير إذا وجد (بدون التأثير على استقرار السيرفر)
             if event.get("delay", 0) > 0:
                 time.sleep(event["delay"] * 60)
         
-        # 4. تسجيل نجاح المهمة في الجدول والسجل
+        # 4. تسجيل النتيجة النهائية
         conn.execute("UPDATE scheduled_jobs SET last_status='success', last_output=?, last_run=datetime('now') WHERE id=?", 
                      (output_log, job_id))
         conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
@@ -423,14 +453,16 @@ def execute_job(job_id):
         conn.commit()
 
     except Exception as e:
-        # 5. تسجيل الفشل في الجدول والسجل
-        error_msg = str(e)
-        conn.execute("UPDATE scheduled_jobs SET last_status='error', last_output=?, last_run=datetime('now') WHERE id=?", 
-                     (error_msg, job_id))
-        conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
-                     (job_id, "error", error_msg))
-        conn.commit()
-    
+        # 5. معالجة الأخطاء الكلية لمنع انهيار الخيط (Thread)
+        error_msg = str(e)[:100]
+        try:
+            conn.execute("UPDATE scheduled_jobs SET last_status='error', last_output=?, last_run=datetime('now') WHERE id=?", 
+                         (error_msg, job_id))
+            conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
+                         (job_id, "error", error_msg))
+            conn.commit()
+        except:
+            pass
     finally:
         conn.close()
 
@@ -562,18 +594,20 @@ def delete_job(job_id):
 @app.route("/jobs/<int:job_id>/run", methods=["POST"])
 @require_auth
 def run_job_now(job_id):
-  conn = get_db()
-  job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-  conn.close()
-  if not job:
-    return jsonify({"error": "Not found"}), 404
+    conn = get_db()
+    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    conn.close()
+    if not job:
+        return jsonify({"error": "Not found"}), 404
 
-  # BUG FIX #11: Authorization check missing — only owner or admin can trigger
-  if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-    return jsonify({"error": "Forbidden"}), 403
+    if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
+        return jsonify({"error": "Forbidden"}), 403
 
-  threading.Thread(target=execute_job, args=(job_id,), daemon=True).start()
-  return jsonify({"ok": True, "message": "Job triggered"})
+    # الحل الهندسي: إضافة المهمة للمجدول للعمل فوراً لمرة واحدة (date)
+    # هذا يغنيك عن فتح خيط (Thread) يدوي
+    scheduler.add_job(execute_job, 'date', run_date=datetime.now(), args=[job_id])
+    
+    return jsonify({"ok": True, "message": "Job triggered via scheduler"})
 
 @app.route("/jobs/<int:job_id>/logs", methods=["GET"])
 @require_auth
