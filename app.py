@@ -21,6 +21,12 @@ scheduled_jobs = {}
 # DATABASE SETUP
 # ═══════════════════════════════════════
 
+def get_db():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    return conn
+    
 def init_db():
     # استخدام المسار المطلق لضمان أننا نكتب في المكان الصحيح دائماً
     db_path = os.path.join(BASE_DIR, "online.db")
