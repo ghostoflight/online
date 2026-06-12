@@ -772,13 +772,24 @@ try:
 except Exception as e:
     print(f"خطأ أثناء تحميل المهام: {e}")
   
+# 1. تهيئة قاعدة البيانات مباشرة عند تحميل الملف (Import time)
+# هذا يضمن أن الجداول موجودة قبل أن يستقبل السيرفر أي طلب
+try:
+    init_db()
+    load_all_jobs()
+    app.logger.info("System initialized successfully.")
+except Exception as e:
+    app.logger.error(f"Startup error: {e}")
+
+# 2. معالج الأخطاء (صحيح)
 @app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f"حدث خطأ غير متوقع: {e}")
     return jsonify({"error": "Internal Server Error"}), 500
-  
+
+# 3. إزالة app.run من الإنتاج
+# لا تلمس كود التشغيل في الأسفل، اتركه كما هو ليعمل السيرفر محلياً فقط
 if __name__ == "__main__":
-    # تشغيل السيرفر
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
     
