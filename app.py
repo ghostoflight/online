@@ -762,56 +762,30 @@ def admin_delete_user(uid):
 # INITIALIZATION & RUN
 # ═══════════════════════════════════════
 
-# التأكد من إنشاء الجداول أولاً
-init_db()
-
-# محاولة تحميل المهام النشطة من قاعدة البيانات إلى الذاكرة (Scheduler)
-try:
-    load_all_jobs()
-    print("المهام المجدولة تم تحميلها بنجاح.")
-except Exception as e:
-    print(f"خطأ أثناء تحميل المهام: {e}")
-  
-# 1. تهيئة قاعدة البيانات مباشرة عند تحميل الملف (Import time)
-# هذا يضمن أن الجداول موجودة قبل أن يستقبل السيرفر أي طلب
-try:
-    init_db()
-    load_all_jobs()
-    app.logger.info("System initialized successfully.")
-except Exception as e:
-    app.logger.error(f"Startup error: {e}")
-
 # ═══════════════════════════════════════
-# تهيئة التطبيق بنظام Lazy Initialization
+# التشغيل والتهيئة (Startup Logic)
 # ═══════════════════════════════════════
 
 def run_startup_tasks():
-    """دالة لتهيئة النظام في الخلفية بعد تشغيل السيرفر"""
+    """تهيئة آمنة ومنفصلة لضمان استقرار Gunicorn"""
     try:
+        # تنفيذ المهام مرة واحدة فقط
         init_db()
         load_all_jobs()
-        app.logger.info("System initialized successfully in background.")
+        app.logger.info("System fully initialized.")
     except Exception as e:
-        app.logger.error(f"Background startup error: {e}")
+        app.logger.error(f"Startup failed: {e}")
 
-# استخدام Flask before_first_request (أو تشغيله في خيط منفصل لضمان عدم حظر الإقلاع)
-# ملاحظة: في بيئة Gunicorn، هذه الطريقة هي الأكثر أماناً
-threading.Thread(target=run_startup_tasks, daemon=True).start()
-
-# ═══════════════════════════════════════
-# معالجة الأخطاء
-# ═══════════════════════════════════════
+# تشغيل التهيئة في خيط خلفي فور تحميل التطبيق
+# daemon=False يضمن بقاء السيرفر حياً حتى تنتهي هذه المهام
+threading.Thread(target=run_startup_tasks, daemon=False).start()
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    app.logger.error(f"حدث خطأ غير متوقع: {e}")
+    app.logger.error(f"Unexpected error: {e}")
     return jsonify({"error": "Internal Server Error"}), 500
 
-# ═══════════════════════════════════════
-# التشغيل المحلي فقط
-# ═══════════════════════════════════════
-
 if __name__ == "__main__":
-    # تشغيل محلي فقط، Gunicorn سيتجاهل هذا الجزء في الإنتاج
+    # هذا الجزء للتشغيل المحلي فقط
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
