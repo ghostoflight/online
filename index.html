@@ -616,7 +616,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
     </select>
     <div id="sh-interval"><div class="mlbl">Interval (seconds)</div><input class="minp" id="sh-secs" type="number" min="10" value="3600" dir="ltr"></div>
     <div id="sh-daily" style="display:none"><div class="mlbl">Time (UTC)</div><input class="minp" id="sh-time" type="time" dir="ltr" value="08:00"></div>
-    <div id="sh-cron" style="display:none"><div class="mlbl">Cron Expression</div><input class="minp" id="sh-cron" dir="ltr" placeholder="0 8 * * *"></div>
+    <div id="sh-cron" style="display:none"><div class="mlbl">Cron Expression</div><input class="minp" id="inp-cron" dir="ltr" placeholder="0 8 * * *"></div>
 
     <div class="mlbl" style="margin-top:4px">
       Event Sequence
@@ -1291,7 +1291,7 @@ function getSchedStr(){
   const t=document.getElementById('job-stype').value;
   if(t==='interval'){const s=parseInt(document.getElementById('sh-secs').value);if(!s||s<10){toast('error','⚠','Min 10 seconds','');return null;}return'interval:'+s;}
   if(t==='daily'){const[h,m]=document.getElementById('sh-time').value.split(':');return'daily:'+h+':'+m;}
-  if(t==='cron'){const ex=document.getElementById('sh-cron').value.trim();if(!ex){toast('error','⚠','Enter cron expression','');return null;}return'cron:'+ex;}
+  if(t==='cron'){const ex=document.getElementById('inp-cron').value.trim();if(!ex){toast('error','⚠','Enter cron expression','');return null;}return'cron:'+ex;}
   return null;
 }
 function addEvRow(name='',delay=0){
@@ -1311,7 +1311,7 @@ function resetJobModal(){
   document.getElementById('job-stype').value='interval';
   document.getElementById('sh-secs').value='3600';
   document.getElementById('sh-time').value='08:00';
-  document.getElementById('sh-cron').value='';
+  document.getElementById('inp-cron').value='';
   document.getElementById('job-code').value='';
   document.getElementById('ev-list').innerHTML='';
   ['px-host','px-port','px-user','px-pass'].forEach(id=>document.getElementById(id).value='');
@@ -1346,7 +1346,7 @@ async function openEditJob(id){
     if(!evs.length)addEvRow();
     if(j.schedule.startsWith('interval:')){document.getElementById('job-stype').value='interval';document.getElementById('sh-secs').value=j.schedule.split(':')[1];}
     else if(j.schedule.startsWith('daily:')){document.getElementById('job-stype').value='daily';const p=j.schedule.split(':');document.getElementById('sh-time').value=p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');}
-    else if(j.schedule.startsWith('cron:')){document.getElementById('job-stype').value='cron';document.getElementById('sh-cron').value=j.schedule.substring(5);}
+    else if(j.schedule.startsWith('cron:')){document.getElementById('job-stype').value='cron';document.getElementById('inp-cron').value=j.schedule.substring(5);}
     updSched();document.getElementById('job-modal').classList.add('on');
   }catch{}
 }
