@@ -1276,20 +1276,16 @@ function loadSnip(i){document.getElementById('code-ed').value=SNIPS[i].code;open
  */
 function runAtToDatetimeLocal(runAt){
   if(!runAt)return'';
-  // "2025-12-31 22:00:00"  →  "2025-12-31T22:00"
-  return runAt.substring(0,16).replace(' ','T');
+  const d = new Date(runAt.replace(' ', 'T') + 'Z');
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/**
- * Read the datetime-local input and return a "YYYY-MM-DD HH:MM:SS" string
- * that _parse_run_at() on the server can accept.
- * Returns null and shows a toast if the field is empty.
- */
 function getRunAtStr(){
-  const raw=document.getElementById('job-run-at').value; // "YYYY-MM-DDTHH:MM"
+  const raw=document.getElementById('job-run-at').value;
   if(!raw){toast('error','⚠','Pick a date & time','Run At is required');return null;}
-  // datetime-local gives "YYYY-MM-DDTHH:MM" — append ":00" for seconds
-  return raw.replace('T',' ')+':00';
+  const d = new Date(raw);
+  return d.toISOString().replace('T', ' ').substring(0, 19);
 }
 
 /**
