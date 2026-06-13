@@ -234,6 +234,13 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .jbtn.ed{background:var(--s2);border:1px solid var(--rim);color:var(--t2)}
 .jbtn.del{background:rgba(240,69,101,.08);border:1px solid rgba(240,69,101,.2);color:var(--red)}
 
+/* ─── run_at hint box ─── */
+.run-at-hint{background:var(--s2);border:1px solid var(--rim);border-radius:var(--r3);padding:9px 13px;font-size:10px;color:var(--t3);line-height:1.6;margin-bottom:12px}
+.run-at-hint b{color:var(--violet);font-weight:700}
+
+/* ─── datetime-local input theming ─── */
+input[type="datetime-local"].minp{color-scheme:dark}
+
 /* ─── HISTORY ─────────────────────── */
 .hpad{padding:12px}
 .hfrow{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
@@ -271,7 +278,6 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .bsync:active{border-color:var(--violet)}
 .blogout{width:100%;background:rgba(240,69,101,.08);border:1px solid rgba(240,69,101,.2);border-radius:var(--r2);padding:13px;color:var(--red);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:all var(--ease)}
 .blogout:active{background:rgba(240,69,101,.15)}
-/* telegram card */
 .tgcard{background:var(--s1);border:1px solid var(--rim);border-radius:var(--r);overflow:hidden}
 .tgrow{padding:12px 16px;border-bottom:1px solid var(--rim)}
 .tgrow:last-child{border-bottom:none}
@@ -309,12 +315,10 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .minp::placeholder{color:var(--t3)}
 .msel{width:100%;background:var(--s2);border:1px solid var(--rim);border-radius:var(--r2);padding:11px 13px;color:var(--t1);font-size:13px;font-family:inherit;outline:none;margin-bottom:12px;cursor:pointer}
 .cmodal{width:100%;min-height:90px;background:#050511;border:1px solid var(--rim);border-radius:var(--r2);color:#d4d4e8;font-size:11px;font-family:'Courier New',monospace;padding:12px;outline:none;resize:vertical;direction:ltr;text-align:left;line-height:1.6;margin-bottom:12px}
-/* proxy grid */
 .proxy-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .proxy-grid .minp{margin-bottom:0}
 .proxy-full{grid-column:1/-1}
 .proxy-head{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;padding:8px 0 0;border-top:1px solid var(--rim);grid-column:1/-1;display:flex;align-items:center;gap:6px}
-/* event rows */
 .evrow{display:flex;gap:6px;margin-bottom:7px;align-items:center}
 .evrow .minp{margin-bottom:0;flex:1}
 .evrow .minp.dl{width:75px;flex:none}
@@ -328,12 +332,10 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .bcancel{flex:1;background:var(--s2);border:1px solid var(--rim);border-radius:var(--r2);padding:13px;color:var(--t2);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:border-color var(--ease)}
 .bgold{flex:2;background:linear-gradient(135deg,var(--gold2),var(--gold));border:none;border-radius:var(--r2);padding:13px;color:#000;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:transform var(--ease)}
 .bgold:active{transform:scale(.97)}
-/* quota tabs */
 .qtabs{display:flex;gap:8px;margin-bottom:16px}
 .qtab{flex:1;padding:10px;border-radius:var(--r2);font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;border:1px solid var(--rim);background:var(--s2);color:var(--t3);transition:all var(--ease);text-align:center}
 .qtab.on{background:var(--violet-g);border-color:rgba(124,95,240,.4);color:var(--violet)}
 .qsec{display:none}.qsec.on{display:block}
-/* log modal */
 .logentry{background:var(--s2);border:1px solid var(--rim);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px}
 
 /* ─── TOAST ─────────────────────────── */
@@ -543,8 +545,9 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       <button class="bsync mt8" onclick="syncDn()">↓ Download Settings from Server</button>
       <div class="ssec">App</div>
       <div class="scard">
-        <div class="srow"><div class="slbl">Version</div><div style="font-size:11px;color:var(--t3)">v2.0 — ONLINE</div></div>
+        <div class="srow"><div class="slbl">Version</div><div style="font-size:11px;color:var(--t3)">v2.1 — ONLINE</div></div>
         <div class="srow"><div class="slbl">Python Engine</div><div style="font-size:11px;color:var(--t3)">Pyodide 0.26 WASM</div></div>
+        <div class="srow"><div class="slbl">Scheduler</div><div style="font-size:11px;color:var(--t3)">Database Watcher</div></div>
         <div class="srow" onclick="resetApp()" style="cursor:pointer">
           <div><div class="slbl sdanger">Reset All Data</div><div class="ssub">Clear everything & restart</div></div>
           <span style="color:var(--red)">🗑</span>
@@ -599,25 +602,35 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
   </div>
 </div>
 
-<!-- MODAL: Job -->
+<!-- ══════════════════════════════════════════════
+     MODAL: Job  —  Database-based Watcher edition
+     run_at replaces the old interval/daily/cron UI
+     ══════════════════════════════════════════════ -->
 <div class="oly" id="job-modal">
   <div class="modal">
     <div class="mhdl"></div>
     <div class="mtitle" id="job-mtitle">➕ New Task</div>
     <input type="hidden" id="job-mid">
+
+    <!-- Task name -->
     <div class="mlbl">Task Name</div>
     <input class="minp" id="job-name" placeholder="e.g. Daily Level Events">
 
-    <div class="mlbl">Schedule</div>
-    <select class="msel" id="job-stype" onchange="updSched()">
-      <option value="interval">Every X Seconds</option>
-      <option value="daily">Daily at Specific Time</option>
-      <option value="cron">Custom Cron Expression</option>
-    </select>
-    <div id="sh-interval"><div class="mlbl">Interval (seconds)</div><input class="minp" id="sh-secs" type="number" min="10" value="3600" dir="ltr"></div>
-    <div id="sh-daily" style="display:none"><div class="mlbl">Time (UTC)</div><input class="minp" id="sh-time" type="time" dir="ltr" value="08:00"></div>
-    <div id="sh-cron" style="display:none"><div class="mlbl">Cron Expression</div><input class="minp" id="inp-cron" dir="ltr" placeholder="0 8 * * *"></div>
+    <!-- ── run_at (replaces schedule selects) ── -->
+    <div class="mlbl">Run At (Date &amp; Time)</div>
+    <input
+      class="minp"
+      type="datetime-local"
+      id="job-run-at"
+      style="cursor:pointer"
+    >
+    <div class="run-at-hint">
+      📌 The server checks every <b>60 seconds</b> and fires this task when
+      the chosen date &amp; time is reached.<br>
+      ⏰ Time is treated as <b>UTC</b> — make sure to account for your timezone.
+    </div>
 
+    <!-- Event sequence -->
     <div class="mlbl" style="margin-top:4px">
       Event Sequence
       <span style="color:var(--t3);font-size:9px;font-weight:400;margin-right:6px">(name + delay in minutes from start)</span>
@@ -625,6 +638,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
     <div id="ev-list"></div>
     <button class="bevad" onclick="addEvRow()">＋ Add Event</button>
 
+    <!-- Proxy -->
     <div class="proxy-grid">
       <div class="proxy-head">🌐 Proxy Settings <span style="font-weight:400;color:var(--t3);font-size:9px">(optional)</span></div>
       <div><div class="mlbl">Host / IP</div><input class="minp proxy-full" id="px-host" dir="ltr" placeholder="192.168.1.1 or proxy.example.com" style="margin-bottom:0"></div>
@@ -633,6 +647,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       <div><div class="mlbl">Password</div><input class="minp" id="px-pass" type="password" dir="ltr" placeholder="optional" style="margin-bottom:0"></div>
     </div>
 
+    <!-- Extra code -->
     <div class="mlbl" style="margin-top:4px">Extra Python Code (optional)</div>
     <textarea class="cmodal" id="job-code" placeholder="# Runs after the event sequence..."></textarea>
 
@@ -693,14 +708,14 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
       <div style="font-size:10px;color:var(--t3);margin-bottom:10px">Each code run or event send counts as 1 use</div>
     </div>
     <div class="qsec" id="qt-time">
-      <div class="mlbl">Expiry Date & Time</div>
+      <div class="mlbl">Expiry Date &amp; Time</div>
       <input class="minp" id="q-exp" type="datetime-local" dir="ltr">
       <div style="font-size:10px;color:var(--t3);margin-bottom:10px">Account will be locked after this date</div>
     </div>
     <div class="qsec" id="qt-both">
       <div class="mlbl">Max Uses</div><input class="minp" id="q-max2" type="number" min="1" dir="ltr" placeholder="100">
       <div class="mlbl">Uses Left</div><input class="minp" id="q-left2" type="number" min="0" dir="ltr" placeholder="100">
-      <div class="mlbl">Expiry Date & Time</div><input class="minp" id="q-exp2" type="datetime-local" dir="ltr">
+      <div class="mlbl">Expiry Date &amp; Time</div><input class="minp" id="q-exp2" type="datetime-local" dir="ltr">
       <div style="font-size:10px;color:var(--t3);margin-bottom:10px">Whichever limit is reached first applies</div>
     </div>
     <div class="mrow"><button class="bok" onclick="saveQuota()">✅ Apply Quota</button><button class="bcancel" onclick="closeM('quota-modal')">Cancel</button></div>
@@ -776,7 +791,7 @@ const GAMES_DATA=[
 const DS='https://web-production-42c2c.up.railway.app';
 let API=localStorage.getItem('ol_srv')||DS;
 let TOKEN=localStorage.getItem('ol_tok')||'';
-let CU=null; // current user
+let CU=null;
 let srvOk=false,pyReady=false,pyodide=null,running=false;
 let pkgs=[];try{pkgs=JSON.parse(localStorage.getItem('pp_pkgs')||'[]');}catch{pkgs=[];}
 let gaid=localStorage.getItem('pp_gaid')||'70ebe327-e224-4b1e-adb0-b09a27f78a0f';
@@ -840,7 +855,6 @@ function enterApp(){
     document.getElementById('hdr-uses').textContent=(CU.uses_left||0)+' uses';
     checkExpiry();
   }
-  // Telegram prefill
   if(CU.tg_token)document.getElementById('tg-token').value=CU.tg_token;
   if(CU.tg_chat_id)document.getElementById('tg-chatid').value=CU.tg_chat_id;
   document.getElementById('srv-url').value=API;
@@ -1015,7 +1029,7 @@ async function loadGameJobs(){
       try{const evs=JSON.parse(j.events||'[]');return j.package===activeGame.package||evs.some(e=>e.name&&activeGame.level_events[0].template.includes(e.name.split('_')[0]));}catch{return false;}
     });
     if(!mine.length){c.innerHTML='<div class="lempty">No scheduled jobs for this game</div>';return;}
-    c.innerHTML=mine.map(j=>`<div class="lentry"><div class="ldot ${j.enabled?'ok':'err'}"></div><div class="ltxt">${escH(j.name)}</div><div class="lst">${escH(fmtSched(j.schedule))}</div></div>`).join('');
+    c.innerHTML=mine.map(j=>`<div class="lentry"><div class="ldot ${j.enabled?'ok':'err'}"></div><div class="ltxt">${escH(j.name)}</div><div class="lst">${escH(fmtRunAt(j.run_at))}</div></div>`).join('');
   }catch{c.innerHTML='<div class="lempty">Failed to load</div>';}
 }
 async function sendLevelEv(){
@@ -1251,7 +1265,47 @@ function renderSnips(){
 }
 function loadSnip(i){document.getElementById('code-ed').value=SNIPS[i].code;openDrwPage('python');toast('success','📋','Snippet loaded',SNIPS[i].title);}
 
-/* ════ SCHEDULER ════ */
+/* ══════════════════════════════════════════════════════════
+   SCHEDULER  —  run_at edition
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Convert a "YYYY-MM-DD HH:MM:SS" string from the server
+ * into the "YYYY-MM-DDTHH:MM" format required by datetime-local inputs.
+ * Returns '' if the value is empty / invalid.
+ */
+function runAtToDatetimeLocal(runAt){
+  if(!runAt)return'';
+  // "2025-12-31 22:00:00"  →  "2025-12-31T22:00"
+  return runAt.substring(0,16).replace(' ','T');
+}
+
+/**
+ * Read the datetime-local input and return a "YYYY-MM-DD HH:MM:SS" string
+ * that _parse_run_at() on the server can accept.
+ * Returns null and shows a toast if the field is empty.
+ */
+function getRunAtStr(){
+  const raw=document.getElementById('job-run-at').value; // "YYYY-MM-DDTHH:MM"
+  if(!raw){toast('error','⚠','Pick a date & time','Run At is required');return null;}
+  // datetime-local gives "YYYY-MM-DDTHH:MM" — append ":00" for seconds
+  return raw.replace('T',' ')+':00';
+}
+
+/**
+ * Format a stored run_at value for display in job cards.
+ * "2025-12-31 22:00:00"  →  "31 Dec 22:00 UTC"
+ */
+function fmtRunAt(runAt){
+  if(!runAt||runAt==='')return'—';
+  try{
+    // Parse as UTC by appending 'Z'
+    const d=new Date(runAt.replace(' ','T')+'Z');
+    return d.toLocaleDateString('en',{day:'numeric',month:'short',timeZone:'UTC'})+
+           ' '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',timeZone:'UTC',hour12:false})+' UTC';
+  }catch{return runAt.substring(0,16);}
+}
+
 async function loadJobs(){
   if(!API||!TOKEN)return;
   const list=document.getElementById('jobs-list');
@@ -1267,33 +1321,39 @@ async function loadJobs(){
       const sl=j.last_status?(j.last_status==='success'?'✅ Success':'❌ Error'):'⏳ Pending';
       const card=document.createElement('div');
       card.className='jcard'+(j.enabled?'':' dis');
-      card.innerHTML=`<div class="jtop"><div class="jname"></div><span class="jbadge ${sc}">${sl}</span></div><div class="jmeta"><div class="jsched">⏱ ${escH(fmtSched(j.schedule))}</div><div class="jlast">${j.last_run?'Last: '+escH(j.last_run.substring(0,16).replace('T',' '))+' UTC':'Never run'}</div></div>${j.last_output?`<div class="jout">${escH(j.last_output.substring(0,300))}</div>`:''}<div class="jacts"><button class="jbtn run" data-id="${j.id}" data-a="run">▶ Run</button><button class="jbtn ${j.enabled?'pon':'poff'}" data-id="${j.id}" data-en="${j.enabled}" data-a="tog">${j.enabled?'⏸ Pause':'▶ Enable'}</button><button class="jbtn ed" data-id="${j.id}" data-a="edit">✏ Edit</button><button class="jbtn ed" data-id="${j.id}" data-a="logs">📋 Logs</button><button class="jbtn del" data-id="${j.id}" data-a="del">🗑</button></div>`;
+      card.innerHTML=`
+        <div class="jtop">
+          <div class="jname"></div>
+          <span class="jbadge ${sc}">${sl}</span>
+        </div>
+        <div class="jmeta">
+          <div class="jsched">📅 ${escH(fmtRunAt(j.run_at))}</div>
+          <div class="jlast">${j.last_run?'Last run: '+escH(j.last_run.substring(0,16).replace('T',' '))+' UTC':'Never run'}</div>
+        </div>
+        ${j.last_output?`<div class="jout">${escH(j.last_output.substring(0,300))}</div>`:''}
+        <div class="jacts">
+          <button class="jbtn run"  data-id="${j.id}" data-a="run">▶ Run Now</button>
+          <button class="jbtn ${j.enabled?'pon':'poff'}" data-id="${j.id}" data-en="${j.enabled}" data-a="tog">${j.enabled?'⏸ Pause':'▶ Enable'}</button>
+          <button class="jbtn ed"   data-id="${j.id}" data-a="edit">✏ Edit</button>
+          <button class="jbtn ed"   data-id="${j.id}" data-a="logs">📋 Logs</button>
+          <button class="jbtn del"  data-id="${j.id}" data-a="del">🗑</button>
+        </div>`;
       card.querySelector('.jname').textContent=j.name;
       list.appendChild(card);
     });
-    list.onclick=e=>{const btn=e.target.closest('[data-a]');if(!btn)return;const id=parseInt(btn.dataset.id),a=btn.dataset.a;if(a==='run')runJNow(id);else if(a==='tog')togJ(id,parseInt(btn.dataset.en));else if(a==='edit')openEditJob(id);else if(a==='logs')viewLogs(id);else if(a==='del')delJob(id);};
+    list.onclick=e=>{
+      const btn=e.target.closest('[data-a]');if(!btn)return;
+      const id=parseInt(btn.dataset.id),a=btn.dataset.a;
+      if(a==='run')runJNow(id);
+      else if(a==='tog')togJ(id,parseInt(btn.dataset.en));
+      else if(a==='edit')openEditJob(id);
+      else if(a==='logs')viewLogs(id);
+      else if(a==='del')delJob(id);
+    };
   }catch{list.innerHTML='<div class="empty"><div class="eico">⚠️</div><div class="emsg">Failed to load</div></div>';}
 }
-function fmtSched(s){
-  if(!s)return'—';
-  if(s.startsWith('interval:'))return'Every '+s.split(':')[1]+'s';
-  if(s.startsWith('daily:')){const p=s.split(':');return'Daily '+p[1]+':'+p[2]+' UTC';}
-  if(s.startsWith('cron:'))return'Cron: '+s.substring(5);
-  return s;
-}
-function updSched(){
-  const t=document.getElementById('job-stype').value;
-  document.getElementById('sh-interval').style.display=t==='interval'?'block':'none';
-  document.getElementById('sh-daily').style.display=t==='daily'?'block':'none';
-  document.getElementById('sh-cron').style.display=t==='cron'?'block':'none';
-}
-function getSchedStr(){
-  const t=document.getElementById('job-stype').value;
-  if(t==='interval'){const s=parseInt(document.getElementById('sh-secs').value);if(!s||s<10){toast('error','⚠','Min 10 seconds','');return null;}return'interval:'+s;}
-  if(t==='daily'){const[h,m]=document.getElementById('sh-time').value.split(':');return'daily:'+h+':'+m;}
-  if(t==='cron'){const ex=document.getElementById('inp-cron').value.trim();if(!ex){toast('error','⚠','Enter cron expression','');return null;}return'cron:'+ex;}
-  return null;
-}
+
+/* ── Event sequence helpers (unchanged) ── */
 function addEvRow(name='',delay=0){
   const c=document.getElementById('ev-list');
   const row=document.createElement('div');row.className='evrow';
@@ -1303,79 +1363,122 @@ function addEvRow(name='',delay=0){
   row.appendChild(ni);row.appendChild(di);row.appendChild(db);
   c.appendChild(row);
 }
-function getEvSeq(){return Array.from(document.querySelectorAll('#ev-list .evrow')).map(r=>({name:r.querySelector('.event-name').value.trim(),delay:parseInt(r.querySelector('.event-delay').value)||0})).filter(e=>e.name);}
+function getEvSeq(){
+  return Array.from(document.querySelectorAll('#ev-list .evrow'))
+    .map(r=>({name:r.querySelector('.event-name').value.trim(),delay:parseInt(r.querySelector('.event-delay').value)||0}))
+    .filter(e=>e.name);
+}
+
+/* ── resetJobModal: clears all fields including run_at ── */
 function resetJobModal(){
   document.getElementById('job-mtitle').textContent='➕ New Task';
   document.getElementById('job-mid').value='';
   document.getElementById('job-name').value='';
-  document.getElementById('job-stype').value='interval';
-  document.getElementById('sh-secs').value='3600';
-  document.getElementById('sh-time').value='08:00';
-  document.getElementById('inp-cron').value='';
+  document.getElementById('job-run-at').value='';          // ← new field
   document.getElementById('job-code').value='';
   document.getElementById('ev-list').innerHTML='';
   ['px-host','px-port','px-user','px-pass'].forEach(id=>document.getElementById(id).value='');
-  updSched();
 }
+
 async function openNewJob(){
-  resetJobModal();addEvRow();
+  resetJobModal();
+  // Pre-fill run_at with current local time + 1 hour as a convenience
+  const soon=new Date(Date.now()+3600000);
+  const pad=n=>String(n).padStart(2,'0');
+  document.getElementById('job-run-at').value=
+    `${soon.getUTCFullYear()}-${pad(soon.getUTCMonth()+1)}-${pad(soon.getUTCDate())}T${pad(soon.getUTCHours())}:${pad(soon.getUTCMinutes())}`;
+  addEvRow();
   document.getElementById('job-modal').classList.add('on');
 }
+
 function openJobFromGame(){
   if(!activeGame){toast('error','⚠','No game selected','');return;}
   resetJobModal();
   document.getElementById('job-mtitle').textContent='⏱ Schedule: '+activeGame.name;
   document.getElementById('job-name').value='Auto: '+activeGame.name;
+  // Pre-fill run_at with current UTC + 1 hour
+  const soon=new Date(Date.now()+3600000);
+  const pad=n=>String(n).padStart(2,'0');
+  document.getElementById('job-run-at').value=
+    `${soon.getUTCFullYear()}-${pad(soon.getUTCMonth()+1)}-${pad(soon.getUTCDate())}T${pad(soon.getUTCHours())}:${pad(soon.getUTCMinutes())}`;
   addEvRow(activeGame.level_events[0].template,0);
   document.getElementById('job-modal').classList.add('on');
 }
+
+/* ── openEditJob: fetch job then populate run_at field ── */
 async function openEditJob(id){
   try{
-    const r=await af('/jobs');const jobs=await r.json();const j=jobs.find(x=>x.id===id);if(!j)return;
+    const r=await af('/jobs');
+    const jobs=await r.json();
+    const j=jobs.find(x=>x.id===id);
+    if(!j)return;
     resetJobModal();
     document.getElementById('job-mtitle').textContent='✏ Edit Task';
     document.getElementById('job-mid').value=id;
     document.getElementById('job-name').value=j.name;
+    // Restore run_at into datetime-local input
+    document.getElementById('job-run-at').value=runAtToDatetimeLocal(j.run_at);
     document.getElementById('job-code').value='';
     document.getElementById('px-host').value=j.proxy_host||'';
     document.getElementById('px-port').value=j.proxy_port||'';
     document.getElementById('px-user').value=j.proxy_user||'';
     document.getElementById('px-pass').value='';
+    // Restore event sequence
     const evs=JSON.parse(j.events||'[]');
     evs.forEach(e=>addEvRow(e.name,e.delay));
     if(!evs.length)addEvRow();
-    if(j.schedule.startsWith('interval:')){document.getElementById('job-stype').value='interval';document.getElementById('sh-secs').value=j.schedule.split(':')[1];}
-    else if(j.schedule.startsWith('daily:')){document.getElementById('job-stype').value='daily';const p=j.schedule.split(':');document.getElementById('sh-time').value=p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');}
-    else if(j.schedule.startsWith('cron:')){document.getElementById('job-stype').value='cron';document.getElementById('inp-cron').value=j.schedule.substring(5);}
-    updSched();document.getElementById('job-modal').classList.add('on');
-  }catch{}
+    document.getElementById('job-modal').classList.add('on');
+  }catch(e){toast('error','❌','Failed to load job',e.message);}
 }
+
+/* ── saveJob: use run_at instead of schedule ── */
 async function saveJob(){
-  const id=document.getElementById('job-mid').value;
-  const name=document.getElementById('job-name').value.trim();
-  const schedule=getSchedStr();
-  const events=getEvSeq();
-  if(!name||!schedule){toast('error','⚠','Fill required fields','Name and schedule required');return;}
-  if(!events.length){toast('error','⚠','Add at least one event','');return;}
+  const id      = document.getElementById('job-mid').value;
+  const name    = document.getElementById('job-name').value.trim();
+  const run_at  = getRunAtStr();   // "YYYY-MM-DD HH:MM:SS" or null
+  const events  = getEvSeq();
+
+  if(!name)          {toast('error','⚠','Task name is required','');return;}
+  if(!run_at)        return;        // getRunAtStr already showed a toast
+  if(!events.length) {toast('error','⚠','Add at least one event','');return;}
+
   const game=activeGame||{package:'',dev_key:''};
   const payload={
-    name,events,schedule,
-    proxy_host:document.getElementById('px-host').value.trim(),
-    proxy_port:document.getElementById('px-port').value.trim(),
-    proxy_user:document.getElementById('px-user').value.trim(),
-    proxy_pass:document.getElementById('px-pass').value.trim(),
-    package:game.package,dev_key:game.dev_key,
-    gaid,afid
+    name,
+    run_at,                        // ← replaces "schedule"
+    events,
+    proxy_host : document.getElementById('px-host').value.trim(),
+    proxy_port : document.getElementById('px-port').value.trim(),
+    proxy_user : document.getElementById('px-user').value.trim(),
+    proxy_pass : document.getElementById('px-pass').value.trim(),
+    package    : game.package,
+    dev_key    : game.dev_key,
+    gaid,
+    afid,
   };
   try{
-    const r=id?await af('/jobs/'+id,'PUT',payload):await af('/jobs','POST',payload);
-    if(r.ok){closeM('job-modal');toast('success','✅',id?'Task updated':'Task created',name);loadJobs();if(activeGame)loadGameJobs();}
-    else{const d=await r.json();toast('error','❌','Failed',d.error||'');}
+    const r=id
+      ? await af('/jobs/'+id,'PUT',payload)
+      : await af('/jobs','POST',payload);
+    if(r.ok){
+      closeM('job-modal');
+      toast('success','✅',id?'Task updated':'Task created',name);
+      loadJobs();
+      if(activeGame)loadGameJobs();
+    }else{
+      const d=await r.json();
+      toast('error','❌','Failed',d.error||'');
+    }
   }catch{toast('error','🔌','Network error','');}
 }
+
 async function runJNow(id){
   toast('loading',null,'Running task...','');
-  try{const r=await af('/jobs/'+id+'/run','POST',{});if(r.ok){toast('success','✅','Triggered!','Check logs');setTimeout(()=>{loadJobs();if(activeGame)loadGameJobs();},2500);}else toast('error','❌','Failed','');}catch{toast('error','❌','Failed','');}
+  try{
+    const r=await af('/jobs/'+id+'/run','POST',{});
+    if(r.ok){toast('success','✅','Triggered!','Check logs');setTimeout(()=>{loadJobs();if(activeGame)loadGameJobs();},2500);}
+    else toast('error','❌','Failed','');
+  }catch{toast('error','❌','Failed','');}
 }
 async function togJ(id,en){
   try{const r=await af('/jobs/'+id,'PUT',{enabled:en?0:1});if(r.ok){loadJobs();toast('success','✅',en?'Paused':'Enabled','');}}catch{}
