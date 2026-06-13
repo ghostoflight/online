@@ -503,97 +503,91 @@ _running_lock        = threading.Lock()
 
 
 def execute_job(job_id: int) -> None:
-    print(f"[Job {job_id}] Execution started...")
-    
-    with _running_lock:
-        if job_id in _running_jobs:
-            print(f"[Job {job_id}] Already running; skip.")
-            return
-        _running_jobs.add(job_id)
+    """Execute a single scheduled job and update its last_run / last_status."""
+    with _running_lock:
+        if job_id in _running_jobs:
+            return          # already running; skip
+        _running_jobs.add(job_id)
 
-    conn = get_db()
-    try:
-        job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-        if not job or not job["enabled"]:
-            print(f"[Job {job_id}] Job not found or disabled.")
-            return
+    conn = get_db()
+    try:
+        job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+        if not job or not job["enabled"]:
+            return
 
-        print(f"[Job {job_id}] Processing: {job['name']}")
-        
-        _update_job_status(conn, job_id, "executing", "Starting execution...")
-        conn.commit()
+        user = conn.execute("SELECT * FROM users WHERE id=?", (job["user_id"],)).fetchone()
+        if user:
+            ok, err = check_access(dict(user))
+            if not ok:
+                _update_job_status(conn, job_id, "error", f"Access denied: {err}")
+                conn.commit()
+                return
 
-        user = conn.execute("SELECT * FROM users WHERE id=?", (job["user_id"],)).fetchone()
-        if user:
-            ok, err = check_access(dict(user))
-            if not ok:
-                _update_job_status(conn, job_id, "error", f"Access denied: {err}")
-                conn.commit()
-                print(f"[Job {job_id}] Access denied for user.")
-                return
+        events  = json.loads(job["events"] or "[]")
+        proxies = build_proxies(
+            job["proxy_host"] or "", job["proxy_port"] or "",
+            job["proxy_user"] or "", job["proxy_pass"] or ""
+        )
+        output_log = ""
+        all_ok     = True
+        prev_delay = 0
 
-        events  = json.loads(job["events"] or "[]")
-        proxies = build_proxies(
-            job["proxy_host"] or "", job["proxy_port"] or "",
-            job["proxy_user"] or "", job["proxy_pass"] or ""
-        )
-        output_log = ""
-        all_ok     = True
-        prev_delay = 0
+        for ev in events:
+            delay_min = ev.get("delay", 0)
+            sleep_sec = max(0, (delay_min - prev_delay)) * 60
+            if sleep_sec > 0:
+                time.sleep(sleep_sec)
+            prev_delay = delay_min
 
-        for ev in events:
-            delay_min = ev.get("delay", 0)
-            sleep_sec = max(0, (delay_min - prev_delay)) * 60
-            if sleep_sec > 0:
-                print(f"[Job {job_id}] Sleeping for {sleep_sec} seconds...")
-                time.sleep(sleep_sec)
-            prev_delay = delay_min
+            payload = {
+                "appsflyer_id":   job["afid"]            or "",
+                "advertising_id": job["gaid"]            or "",
+                "eventName":      ev.get("name", ""),
+                "eventTime":      datetime.now(timezone.utc).isoformat(),
+                "eventValue":     "{}",
+            }
+            try:
+                r     = requests.post(
+                    f"https://api2.appsflyer.com/inappevent/{job['package']}",
+                    headers={"authentication": job["dev_key"] or ""},
+                    json=payload, proxies=proxies, timeout=12
+                )
+                ok_ev = r.status_code in (200, 201)
+                if not ok_ev:
+                    all_ok = False
+                output_log += f"[{ev.get('name')}] → {r.status_code}\n"
+                log_history(job["user_id"], job["package"] or "scheduler",
+                            ev.get("name", ""), r.status_code, ok_ev, "scheduled")
+            except requests.RequestException as e:
+                output_log += f"[{ev.get('name')}] → FAIL: {str(e)[:60]}\n"
+                all_ok = False
+                log_history(job["user_id"], job["package"] or "scheduler",
+                            ev.get("name", ""), 0, False, "scheduled")
 
-            payload = {
-                "appsflyer_id":   job["afid"]            or "",
-                "advertising_id": job["gaid"]            or "",
-                "eventName":      ev.get("name", ""),
-                "eventTime":      datetime.now(timezone.utc).isoformat(),
-                "eventValue":     "{}"
-            }
-            try:
-                print(f"[Job {job_id}] Sending event: {ev.get('name', '')}")
-                r = requests.post(
-                    f"https://api2.appsflyer.com/inappevent/{job['package']}",
-                    headers={"authentication": job["dev_key"] or ""},
-                    json=payload, proxies=proxies, timeout=12
-                )
-                ok_ev = r.status_code in (200, 201)
-                if not ok_ev:
-                    all_ok = False
-                output_log += f"[{ev.get('name')}] → {r.status_code}\n"
-                log_history(job["user_id"], job["package"] or "scheduler",
-                            ev.get("name", ""), r.status_code, ok_ev, "scheduled")
-                print(f"[Job {job_id}] Event sent, status: {r.status_code}")
-            except requests.RequestException as e:
-                output_log += f"[{ev.get('name')}] → FAIL: {str(e)[:60]}\n"
-                all_ok = False
-                log_history(job["user_id"], job["package"] or "scheduler",
-                            ev.get("name", ""), 0, False, "scheduled")
-                print(f"[Job {job_id}] Event failed: {e}")
+        status = "success" if all_ok else "error"
+        _update_job_status(conn, job_id, status, output_log[:2000])
+        conn.execute(
+            "INSERT INTO job_logs (job_id,user_id,status,output) VALUES (?,?,?,?)",
+            (job_id, job["user_id"], status, output_log[:2000])
+        )
+        conn.commit()
 
-        status = "success" if all_ok else "error"
-        
-        conn.execute(
-            "UPDATE scheduled_jobs SET last_status=?, last_output=?, last_run=datetime('now'), enabled=0 WHERE id=?",
-            (status, output_log[:2000], job_id)
-        )
-        conn.execute(
-            "INSERT INTO job_logs (job_id,user_id,status,output) VALUES (?,?,?,?)",
-            (job_id, job["user_id"], status, output_log[:2000])
-        )
-        conn.commit()
-        print(f"[Job {job_id}] Execution completed with status: {status}")
-        if user and user["tg_token"] and user["tg_chat_id"]:
-            icon = "✅" if all_ok else "⚠️"
-            msg_text = f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`"
-            tg_notify(dict(user), msg_text)
+        if user and user["tg_token"] and user["tg_chat_id"]:
+            icon = "✅" if all_ok else "⚠️"
+            tg_notify(dict(user),
+                      f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`\n```{output_log[:300]}```")
 
+    except Exception as e:
+        try:
+            _update_job_status(conn, job_id, "error", str(e)[:200])
+            conn.commit()
+        except Exception:
+            pass
+    finally:
+        conn.close()
+        with _running_lock:
+            _running_jobs.discard(job_id)
+            
 def _update_job_status(conn, job_id: int, status: str, output: str) -> None:
     conn.execute(
         "UPDATE scheduled_jobs SET last_status=?, last_output=?, last_run=datetime('now') WHERE id=?",
