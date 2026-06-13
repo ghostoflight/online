@@ -528,15 +528,20 @@ def execute_job(job_id: int) -> None:
                 time.sleep(sleep_sec)
             prev_delay = delay_min
 
+            # التعديل هنا: معالجة اسم الحدث ديناميكياً
+            ev_name = ev.get("name", "")
+            if "{}" in ev_name:
+                ev_name = ev_name.replace("{}", "1")
+
             payload = {
                 "appsflyer_id":   job["afid"]            or "",
                 "advertising_id": job["gaid"]            or "",
-                "eventName":      ev.get("name", ""),
+                "eventName":      ev_name,
                 "eventTime":      datetime.now(timezone.utc).isoformat(),
                 "eventValue":     "{}"
             }
             try:
-                print(f"[Job {job_id}] Sending event: {ev.get('name', '')}")
+                print(f"[Job {job_id}] Sending event: {ev_name}")
                 r = requests.post(
                     f"https://api2.appsflyer.com/inappevent/{job['package']}",
                     headers={"authentication": job["dev_key"] or ""},
@@ -545,15 +550,15 @@ def execute_job(job_id: int) -> None:
                 ok_ev = r.status_code in (200, 201)
                 if not ok_ev:
                     all_ok = False
-                output_log += f"[{ev.get('name')}] → {r.status_code}\n"
+                output_log += f"[{ev_name}] → {r.status_code}\n"
                 log_history(job["user_id"], job["package"] or "scheduler",
-                            ev.get("name", ""), r.status_code, ok_ev, "scheduled")
+                            ev_name, r.status_code, ok_ev, "scheduled")
                 print(f"[Job {job_id}] Event sent, status: {r.status_code}")
             except requests.RequestException as e:
-                output_log += f"[{ev.get('name')}] → FAIL: {str(e)[:60]}\n"
+                output_log += f"[{ev_name}] → FAIL: {str(e)[:60]}\n"
                 all_ok = False
                 log_history(job["user_id"], job["package"] or "scheduler",
-                            ev.get("name", ""), 0, False, "scheduled")
+                            ev_name, 0, False, "scheduled")
                 print(f"[Job {job_id}] Event failed: {e}")
 
         status = "success" if all_ok else "error"
