@@ -11,14 +11,13 @@ CORS(app, origins="*")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "online.db")
 
-# BUG FIX #1: scheduler must be created before use, and daemon=True prevents blocking shutdown
 scheduler = BackgroundScheduler(timezone="UTC", daemon=True)
 scheduler.start()
-
 scheduled_jobs = {}
+SAFE_PKG_RE = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
 
 # ═══════════════════════════════════════
-# DATABASE SETUP
+# DATABASE
 # ═══════════════════════════════════════
 
 def get_db():
@@ -26,533 +25,668 @@ def get_db():
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     return conn
-    
+
 def init_db():
-    # استخدام المسار المطلق لضمان أننا نكتب في المكان الصحيح دائماً
-    db_path = os.path.join(BASE_DIR, "online.db")
-    
-    # فتح اتصال واحد فقط
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+    conn = get_db()
     c = conn.cursor()
-    
-    # تنفيذ إنشاء الجداول (بدون DROP)
     c.executescript("""
         CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT, 
-          username TEXT UNIQUE NOT NULL, 
-          password TEXT NOT NULL,
-          role TEXT DEFAULT 'user', 
-          max_uses INTEGER DEFAULT 100, 
-          uses_left INTEGER DEFAULT 100,
-          created TEXT DEFAULT (datetime('now')), 
-          active INTEGER DEFAULT 1
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            username   TEXT UNIQUE NOT NULL,
+            password   TEXT NOT NULL,
+            role       TEXT DEFAULT 'user',
+            max_uses   INTEGER DEFAULT 100,
+            uses_left  INTEGER DEFAULT 100,
+            expire_at  TEXT DEFAULT NULL,
+            created    TEXT DEFAULT (datetime('now')),
+            active     INTEGER DEFAULT 1,
+            tg_token   TEXT DEFAULT NULL,
+            tg_chat_id TEXT DEFAULT NULL
         );
         CREATE TABLE IF NOT EXISTS sessions (
-          token TEXT PRIMARY KEY, 
-          user_id INTEGER NOT NULL, 
-          created TEXT DEFAULT (datetime('now')), 
-          FOREIGN KEY(user_id) REFERENCES users(id)
+            token   TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            created TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(user_id) REFERENCES users(id)
         );
         CREATE TABLE IF NOT EXISTS user_data (
-          id INTEGER PRIMARY KEY AUTOINCREMENT, 
-          user_id INTEGER NOT NULL, 
-          key TEXT NOT NULL, 
-          value TEXT, 
-          updated TEXT DEFAULT (datetime('now')), 
-          UNIQUE(user_id, key), 
-          FOREIGN KEY(user_id) REFERENCES users(id)
+            id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            key     TEXT NOT NULL,
+            value   TEXT,
+            updated TEXT DEFAULT (datetime('now')),
+            UNIQUE(user_id, key),
+            FOREIGN KEY(user_id) REFERENCES users(id)
         );
         CREATE TABLE IF NOT EXISTS scheduled_jobs (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER NOT NULL,
-          name TEXT NOT NULL,
-          events TEXT NOT NULL,
-          user_ip TEXT NOT NULL,
-          package TEXT, 
-          dev_key TEXT, 
-          gaid TEXT, 
-          afid TEXT,
-          schedule TEXT NOT NULL,
-          enabled INTEGER DEFAULT 1,
-          last_run TEXT, 
-          last_status TEXT, 
-          last_output TEXT,
-          created TEXT DEFAULT (datetime('now')),
-          FOREIGN KEY(user_id) REFERENCES users(id)
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL,
+            name        TEXT NOT NULL,
+            events      TEXT NOT NULL DEFAULT '[]',
+            proxy_host  TEXT DEFAULT '',
+            proxy_port  TEXT DEFAULT '',
+            proxy_user  TEXT DEFAULT '',
+            proxy_pass  TEXT DEFAULT '',
+            package     TEXT DEFAULT '',
+            dev_key     TEXT DEFAULT '',
+            gaid        TEXT DEFAULT '',
+            afid        TEXT DEFAULT '',
+            schedule    TEXT NOT NULL,
+            enabled     INTEGER DEFAULT 1,
+            last_run    TEXT,
+            last_status TEXT,
+            last_output TEXT,
+            created     TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(user_id) REFERENCES users(id)
         );
         CREATE TABLE IF NOT EXISTS job_logs (
-          id INTEGER PRIMARY KEY AUTOINCREMENT, 
-          job_id INTEGER NOT NULL, 
-          ran_at TEXT DEFAULT (datetime('now')), 
-          status TEXT, 
-          output TEXT, 
-          FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id)
+            id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_id  INTEGER NOT NULL,
+            user_id INTEGER NOT NULL DEFAULT 0,
+            ran_at  TEXT DEFAULT (datetime('now')),
+            status  TEXT,
+            output  TEXT,
+            FOREIGN KEY(job_id) REFERENCES scheduled_jobs(id)
+        );
+        CREATE TABLE IF NOT EXISTS event_history (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id    INTEGER NOT NULL,
+            game       TEXT,
+            event_name TEXT,
+            status     INTEGER,
+            ok         INTEGER DEFAULT 0,
+            type       TEXT DEFAULT 'sent',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY(user_id) REFERENCES users(id)
         );
     """)
-    
-    # التحقق من وجود الأدمن (فقط إذا لم يكن موجوداً)
-    admin_exists = c.execute("SELECT id FROM users WHERE username='admin'").fetchone()
-    if not admin_exists:
-        pw_hash = hashlib.sha256("admin123".encode()).hexdigest()
-        c.execute("INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)", 
-                  ("admin", pw_hash, "admin", 999999, 999999))
-    
+
+    # Migrate: add missing columns
+    def add_col(table, col, typedef):
+        try:
+            existing = {r[1] for r in c.execute(f"PRAGMA table_info({table})").fetchall()}
+            if col not in existing:
+                c.execute(f"ALTER TABLE {table} ADD COLUMN {col} {typedef}")
+        except Exception:
+            pass
+
+    add_col("users", "expire_at",  "TEXT DEFAULT NULL")
+    add_col("users", "tg_token",   "TEXT DEFAULT NULL")
+    add_col("users", "tg_chat_id", "TEXT DEFAULT NULL")
+    add_col("scheduled_jobs", "proxy_host", "TEXT DEFAULT ''")
+    add_col("scheduled_jobs", "proxy_port", "TEXT DEFAULT ''")
+    add_col("scheduled_jobs", "proxy_user", "TEXT DEFAULT ''")
+    add_col("scheduled_jobs", "proxy_pass", "TEXT DEFAULT ''")
+    add_col("scheduled_jobs", "events",     "TEXT NOT NULL DEFAULT '[]'")
+    add_col("job_logs",       "user_id",    "INTEGER NOT NULL DEFAULT 0")
+
+    if not c.execute("SELECT id FROM users WHERE username='admin'").fetchone():
+        c.execute(
+            "INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)",
+            ("admin", hashlib.sha256("admin123".encode()).hexdigest(), "admin", 999999, 999999)
+        )
     conn.commit()
     conn.close()
-    print("قاعدة البيانات مهيأة وجاهزة للعمل.")
-  
+    print("[DB] Ready.")
+
 # ═══════════════════════════════════════
-# AUTH HELPERS
+# HELPERS
 # ═══════════════════════════════════════
 
 def hash_pw(pw):
-  # BUG FIX #3: Use bcrypt or at minimum add a salt; SHA-256 alone is insecure.
-  # Keeping SHA-256 for backward-compat but adding PBKDF2 wrapping.
-  # For a real upgrade, replace with bcrypt. Here we stay compatible.
-  return hashlib.sha256(pw.encode()).hexdigest()
+    return hashlib.sha256(pw.encode()).hexdigest()
 
 def get_user_from_token(token):
-  if not token:
-    return None
-  conn = get_db()
-  row = conn.execute("""
-    SELECT u.* FROM users u
-    JOIN sessions s ON s.user_id = u.id
-    WHERE s.token = ? AND u.active = 1
-  """, (token,)).fetchone()
-  conn.close()
-  return row
+    if not token:
+        return None
+    conn = get_db()
+    row = conn.execute("""
+        SELECT u.* FROM users u
+        JOIN sessions s ON s.user_id = u.id
+        WHERE s.token = ? AND u.active = 1
+    """, (token,)).fetchone()
+    conn.close()
+    return row
+
+def check_access(user):
+    if user["role"] == "admin":
+        return True, None
+    if user["uses_left"] <= 0:
+        return False, "Usage limit reached"
+    if user["expire_at"]:
+        try:
+            exp = datetime.fromisoformat(user["expire_at"])
+            if exp.tzinfo is None:
+                exp = exp.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) > exp:
+                return False, "Account expired"
+        except Exception:
+            pass
+    return True, None
+
+def build_proxies(host, port, user, passwd):
+    if not host:
+        return None
+    creds = f"{user}:{passwd}@" if user else ""
+    p = port if port else "80"
+    url = f"http://{creds}{host}:{p}"
+    return {"http": url, "https": url}
+
+def log_history(user_id, game, event_name, status, ok, etype="sent"):
+    try:
+        conn = get_db()
+        conn.execute(
+            "INSERT INTO event_history (user_id,game,event_name,status,ok,type) VALUES (?,?,?,?,?,?)",
+            (user_id, game, event_name, status, 1 if ok else 0, etype)
+        )
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+def send_telegram(token, chat_id, text):
+    try:
+        r = requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": text, "parse_mode": "Markdown"},
+            timeout=8
+        )
+        return r.status_code == 200, r.text[:200]
+    except Exception as e:
+        return False, str(e)
+
+def tg_notify(user, text):
+    if user and user["tg_token"] and user["tg_chat_id"]:
+        threading.Thread(
+            target=send_telegram,
+            args=(user["tg_token"], user["tg_chat_id"], text),
+            daemon=True
+        ).start()
 
 def require_auth(f):
-  from functools import wraps
-  @wraps(f)
-  def decorated(*args, **kwargs):
-    token = request.headers.get("X-Token") or (request.json.get("token", "") if request.is_json else "")
-    user = get_user_from_token(token)
-    if not user:
-      return jsonify({"error": "Unauthorized"}), 401
-    request.current_user = user
-    return f(*args, **kwargs)
-  return decorated
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("X-Token") or ""
+        if request.is_json and not token:
+            token = (request.json or {}).get("token", "")
+        user = get_user_from_token(token)
+        if not user:
+            return jsonify({"error": "Unauthorized"}), 401
+        request.current_user = user
+        return f(*args, **kwargs)
+    return decorated
 
 def require_admin(f):
-  from functools import wraps
-  @wraps(f)
-  def decorated(*args, **kwargs):
-    token = request.headers.get("X-Token") or (request.json.get("token", "") if request.is_json else "")
-    user = get_user_from_token(token)
-    if not user or user["role"] != "admin":
-      return jsonify({"error": "Admin only"}), 403
-    request.current_user = user
-    return f(*args, **kwargs)
-  return decorated
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get("X-Token") or ""
+        user = get_user_from_token(token)
+        if not user or user["role"] != "admin":
+            return jsonify({"error": "Admin only"}), 403
+        request.current_user = user
+        return f(*args, **kwargs)
+    return decorated
 
 # ═══════════════════════════════════════
-# AUTH ROUTES
+# AUTH
 # ═══════════════════════════════════════
 
 @app.route("/")
 def index():
-  return jsonify({"status": "online", "app": "ONLINE Backend", "version": "1.0"})
+    return jsonify({"status": "online", "version": "2.0"})
 
 @app.route("/auth/login", methods=["POST"])
 def login():
-  data = request.json or {}
-  username = data.get("username", "").strip()
-  password = data.get("password", "")
-  if not username or not password:
-    return jsonify({"error": "Missing credentials"}), 400
-
-  conn = get_db()
-  user = conn.execute("SELECT * FROM users WHERE username=? AND active=1", (username,)).fetchone()
-
-  # BUG FIX #4: Use constant-time comparison to prevent timing attacks
-  if not user or not secrets.compare_digest(user["password"], hash_pw(password)):
+    data = request.json or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    if not username or not password:
+        return jsonify({"error": "Missing credentials"}), 400
+    conn = get_db()
+    user = conn.execute("SELECT * FROM users WHERE username=? AND active=1", (username,)).fetchone()
     conn.close()
-    return jsonify({"error": "Invalid username or password"}), 401
-
-  if user["role"] != "admin" and user["uses_left"] <= 0:
+    if not user or not secrets.compare_digest(user["password"], hash_pw(password)):
+        return jsonify({"error": "Invalid credentials"}), 401
+    ok, err = check_access(user)
+    if not ok:
+        return jsonify({"error": err + " — contact admin"}), 403
+    token = secrets.token_hex(32)
+    conn = get_db()
+    conn.execute("INSERT INTO sessions (token,user_id) VALUES (?,?)", (token, user["id"]))
+    conn.commit()
     conn.close()
-    return jsonify({"error": "Usage limit reached. Contact admin."}), 403
-
-  token = secrets.token_hex(32)
-  conn.execute("INSERT INTO sessions (token,user_id) VALUES (?,?)", (token, user["id"]))
-  conn.commit()
-  conn.close()
-
-  return jsonify({
-    "token": token,
-    "username": user["username"],
-    "role": user["role"],
-    "uses_left": user["uses_left"],
-    "max_uses": user["max_uses"]
-  })
+    return jsonify({
+        "token": token, "username": user["username"], "role": user["role"],
+        "uses_left": user["uses_left"], "max_uses": user["max_uses"],
+        "expire_at": user["expire_at"], "tg_token": user["tg_token"] or "",
+        "tg_chat_id": user["tg_chat_id"] or ""
+    })
 
 @app.route("/auth/logout", methods=["POST"])
 def logout():
-  token = request.headers.get("X-Token", "")
-  if token:
-    conn = get_db()
-    conn.execute("DELETE FROM sessions WHERE token=?", (token,))
-    conn.commit()
-    conn.close()
-  return jsonify({"ok": True})
+    token = request.headers.get("X-Token", "")
+    if token:
+        conn = get_db()
+        conn.execute("DELETE FROM sessions WHERE token=?", (token,))
+        conn.commit()
+        conn.close()
+    return jsonify({"ok": True})
 
 @app.route("/auth/me", methods=["GET"])
 def me():
-  token = request.headers.get("X-Token", "")
-  user = get_user_from_token(token)
-  if not user:
-    return jsonify({"error": "Unauthorized"}), 401
-  return jsonify({
-    "username": user["username"],
-    "role": user["role"],
-    "uses_left": user["uses_left"],
-    "max_uses": user["max_uses"]
-  })
+    token = request.headers.get("X-Token", "")
+    user = get_user_from_token(token)
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({
+        "username": user["username"], "role": user["role"],
+        "uses_left": user["uses_left"], "max_uses": user["max_uses"],
+        "expire_at": user["expire_at"], "tg_token": user["tg_token"] or "",
+        "tg_chat_id": user["tg_chat_id"] or ""
+    })
 
 # ═══════════════════════════════════════
-# USER DATA (settings sync)
+# USER DATA / SYNC
 # ═══════════════════════════════════════
 
 @app.route("/data", methods=["GET"])
 @require_auth
 def get_data():
-  conn = get_db()
-  rows = conn.execute(
-    "SELECT key,value,updated FROM user_data WHERE user_id=?",
-    (request.current_user["id"],)
-  ).fetchall()
-  conn.close()
-  return jsonify({r["key"]: {"value": r["value"], "updated": r["updated"]} for r in rows})
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT key,value,updated FROM user_data WHERE user_id=?",
+        (request.current_user["id"],)
+    ).fetchall()
+    conn.close()
+    return jsonify({r["key"]: {"value": r["value"], "updated": r["updated"]} for r in rows})
 
 @app.route("/data", methods=["POST"])
 @require_auth
 def set_data():
-  data = request.json or {}
-  user_id = request.current_user["id"]
-  conn = get_db()
-  for key, value in data.items():
-    if key == "token":
-      continue
-    # BUG FIX #5: Limit key length to prevent abuse
-    if len(str(key)) > 100 or len(str(value)) > 10000:
-      continue
-    conn.execute("""
-      INSERT INTO user_data (user_id,key,value,updated)
-      VALUES (?,?,?,datetime('now'))
-      ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value, updated=excluded.updated
-    """, (user_id, key, str(value)))
-  conn.commit()
-  conn.close()
-  return jsonify({"ok": True})
+    data = request.json or {}
+    uid = request.current_user["id"]
+    conn = get_db()
+    for key, value in data.items():
+        if key == "token":
+            continue
+        if len(str(key)) > 100 or len(str(value)) > 50000:
+            continue
+        conn.execute("""
+            INSERT INTO user_data (user_id,key,value,updated)
+            VALUES (?,?,?,datetime('now'))
+            ON CONFLICT(user_id,key) DO UPDATE SET value=excluded.value, updated=excluded.updated
+        """, (uid, key, str(value)))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+# ═══════════════════════════════════════
+# TELEGRAM
+# ═══════════════════════════════════════
+
+@app.route("/settings/telegram", methods=["POST"])
+@require_auth
+def save_telegram():
+    data = request.json or {}
+    tgt = data.get("tg_token", "").strip() or None
+    cgid = data.get("tg_chat_id", "").strip() or None
+    conn = get_db()
+    conn.execute("UPDATE users SET tg_token=?, tg_chat_id=? WHERE id=?",
+                 (tgt, cgid, request.current_user["id"]))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+@app.route("/settings/telegram/test", methods=["POST"])
+@require_auth
+def test_telegram():
+    u = request.current_user
+    if not u["tg_token"] or not u["tg_chat_id"]:
+        return jsonify({"ok": False, "error": "Not configured"}), 400
+    ok, err = send_telegram(u["tg_token"], u["tg_chat_id"],
+                            "✅ *ONLINE App*\nTelegram is connected and working!")
+    return jsonify({"ok": ok, "error": err if not ok else None})
 
 # ═══════════════════════════════════════
 # PYTHON EXECUTION
 # ═══════════════════════════════════════
 
-# BUG FIX #6: Validate package name with regex to prevent command injection
-import re
-SAFE_PKG_RE = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
-
 @app.route("/run", methods=["POST"])
 @require_auth
 def run_code():
-  data = request.json or {}
-  code = data.get("code", "").strip()
-  if not code:
-    return jsonify({"error": "No code"}), 400
-
-  user = request.current_user
-
-  if user["role"] != "admin":
-    if user["uses_left"] <= 0:
-      return jsonify({"error": "Usage limit reached"}), 403
-    conn = get_db()
-    conn.execute("UPDATE users SET uses_left=uses_left-1 WHERE id=?", (user["id"],))
-    conn.commit()
-    conn.close()
-
-  result = _run_python(code)
-  return jsonify(result)
+    data = request.json or {}
+    code = data.get("code", "").strip()
+    if not code:
+        return jsonify({"error": "No code"}), 400
+    user = request.current_user
+    ok, err = check_access(user)
+    if not ok:
+        return jsonify({"error": err}), 403
+    if user["role"] != "admin":
+        conn = get_db()
+        conn.execute("UPDATE users SET uses_left=uses_left-1 WHERE id=?", (user["id"],))
+        conn.commit()
+        conn.close()
+    return jsonify(_run_python(code))
 
 @app.route("/pip", methods=["POST"])
 @require_auth
 def pip_install():
-  data = request.json or {}
-  pkg = data.get("package", "").strip()
-
-  # BUG FIX #7: Use regex instead of space-only check to block injection
-  if not pkg or not SAFE_PKG_RE.match(pkg):
-    return jsonify({"error": "Invalid package name"}), 400
-
-  try:
-    res = subprocess.run(
-      [sys.executable, "-m", "pip", "install", pkg, "--quiet"],
-      capture_output=True, text=True, timeout=60
-    )
-    if res.returncode == 0:
-      return jsonify({"success": True, "message": f"{pkg} installed"})
-    else:
-      return jsonify({"success": False, "message": res.stderr[:500]})
-  except Exception as e:
-    return jsonify({"success": False, "message": str(e)})
+    pkg = (request.json or {}).get("package", "").strip()
+    if not pkg or not SAFE_PKG_RE.match(pkg):
+        return jsonify({"error": "Invalid package name"}), 400
+    try:
+        res = subprocess.run(
+            [sys.executable, "-m", "pip", "install", pkg, "--quiet"],
+            capture_output=True, text=True, timeout=60
+        )
+        if res.returncode == 0:
+            return jsonify({"success": True, "message": f"{pkg} installed"})
+        return jsonify({"success": False, "message": res.stderr[:500]})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
 
 def _run_python(code, timeout=30):
-  try:
-    res = subprocess.run(
-      [sys.executable, "-c", code],
-      capture_output=True, text=True, timeout=timeout
-    )
-    return {
-      "stdout": res.stdout,
-      "stderr": res.stderr,
-      "returncode": res.returncode
-    }
-  except subprocess.TimeoutExpired:
-    return {"stdout": "", "stderr": "Timeout after 30s", "returncode": -1}
-  except Exception as e:
-    return {"stdout": "", "stderr": str(e), "returncode": -1}
+    try:
+        res = subprocess.run([sys.executable, "-c", code],
+                             capture_output=True, text=True, timeout=timeout)
+        return {"stdout": res.stdout, "stderr": res.stderr, "returncode": res.returncode}
+    except subprocess.TimeoutExpired:
+        return {"stdout": "", "stderr": "Timeout after 30s", "returncode": -1}
+    except Exception as e:
+        return {"stdout": "", "stderr": str(e), "returncode": -1}
 
 # ═══════════════════════════════════════
-# APPSFLYER PROXY ROUTE
+# APPSFLYER PROXY
 # ═══════════════════════════════════════
 
 @app.route("/api/send-event", methods=["POST"])
 @require_auth
 def proxy_send_event():
-  data = request.json or {}
-  if "package" not in data or "dev_key" not in data or "body" not in data:
-    return jsonify({"success": False, "error": "Missing raw payload fields"}), 400
+    data = request.json or {}
+    if "package" not in data or "dev_key" not in data or "body" not in data:
+        return jsonify({"success": False, "error": "Missing fields"}), 400
 
-  package = data["package"]
-  dev_key = data["dev_key"]
-  body_data = data["body"]
+    user      = request.current_user
+    package   = data["package"]
+    dev_key   = data["dev_key"]
+    body_data = data["body"]
+    event_name = body_data.get("eventName", "unknown")
+    proxies = build_proxies(
+        data.get("proxy_host", ""), data.get("proxy_port", ""),
+        data.get("proxy_user", ""), data.get("proxy_pass", "")
+    )
 
-  url = f"https://api2.appsflyer.com/inappevent/{package}"
-  headers = {
-    "Content-Type": "application/json",
-    "authentication": dev_key
-  }
-
-  try:
-    response = requests.post(url, headers=headers, json=body_data, timeout=15)
-    return jsonify({
-      "success": True,
-      "status_code": response.status_code,
-      "response": response.text
-    })
-  except requests.exceptions.RequestException as e:
-    return jsonify({
-      "success": False,
-      "error": str(e)
-    }), 500
+    try:
+        response = requests.post(
+            f"https://api2.appsflyer.com/inappevent/{package}",
+            headers={"Content-Type": "application/json", "authentication": dev_key},
+            json=body_data, proxies=proxies, timeout=15
+        )
+        ok = response.status_code in (200, 201)
+        log_history(user["id"], package, event_name, response.status_code, ok)
+        if user["tg_token"] and user["tg_chat_id"]:
+            icon = "✅" if ok else "❌"
+            tg_notify(user, f"{icon} *Event Sent*\nGame: `{package}`\nEvent: `{event_name}`\nStatus: `{response.status_code}`")
+        return jsonify({"success": True, "status_code": response.status_code, "response": response.text})
+    except requests.RequestException as e:
+        log_history(user["id"], package, event_name, 0, False)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ═══════════════════════════════════════
-# SCHEDULER
+# EVENT HISTORY
+# ═══════════════════════════════════════
+
+@app.route("/history", methods=["GET"])
+@require_auth
+def get_history():
+    uid   = request.current_user["id"]
+    role  = request.current_user["role"]
+    limit = min(int(request.args.get("limit", 200)), 500)
+    ftype = request.args.get("type", "")
+    conn  = get_db()
+    if role == "admin" and request.args.get("all") == "1":
+        q, p = "SELECT * FROM event_history WHERE 1=1", []
+    else:
+        q, p = "SELECT * FROM event_history WHERE user_id=?", [uid]
+    if ftype:
+        q += " AND type=?"; p.append(ftype)
+    q += " ORDER BY id DESC LIMIT ?"; p.append(limit)
+    rows = conn.execute(q, p).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+@app.route("/history", methods=["DELETE"])
+@require_auth
+def clear_history():
+    conn = get_db()
+    conn.execute("DELETE FROM event_history WHERE user_id=?", (request.current_user["id"],))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+# ═══════════════════════════════════════
+# SCHEDULER EXECUTOR
 # ═══════════════════════════════════════
 
 def execute_job(job_id):
-    # فتح اتصال جديد ومستقل لهذه المهمة فقط
     conn = get_db()
     try:
         job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
         if not job or not job["enabled"]:
             return
+        user = conn.execute("SELECT * FROM users WHERE id=?", (job["user_id"],)).fetchone()
+        if user:
+            ok, err = check_access(dict(user))
+            if not ok:
+                _upd(conn, job_id, "error", f"Access denied: {err}")
+                conn.commit()
+                return
 
-        # 1. التحقق الآمن من بيانات الأحداث
-        try:
-            events = json.loads(job["events"]) if job["events"] else []
-        except json.JSONDecodeError:
-            app.logger.error(f"تلف بيانات المهمة {job_id}")
-            return
-            
+        events = json.loads(job["events"] or "[]")
+        proxies = build_proxies(
+            job["proxy_host"] or "", job["proxy_port"] or "",
+            job["proxy_user"] or "", job["proxy_pass"] or ""
+        )
         output_log = ""
-        
-        # 2. إعداد البروكسي الآمن (تجنب الانهيار في حال كانت الحقول فارغة)
-        proxies = None
-        user_ip = job.get("user_ip", "").strip()
-        if user_ip:
-            # نتأكد أن العنوان يبدأ بـ http:// إن لم يكن موجوداً
-            formatted_ip = user_ip if user_ip.startswith("http") else f"http://{user_ip}"
-            proxies = {
-                "http": formatted_ip,
-                "https": formatted_ip
-            }
-        
-        # 3. تنفيذ سلسلة الأحداث
-        for event in events:
+        all_ok = True
+        prev_delay = 0
+
+        for ev in events:
+            delay_min = ev.get("delay", 0)
+            sleep_sec = max(0, (delay_min - prev_delay)) * 60
+            if sleep_sec > 0:
+                time.sleep(sleep_sec)
+            prev_delay = delay_min
+
             payload = {
-                "appsflyer_id": job.get("afid", ""),
-                "advertising_id": job.get("gaid", ""),
-                "eventName": event.get("name", "unknown_event"),
+                "appsflyer_id": job["afid"] or "",
+                "advertising_id": job["gaid"] or "",
+                "eventName": ev.get("name", ""),
                 "eventTime": datetime.now(timezone.utc).isoformat(),
                 "eventValue": "{}"
             }
-            
             try:
-                # استخدام timeout مناسب لتجنب تعليق السيرفر
-                res = requests.post(
-                    f"https://api2.appsflyer.com/inappevent/{job.get('package')}",
-                    headers={"authentication": job.get("dev_key", "")},
-                    json=payload,
-                    proxies=proxies,
-                    timeout=10 
+                r = requests.post(
+                    f"https://api2.appsflyer.com/inappevent/{job['package']}",
+                    headers={"authentication": job["dev_key"] or ""},
+                    json=payload, proxies=proxies, timeout=12
                 )
-                output_log += f"Event: {event.get('name')} | Status: {res.status_code}\n"
-            except requests.exceptions.RequestException as e:
-                output_log += f"Event: {event.get('name')} | Failed: {str(e)[:50]}\n"
-            
-            # تنفيذ التأخير إذا وجد (بدون التأثير على استقرار السيرفر)
-            if event.get("delay", 0) > 0:
-                time.sleep(event["delay"] * 60)
-        
-        # 4. تسجيل النتيجة النهائية
-        conn.execute("UPDATE scheduled_jobs SET last_status='success', last_output=?, last_run=datetime('now') WHERE id=?", 
-                     (output_log, job_id))
-        conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
-                     (job_id, "success", output_log))
+                ok_ev = r.status_code in (200, 201)
+                if not ok_ev:
+                    all_ok = False
+                output_log += f"[{ev.get('name')}] → {r.status_code}\n"
+                log_history(job["user_id"], job["package"] or "scheduler",
+                            ev.get("name", ""), r.status_code, ok_ev, "scheduled")
+            except requests.RequestException as e:
+                output_log += f"[{ev.get('name')}] → FAIL: {str(e)[:60]}\n"
+                all_ok = False
+                log_history(job["user_id"], job["package"] or "scheduler",
+                            ev.get("name", ""), 0, False, "scheduled")
+
+        status = "success" if all_ok else "error"
+        _upd(conn, job_id, status, output_log[:2000])
+        conn.execute(
+            "INSERT INTO job_logs (job_id,user_id,status,output) VALUES (?,?,?,?)",
+            (job_id, job["user_id"], status, output_log[:2000])
+        )
         conn.commit()
 
+        if user and user["tg_token"] and user["tg_chat_id"]:
+            icon = "✅" if all_ok else "⚠️"
+            tg_notify(dict(user),
+                      f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`\n```{output_log[:300]}```")
+
     except Exception as e:
-        # 5. معالجة الأخطاء الكلية لمنع انهيار الخيط (Thread)
-        error_msg = str(e)[:100]
         try:
-            conn.execute("UPDATE scheduled_jobs SET last_status='error', last_output=?, last_run=datetime('now') WHERE id=?", 
-                         (error_msg, job_id))
-            conn.execute("INSERT INTO job_logs (job_id, status, output) VALUES (?,?,?)", 
-                         (job_id, "error", error_msg))
+            _upd(conn, job_id, "error", str(e)[:200])
             conn.commit()
-        except:
+        except Exception:
             pass
     finally:
         conn.close()
 
-def register_job_in_scheduler(job_id, schedule_str, enabled):
-    # إزالة المهمة القديمة إذا كانت موجودة لمنع التكرار
+def _upd(conn, job_id, status, output):
+    conn.execute(
+        "UPDATE scheduled_jobs SET last_status=?,last_output=?,last_run=datetime('now') WHERE id=?",
+        (status, output, job_id)
+    )
+
+def register_job(job_id, schedule_str, enabled):
     if job_id in scheduled_jobs:
         try:
             scheduled_jobs[job_id].remove()
-        except:
+        except Exception:
             pass
         del scheduled_jobs[job_id]
-    
     if not enabled:
         return
-        
     try:
         if schedule_str.startswith("interval:"):
-            seconds = max(10, int(schedule_str.split(":")[1]))
-            scheduled_jobs[job_id] = scheduler.add_job(execute_job, "interval", seconds=seconds, args=[job_id])
+            secs = max(10, int(schedule_str.split(":")[1]))
+            scheduled_jobs[job_id] = scheduler.add_job(
+                execute_job, "interval", seconds=secs, args=[job_id])
         elif schedule_str.startswith("daily:"):
             parts = schedule_str.split(":")
-            scheduled_jobs[job_id] = scheduler.add_job(execute_job, "cron", hour=int(parts[1]), minute=int(parts[2]), args=[job_id])
+            scheduled_jobs[job_id] = scheduler.add_job(
+                execute_job, "cron", hour=int(parts[1]), minute=int(parts[2]), args=[job_id])
+        elif schedule_str.startswith("cron:"):
+            expr = schedule_str[5:].strip().split()
+            if len(expr) == 5:
+                scheduled_jobs[job_id] = scheduler.add_job(
+                    execute_job, "cron",
+                    minute=expr[0], hour=expr[1], day=expr[2],
+                    month=expr[3], day_of_week=expr[4], args=[job_id])
     except Exception as e:
-        print(f"Scheduler registration error for job {job_id}: {e}")
-      
+        print(f"[Scheduler] Job {job_id} error: {e}")
+
 def load_all_jobs():
-  conn = get_db()
-  jobs = conn.execute("SELECT id,schedule,enabled FROM scheduled_jobs").fetchall()
-  conn.close()
-  for j in jobs:
-    register_job_in_scheduler(j["id"], j["schedule"], j["enabled"])
+    conn = get_db()
+    jobs = conn.execute("SELECT id,schedule,enabled FROM scheduled_jobs").fetchall()
+    conn.close()
+    for j in jobs:
+        register_job(j["id"], j["schedule"], j["enabled"])
+    print(f"[Scheduler] {len(jobs)} jobs loaded.")
+
+# ═══════════════════════════════════════
+# JOB ROUTES
+# ═══════════════════════════════════════
 
 @app.route("/jobs", methods=["GET"])
 @require_auth
 def list_jobs():
-  user_id = request.current_user["id"]
-  role = request.current_user["role"]
-  conn = get_db()
-  if role == "admin":
-    jobs = conn.execute("SELECT * FROM scheduled_jobs ORDER BY id DESC").fetchall()
-  else:
-    jobs = conn.execute(
-      "SELECT * FROM scheduled_jobs WHERE user_id=? ORDER BY id DESC",
-      (user_id,)
-    ).fetchall()
-  conn.close()
-  return jsonify([dict(j) for j in jobs])
+    uid  = request.current_user["id"]
+    role = request.current_user["role"]
+    conn = get_db()
+    if role == "admin":
+        jobs = conn.execute("SELECT * FROM scheduled_jobs ORDER BY id DESC").fetchall()
+    else:
+        jobs = conn.execute(
+            "SELECT * FROM scheduled_jobs WHERE user_id=? ORDER BY id DESC", (uid,)
+        ).fetchall()
+    conn.close()
+    return jsonify([dict(j) for j in jobs])
 
 @app.route("/jobs", methods=["POST"])
 @require_auth
 def create_job():
     data = request.json or {}
-    # التحقق من البيانات وتجهيزها
-    name = data.get("name", "").strip()
-    events = data.get("events") 
+    name     = data.get("name", "").strip()
+    events   = data.get("events", [])
     schedule = data.get("schedule", "").strip()
-    user_ip = data.get("user_ip", "").strip()
-    
-    if not name or not events or not schedule or not user_ip:
-        return jsonify({"error": "Missing fields"}), 400
-
+    if not name or not events or not schedule:
+        return jsonify({"error": "name, events, schedule required"}), 400
     conn = get_db()
-    cursor = conn.execute("""
-        INSERT INTO scheduled_jobs (user_id, name, events, schedule, user_ip, package, dev_key, gaid, afid, enabled)
-        VALUES (?,?,?,?,?,?,?,?,?,1)
-    """, (request.current_user["id"], name, json.dumps(events), schedule, user_ip, 
-          data.get("package"), data.get("dev_key"), data.get("gaid"), data.get("afid")))
-    
-    job_id = cursor.lastrowid
+    cur = conn.execute("""
+        INSERT INTO scheduled_jobs
+        (user_id,name,events,schedule,proxy_host,proxy_port,proxy_user,proxy_pass,
+         package,dev_key,gaid,afid,enabled)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1)
+    """, (request.current_user["id"], name, json.dumps(events), schedule,
+          data.get("proxy_host",""), data.get("proxy_port",""),
+          data.get("proxy_user",""), data.get("proxy_pass",""),
+          data.get("package",""), data.get("dev_key",""),
+          data.get("gaid",""), data.get("afid","")))
+    jid = cur.lastrowid
     conn.commit()
     conn.close()
-
-    # التفعيل الفوري للمهمة
-    register_job_in_scheduler(job_id, schedule, True)
-    return jsonify({"ok": True, "id": job_id})
+    register_job(jid, schedule, True)
+    return jsonify({"ok": True, "id": jid})
 
 @app.route("/jobs/<int:job_id>", methods=["PUT"])
 @require_auth
 def update_job(job_id):
     data = request.json or {}
     conn = get_db()
-    
-    # تحديث البيانات
+    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    if not job:
+        conn.close(); return jsonify({"error": "Not found"}), 404
+    if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
+        conn.close(); return jsonify({"error": "Forbidden"}), 403
+    schedule = data.get("schedule", job["schedule"])
+    enabled  = int(data.get("enabled", job["enabled"]))
+    events   = data.get("events", json.loads(job["events"] or "[]"))
     conn.execute("""
-        UPDATE scheduled_jobs 
-        SET name=?, events=?, schedule=?, enabled=? 
-        WHERE id=? AND (user_id=? OR ?='admin')
-    """, (data.get("name"), json.dumps(data.get("events")), data.get("schedule"), 
-          int(data.get("enabled")), job_id, request.current_user["id"], request.current_user["role"]))
-    
+        UPDATE scheduled_jobs SET
+        name=?,events=?,schedule=?,enabled=?,
+        proxy_host=?,proxy_port=?,proxy_user=?,proxy_pass=?,
+        package=?,dev_key=?,gaid=?,afid=?
+        WHERE id=?
+    """, (data.get("name", job["name"]), json.dumps(events), schedule, enabled,
+          data.get("proxy_host", job["proxy_host"] or ""),
+          data.get("proxy_port", job["proxy_port"] or ""),
+          data.get("proxy_user", job["proxy_user"] or ""),
+          data.get("proxy_pass", job["proxy_pass"] or ""),
+          data.get("package",   job["package"]  or ""),
+          data.get("dev_key",   job["dev_key"]  or ""),
+          data.get("gaid",      job["gaid"]     or ""),
+          data.get("afid",      job["afid"]     or ""),
+          job_id))
     conn.commit()
     conn.close()
-
-    # إعادة جدولة المهمة المحدثة
-    register_job_in_scheduler(job_id, data.get("schedule"), int(data.get("enabled")))
+    register_job(job_id, schedule, enabled)
     return jsonify({"ok": True})
 
 @app.route("/jobs/<int:job_id>", methods=["DELETE"])
 @require_auth
 def delete_job(job_id):
     conn = get_db()
-    try:
-        job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-        if not job:
-            return jsonify({"error": "Not found"}), 404
-
-        # التحقق من الصلاحيات
-        if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-            return jsonify({"error": "Forbidden"}), 403
-
-        # الحذف من قاعدة البيانات
-        conn.execute("DELETE FROM scheduled_jobs WHERE id=?", (job_id,))
-        conn.execute("DELETE FROM job_logs WHERE job_id=?", (job_id,))
-        conn.commit()
-
-        # الحذف من المجدول (بشكل آمن)
-        job_instance = scheduled_jobs.pop(job_id, None)
-        if job_instance:
-            try:
-                job_instance.remove()
-            except Exception:
-                pass
-
-        return jsonify({"ok": True})
-    
-    finally:
-        conn.close()
+    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    if not job:
+        conn.close(); return jsonify({"error": "Not found"}), 404
+    if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
+        conn.close(); return jsonify({"error": "Forbidden"}), 403
+    conn.execute("DELETE FROM scheduled_jobs WHERE id=?", (job_id,))
+    conn.execute("DELETE FROM job_logs WHERE job_id=?", (job_id,))
+    conn.commit()
+    conn.close()
+    inst = scheduled_jobs.pop(job_id, None)
+    if inst:
+        try: inst.remove()
+        except Exception: pass
+    return jsonify({"ok": True})
 
 @app.route("/jobs/<int:job_id>/run", methods=["POST"])
 @require_auth
@@ -560,161 +694,130 @@ def run_job_now(job_id):
     conn = get_db()
     job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
     conn.close()
-    if not job:
-        return jsonify({"error": "Not found"}), 404
-
+    if not job: return jsonify({"error": "Not found"}), 404
     if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
         return jsonify({"error": "Forbidden"}), 403
-
-    # الحل الهندسي: إضافة المهمة للمجدول للعمل فوراً لمرة واحدة (date)
-    # هذا يغنيك عن فتح خيط (Thread) يدوي
-    scheduler.add_job(execute_job, 'date', run_date=datetime.now(), args=[job_id])
-    
-    return jsonify({"ok": True, "message": "Job triggered via scheduler"})
+    scheduler.add_job(execute_job, "date",
+                      run_date=datetime.now(timezone.utc), args=[job_id])
+    return jsonify({"ok": True})
 
 @app.route("/jobs/<int:job_id>/logs", methods=["GET"])
 @require_auth
-def job_logs(job_id):
-  # BUG FIX #12: Authorization check missing on logs endpoint
-  conn = get_db()
-  job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-  if not job:
+def job_logs_route(job_id):
+    conn = get_db()
+    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    if not job:
+        conn.close(); return jsonify({"error": "Not found"}), 404
+    if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
+        conn.close(); return jsonify({"error": "Forbidden"}), 403
+    logs = conn.execute(
+        "SELECT * FROM job_logs WHERE job_id=? ORDER BY id DESC LIMIT 20", (job_id,)
+    ).fetchall()
     conn.close()
-    return jsonify({"error": "Not found"}), 404
-
-  if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-    conn.close()
-    return jsonify({"error": "Forbidden"}), 403
-
-  logs = conn.execute(
-    "SELECT * FROM job_logs WHERE job_id=? ORDER BY id DESC LIMIT 20", (job_id,)
-  ).fetchall()
-  conn.close()
-  return jsonify([dict(l) for l in logs])
+    return jsonify([dict(l) for l in logs])
 
 # ═══════════════════════════════════════
-# ADMIN — USER MANAGEMENT
+# ADMIN USER MANAGEMENT
 # ═══════════════════════════════════════
 
 @app.route("/admin/users", methods=["GET"])
 @require_admin
 def admin_list_users():
-  conn = get_db()
-  users = conn.execute(
-    "SELECT id,username,role,max_uses,uses_left,created,active FROM users"
-  ).fetchall()
-  conn.close()
-  return jsonify([dict(u) for u in users])
+    conn = get_db()
+    users = conn.execute(
+        "SELECT id,username,role,max_uses,uses_left,expire_at,created,active,tg_token,tg_chat_id FROM users"
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(u) for u in users])
 
 @app.route("/admin/users", methods=["POST"])
 @require_admin
 def admin_create_user():
-  data = request.json or {}
-  username = data.get("username", "").strip()
-  password = data.get("password", "").strip()
-  role = data.get("role", "user")
-  max_uses = int(data.get("max_uses", 100))
-
-  if not username or not password:
-    return jsonify({"error": "username and password required"}), 400
-
-  # BUG FIX #13: Validate role to prevent arbitrary roles
-  if role not in ("user", "admin"):
-    return jsonify({"error": "Invalid role"}), 400
-
-  conn = get_db()
-  try:
-    conn.execute(
-      "INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)",
-      (username, hash_pw(password), role, max_uses, max_uses)
-    )
-    conn.commit()
-  except sqlite3.IntegrityError:
+    data = request.json or {}
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    role     = data.get("role", "user")
+    max_uses = int(data.get("max_uses", 100))
+    expire_at = data.get("expire_at") or None
+    if not username or not password:
+        return jsonify({"error": "username and password required"}), 400
+    if role not in ("user", "admin"):
+        return jsonify({"error": "Invalid role"}), 400
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT INTO users (username,password,role,max_uses,uses_left,expire_at) VALUES (?,?,?,?,?,?)",
+            (username, hash_pw(password), role, max_uses, max_uses, expire_at)
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({"error": "Username already exists"}), 400
     conn.close()
-    return jsonify({"error": "Username already exists"}), 400
-  conn.close()
-  return jsonify({"ok": True})
+    return jsonify({"ok": True})
 
 @app.route("/admin/users/<int:uid>", methods=["PUT"])
 @require_admin
 def admin_update_user(uid):
-  data = request.json or {}
-  conn = get_db()
-  user = conn.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
-  if not user:
+    data = request.json or {}
+    conn = get_db()
+    user = conn.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    if not user:
+        conn.close(); return jsonify({"error": "Not found"}), 404
+    pw        = hash_pw(data["password"]) if data.get("password") else user["password"]
+    max_uses  = int(data.get("max_uses",  user["max_uses"]))
+    uses_left = int(data.get("uses_left", user["uses_left"]))
+    active    = int(data.get("active",    user["active"]))
+    role      = data.get("role", user["role"])
+    expire_at = data.get("expire_at", user["expire_at"])
+    if expire_at == "": expire_at = None
+    if role not in ("user", "admin"):
+        conn.close(); return jsonify({"error": "Invalid role"}), 400
+    conn.execute(
+        "UPDATE users SET password=?,max_uses=?,uses_left=?,active=?,role=?,expire_at=? WHERE id=?",
+        (pw, max_uses, uses_left, active, role, expire_at, uid)
+    )
+    conn.commit()
     conn.close()
-    return jsonify({"error": "Not found"}), 404
-
-  pw = hash_pw(data["password"]) if data.get("password") else user["password"]
-  max_uses = int(data.get("max_uses", user["max_uses"]))
-  uses_left = int(data.get("uses_left", user["uses_left"]))
-  active = int(data.get("active", user["active"]))
-  role = data.get("role", user["role"])
-
-  # BUG FIX #14: Validate role on update too
-  if role not in ("user", "admin"):
-    conn.close()
-    return jsonify({"error": "Invalid role"}), 400
-
-  conn.execute(
-    "UPDATE users SET password=?,max_uses=?,uses_left=?,active=?,role=? WHERE id=?",
-    (pw, max_uses, uses_left, active, role, uid)
-  )
-  conn.commit()
-  conn.close()
-  return jsonify({"ok": True})
+    return jsonify({"ok": True})
 
 @app.route("/admin/users/<int:uid>", methods=["DELETE"])
 @require_admin
 def admin_delete_user(uid):
-  # BUG FIX #15: Prevent admin from deleting their own account
-  if uid == request.current_user["id"]:
-    return jsonify({"error": "Cannot delete your own account"}), 400
-
-  conn = get_db()
-  conn.execute("DELETE FROM users WHERE id=?", (uid,))
-  conn.execute("DELETE FROM sessions WHERE user_id=?", (uid,))
-  # BUG FIX #16: Also clean up user data and jobs on delete
-  conn.execute("DELETE FROM user_data WHERE user_id=?", (uid,))
-  jobs = conn.execute("SELECT id FROM scheduled_jobs WHERE user_id=?", (uid,)).fetchall()
-  for j in jobs:
-    conn.execute("DELETE FROM job_logs WHERE job_id=?", (j["id"],))
-    if j["id"] in scheduled_jobs:
-      try:
-        scheduled_jobs[j["id"]].remove()
-      except Exception:
-        pass
-      del scheduled_jobs[j["id"]]
-  conn.execute("DELETE FROM scheduled_jobs WHERE user_id=?", (uid,))
-  conn.commit()
-  conn.close()
-  return jsonify({"ok": True})
+    if uid == request.current_user["id"]:
+        return jsonify({"error": "Cannot delete yourself"}), 400
+    conn = get_db()
+    conn.execute("DELETE FROM users WHERE id=?", (uid,))
+    conn.execute("DELETE FROM sessions WHERE user_id=?", (uid,))
+    conn.execute("DELETE FROM user_data WHERE user_id=?", (uid,))
+    conn.execute("DELETE FROM event_history WHERE user_id=?", (uid,))
+    jobs = conn.execute("SELECT id FROM scheduled_jobs WHERE user_id=?", (uid,)).fetchall()
+    for j in jobs:
+        conn.execute("DELETE FROM job_logs WHERE job_id=?", (j["id"],))
+        inst = scheduled_jobs.pop(j["id"], None)
+        if inst:
+            try: inst.remove()
+            except Exception: pass
+    conn.execute("DELETE FROM scheduled_jobs WHERE user_id=?", (uid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
 
 # ═══════════════════════════════════════
-# INITIALIZATION & RUN
+# START
 # ═══════════════════════════════════════
 
-# ═══════════════════════════════════════
-# التشغيل والتهيئة (Startup Logic)
-# ═══════════════════════════════════════
-
-def run_startup_tasks():
-    try:
-        init_db()
-        load_all_jobs()
-        app.logger.info("System fully initialized.")
-    except Exception as e:
-        app.logger.error(f"Startup failed: {e}")
-
-# التشغيل في خيط خلفي (بدون daemon حتى نضمن استقرار العملية)
-threading.Thread(target=run_startup_tasks, daemon=False).start()
+init_db()
+try:
+    load_all_jobs()
+except Exception as e:
+    print(f"[Scheduler] Load error: {e}")
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    app.logger.error(f"Unexpected error: {e}")
+    app.logger.error(f"Unhandled: {e}")
     return jsonify({"error": "Internal Server Error"}), 500
 
-# هذا الجزء يضمن عدم تداخل التشغيل المحلي مع Gunicorn
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
