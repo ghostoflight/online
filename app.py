@@ -481,115 +481,55 @@ _running_jobs: set = set()
 _running_lock        = threading.Lock()
 
 def execute_job(job_id: int) -> None:
-    """Execute a single scheduled job and update its last_run / last_status."""
-    print(f"[Job {job_id}] Execution started...")
-    
-    with _running_lock:
-        if job_id in _running_jobs:
-            print(f"[Job {job_id}] Already running; skip.")
-            return
-        _running_jobs.add(job_id)
-
+    print(f"[Job {job_id}] Start direct execution...")
     conn = get_db()
     try:
         job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
-        if not job or not job["enabled"]:
-            print(f"[Job {job_id}] Job not found or disabled.")
-            return
-
-        print(f"[Job {job_id}] Processing: {job['name']}")
-        
-        _update_job_status(conn, job_id, "executing", "Starting execution...")
-        conn.commit()
+        if not job: return
 
         user = conn.execute("SELECT * FROM users WHERE id=?", (job["user_id"],)).fetchone()
-        if user:
-            ok, err = check_access(dict(user))
-            if not ok:
-                _update_job_status(conn, job_id, "error", f"Access denied: {err}")
-                conn.commit()
-                print(f"[Job {job_id}] Access denied for user.")
-                return
-
-        events  = json.loads(job["events"] or "[]")
-        proxies = build_proxies(
-            job["proxy_host"] or "", job["proxy_port"] or "",
-            job["proxy_user"] or "", job["proxy_pass"] or ""
-        )
+        events = json.loads(job["events"] or "[]")
+        proxies = build_proxies(job.get("proxy_host"), job.get("proxy_port"), job.get("proxy_user"), job.get("proxy_pass"))
+        
         output_log = ""
-        all_ok     = True
-        prev_delay = 0
-
+        all_ok = True
+        
         for ev in events:
-            delay_min = ev.get("delay", 0)
-            sleep_sec = max(0, (delay_min - prev_delay)) * 60
-            if sleep_sec > 0:
-                print(f"[Job {job_id}] Sleeping for {sleep_sec} seconds...")
-                time.sleep(sleep_sec)
-            prev_delay = delay_min
-
-            ev_name = ev.get("name", "")
-            if "{}" in ev_name:
-                ev_name = ev_name.replace("{}", "1")
-
-            payload = {
-                "appsflyer_id":   job["afid"]            or "",
-                "advertising_id": job["gaid"]            or "",
-                "eventName":      ev_name,
-                "eventTime":      datetime.now(timezone.utc).isoformat(),
-                "eventValue":     "{}"
-            }
+            ev_name = ev.get("name", "").replace("{}", "1")
             try:
-                print(f"[Job {job_id}] Sending event: {ev_name}")
                 r = requests.post(
                     f"https://api2.appsflyer.com/inappevent/{job['package']}",
-                    headers={"authentication": job["dev_key"] or ""},
-                    json=payload, proxies=proxies, timeout=12
+                    headers={"authentication": job.get("dev_key") or ""},
+                    json={
+                        "appsflyer_id": job.get("afid") or "",
+                        "advertising_id": job.get("gaid") or "",
+                        "eventName": ev_name,
+                        "eventTime": datetime.now(timezone.utc).isoformat(),
+                        "eventValue": "{}"
+                    }, 
+                    proxies=proxies, timeout=10
                 )
-                ok_ev = r.status_code in (200, 201)
-                if not ok_ev:
-                    all_ok = False
                 output_log += f"[{ev_name}] → {r.status_code}\n"
-                log_history(job["user_id"], job["package"] or "scheduler",
-                            ev_name, r.status_code, ok_ev, "scheduled")
-                print(f"[Job {job_id}] Event sent, status: {r.status_code}")
-            except requests.RequestException as e:
-                output_log += f"[{ev_name}] → FAIL: {str(e)[:60]}\n"
+                if r.status_code not in (200, 201): all_ok = False
+            except Exception as e:
+                output_log += f"[{ev_name}] → FAIL: {str(e)[:30]}\n"
                 all_ok = False
-                log_history(job["user_id"], job["package"] or "scheduler",
-                            ev_name, 0, False, "scheduled")
-                print(f"[Job {job_id}] Event failed: {e}")
 
         status = "success" if all_ok else "error"
-        
-        conn.execute(
-            "UPDATE scheduled_jobs SET last_status=?, last_output=?, last_run=datetime('now'), enabled=0 WHERE id=?",
-            (status, output_log[:2000], job_id)
-        )
-        conn.execute(
-            "INSERT INTO job_logs (job_id,user_id,status,output) VALUES (?,?,?,?)",
-            (job_id, job["user_id"], status, output_log[:2000])
-        )
+        conn.execute("UPDATE scheduled_jobs SET last_status=?, last_output=?, last_run=datetime('now') WHERE id=?", (status, output_log[:2000], job_id))
         conn.commit()
-        print(f"[Job {job_id}] Execution completed with status: {status}")
 
+        # إرسال إشعار تليجرام
         if user and user["tg_token"] and user["tg_chat_id"]:
             icon = "✅" if all_ok else "⚠️"
             short_log = output_log.replace("\n", " | ") if output_log else "No output"
             msg_text = f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`\nLogs: `{short_log[:150]}`"
-            tg_notify(dict(user), msg_text)
+            send_telegram(user["tg_token"], user["tg_chat_id"], msg_text)
 
     except Exception as e:
-        print(f"[Job {job_id}] CRITICAL ERROR: {str(e)}")
-        try:
-            _update_job_status(conn, job_id, "error", str(e)[:200])
-            conn.commit()
-        except Exception:
-            pass
+        print(f"CRITICAL: {e}")
     finally:
         conn.close()
-        with _running_lock:
-            _running_jobs.discard(job_id)
 
 def _update_job_status(conn, job_id: int, status: str, output: str) -> None:
     conn.execute(
@@ -776,13 +716,16 @@ def delete_job(job_id):
 @require_auth
 def run_job_now(job_id):
     conn = get_db()
-    job  = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
     conn.close()
+    
     if not job:
         return jsonify({"error": "Not found"}), 404
     if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
         return jsonify({"error": "Forbidden"}), 403
-    threading.Thread(target=execute_job, args=(job_id,), daemon=True).start()
+    
+    # تنفيذ مباشر دون خيوط (Threads) لضمان الاستقرار في Railway
+    execute_job(job_id)
     return jsonify({"ok": True})
 
 @app.route("/jobs/<int:job_id>/logs", methods=["GET"])
