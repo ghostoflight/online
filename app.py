@@ -589,8 +589,7 @@ def execute_job(job_id: int) -> None:
         )
         conn.commit()
         print(f"[Job {job_id}] Execution completed with status: {status}")
-
-if user and user["tg_token"] and user["tg_chat_id"]:
+        if user and user["tg_token"] and user["tg_chat_id"]:
             icon = "✅" if all_ok else "⚠️"
             msg_text = f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`"
             tg_notify(dict(user), msg_text)
