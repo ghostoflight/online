@@ -528,7 +528,6 @@ def execute_job(job_id: int) -> None:
                 time.sleep(sleep_sec)
             prev_delay = delay_min
 
-            # التعديل هنا: معالجة اسم الحدث ديناميكياً
             ev_name = ev.get("name", "")
             if "{}" in ev_name:
                 ev_name = ev_name.replace("{}", "1")
@@ -576,7 +575,8 @@ def execute_job(job_id: int) -> None:
 
         if user and user["tg_token"] and user["tg_chat_id"]:
             icon = "✅" if all_ok else "⚠️"
-            msg_text = f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`"
+            short_log = output_log.replace("\n", " | ") if output_log else "No output"
+            msg_text = f"{icon} *Job Done*\nTask: `{job['name']}`\nStatus: `{status}`\nLogs: `{short_log[:150]}`"
             tg_notify(dict(user), msg_text)
 
     except Exception as e:
