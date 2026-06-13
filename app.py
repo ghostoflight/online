@@ -3,17 +3,13 @@ from flask_cors import CORS
 import sqlite3, hashlib, secrets, os, threading, time, subprocess, sys, json, re
 from datetime import datetime, timezone
 import requests
-from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 CORS(app, origins="*")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(BASE_DIR, "online.db")
+DB       = os.path.join(BASE_DIR, "online.db")
 
-scheduler = BackgroundScheduler(timezone="UTC", daemon=True)
-scheduler.start()
-scheduled_jobs = {}
 SAFE_PKG_RE = re.compile(r'^[a-zA-Z0-9_\-\.]+$')
 
 # ═══════════════════════════════════════
@@ -25,6 +21,7 @@ def get_db():
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     return conn
+
 
 def init_db():
     conn = get_db()
@@ -71,7 +68,7 @@ def init_db():
             dev_key     TEXT DEFAULT '',
             gaid        TEXT DEFAULT '',
             afid        TEXT DEFAULT '',
-            schedule    TEXT NOT NULL,
+            run_at      TEXT NOT NULL,
             enabled     INTEGER DEFAULT 1,
             last_run    TEXT,
             last_status TEXT,
@@ -101,7 +98,7 @@ def init_db():
         );
     """)
 
-    # Migrate: add missing columns
+    # ── Migrate: add missing columns safely ──────────────────────────────────
     def add_col(table, col, typedef):
         try:
             existing = {r[1] for r in c.execute(f"PRAGMA table_info({table})").fetchall()}
@@ -110,21 +107,25 @@ def init_db():
         except Exception:
             pass
 
-    add_col("users", "expire_at",  "TEXT DEFAULT NULL")
-    add_col("users", "tg_token",   "TEXT DEFAULT NULL")
-    add_col("users", "tg_chat_id", "TEXT DEFAULT NULL")
+    add_col("users",          "expire_at",  "TEXT DEFAULT NULL")
+    add_col("users",          "tg_token",   "TEXT DEFAULT NULL")
+    add_col("users",          "tg_chat_id", "TEXT DEFAULT NULL")
     add_col("scheduled_jobs", "proxy_host", "TEXT DEFAULT ''")
     add_col("scheduled_jobs", "proxy_port", "TEXT DEFAULT ''")
     add_col("scheduled_jobs", "proxy_user", "TEXT DEFAULT ''")
     add_col("scheduled_jobs", "proxy_pass", "TEXT DEFAULT ''")
     add_col("scheduled_jobs", "events",     "TEXT NOT NULL DEFAULT '[]'")
+    # Migrate old 'schedule' column users: add run_at if missing
+    add_col("scheduled_jobs", "run_at",     "TEXT NOT NULL DEFAULT ''")
     add_col("job_logs",       "user_id",    "INTEGER NOT NULL DEFAULT 0")
 
+    # Default admin account
     if not c.execute("SELECT id FROM users WHERE username='admin'").fetchone():
         c.execute(
             "INSERT INTO users (username,password,role,max_uses,uses_left) VALUES (?,?,?,?,?)",
             ("admin", hashlib.sha256("admin123".encode()).hexdigest(), "admin", 999999, 999999)
         )
+
     conn.commit()
     conn.close()
     print("[DB] Ready.")
@@ -135,6 +136,7 @@ def init_db():
 
 def hash_pw(pw):
     return hashlib.sha256(pw.encode()).hexdigest()
+
 
 def get_user_from_token(token):
     if not token:
@@ -147,6 +149,7 @@ def get_user_from_token(token):
     """, (token,)).fetchone()
     conn.close()
     return row
+
 
 def check_access(user):
     if user["role"] == "admin":
@@ -164,13 +167,15 @@ def check_access(user):
             pass
     return True, None
 
+
 def build_proxies(host, port, user, passwd):
     if not host:
         return None
     creds = f"{user}:{passwd}@" if user else ""
-    p = port if port else "80"
-    url = f"http://{creds}{host}:{p}"
+    p     = port if port else "80"
+    url   = f"http://{creds}{host}:{p}"
     return {"http": url, "https": url}
+
 
 def log_history(user_id, game, event_name, status, ok, etype="sent"):
     try:
@@ -184,6 +189,7 @@ def log_history(user_id, game, event_name, status, ok, etype="sent"):
     except Exception:
         pass
 
+
 def send_telegram(token, chat_id, text):
     try:
         r = requests.post(
@@ -195,6 +201,7 @@ def send_telegram(token, chat_id, text):
     except Exception as e:
         return False, str(e)
 
+
 def tg_notify(user, text):
     if user and user["tg_token"] and user["tg_chat_id"]:
         threading.Thread(
@@ -202,6 +209,7 @@ def tg_notify(user, text):
             args=(user["tg_token"], user["tg_chat_id"], text),
             daemon=True
         ).start()
+
 
 def require_auth(f):
     from functools import wraps
@@ -217,12 +225,13 @@ def require_auth(f):
         return f(*args, **kwargs)
     return decorated
 
+
 def require_admin(f):
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.headers.get("X-Token") or ""
-        user = get_user_from_token(token)
+        user  = get_user_from_token(token)
         if not user or user["role"] != "admin":
             return jsonify({"error": "Admin only"}), 403
         request.current_user = user
@@ -235,11 +244,12 @@ def require_admin(f):
 
 @app.route("/")
 def index():
-    return jsonify({"status": "online", "version": "2.0"})
+    return jsonify({"status": "online", "version": "2.1"})
+
 
 @app.route("/auth/login", methods=["POST"])
 def login():
-    data = request.json or {}
+    data     = request.json or {}
     username = data.get("username", "").strip()
     password = data.get("password", "")
     if not username or not password:
@@ -253,16 +263,21 @@ def login():
     if not ok:
         return jsonify({"error": err + " — contact admin"}), 403
     token = secrets.token_hex(32)
-    conn = get_db()
+    conn  = get_db()
     conn.execute("INSERT INTO sessions (token,user_id) VALUES (?,?)", (token, user["id"]))
     conn.commit()
     conn.close()
     return jsonify({
-        "token": token, "username": user["username"], "role": user["role"],
-        "uses_left": user["uses_left"], "max_uses": user["max_uses"],
-        "expire_at": user["expire_at"], "tg_token": user["tg_token"] or "",
-        "tg_chat_id": user["tg_chat_id"] or ""
+        "token":      token,
+        "username":   user["username"],
+        "role":       user["role"],
+        "uses_left":  user["uses_left"],
+        "max_uses":   user["max_uses"],
+        "expire_at":  user["expire_at"],
+        "tg_token":   user["tg_token"]   or "",
+        "tg_chat_id": user["tg_chat_id"] or "",
     })
+
 
 @app.route("/auth/logout", methods=["POST"])
 def logout():
@@ -274,17 +289,21 @@ def logout():
         conn.close()
     return jsonify({"ok": True})
 
+
 @app.route("/auth/me", methods=["GET"])
 def me():
     token = request.headers.get("X-Token", "")
-    user = get_user_from_token(token)
+    user  = get_user_from_token(token)
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
     return jsonify({
-        "username": user["username"], "role": user["role"],
-        "uses_left": user["uses_left"], "max_uses": user["max_uses"],
-        "expire_at": user["expire_at"], "tg_token": user["tg_token"] or "",
-        "tg_chat_id": user["tg_chat_id"] or ""
+        "username":   user["username"],
+        "role":       user["role"],
+        "uses_left":  user["uses_left"],
+        "max_uses":   user["max_uses"],
+        "expire_at":  user["expire_at"],
+        "tg_token":   user["tg_token"]   or "",
+        "tg_chat_id": user["tg_chat_id"] or "",
     })
 
 # ═══════════════════════════════════════
@@ -302,11 +321,12 @@ def get_data():
     conn.close()
     return jsonify({r["key"]: {"value": r["value"], "updated": r["updated"]} for r in rows})
 
+
 @app.route("/data", methods=["POST"])
 @require_auth
 def set_data():
     data = request.json or {}
-    uid = request.current_user["id"]
+    uid  = request.current_user["id"]
     conn = get_db()
     for key, value in data.items():
         if key == "token":
@@ -330,7 +350,7 @@ def set_data():
 @require_auth
 def save_telegram():
     data = request.json or {}
-    tgt = data.get("tg_token", "").strip() or None
+    tgt  = data.get("tg_token",   "").strip() or None
     cgid = data.get("tg_chat_id", "").strip() or None
     conn = get_db()
     conn.execute("UPDATE users SET tg_token=?, tg_chat_id=? WHERE id=?",
@@ -338,6 +358,7 @@ def save_telegram():
     conn.commit()
     conn.close()
     return jsonify({"ok": True})
+
 
 @app.route("/settings/telegram/test", methods=["POST"])
 @require_auth
@@ -371,6 +392,7 @@ def run_code():
         conn.close()
     return jsonify(_run_python(code))
 
+
 @app.route("/pip", methods=["POST"])
 @require_auth
 def pip_install():
@@ -383,15 +405,18 @@ def pip_install():
             capture_output=True, text=True, timeout=60
         )
         if res.returncode == 0:
-            return jsonify({"success": True, "message": f"{pkg} installed"})
+            return jsonify({"success": True,  "message": f"{pkg} installed"})
         return jsonify({"success": False, "message": res.stderr[:500]})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
+
 def _run_python(code, timeout=30):
     try:
-        res = subprocess.run([sys.executable, "-c", code],
-                             capture_output=True, text=True, timeout=timeout)
+        res = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True, text=True, timeout=timeout
+        )
         return {"stdout": res.stdout, "stderr": res.stderr, "returncode": res.returncode}
     except subprocess.TimeoutExpired:
         return {"stdout": "", "stderr": "Timeout after 30s", "returncode": -1}
@@ -409,12 +434,12 @@ def proxy_send_event():
     if "package" not in data or "dev_key" not in data or "body" not in data:
         return jsonify({"success": False, "error": "Missing fields"}), 400
 
-    user      = request.current_user
-    package   = data["package"]
-    dev_key   = data["dev_key"]
-    body_data = data["body"]
+    user       = request.current_user
+    package    = data["package"]
+    dev_key    = data["dev_key"]
+    body_data  = data["body"]
     event_name = body_data.get("eventName", "unknown")
-    proxies = build_proxies(
+    proxies    = build_proxies(
         data.get("proxy_host", ""), data.get("proxy_port", ""),
         data.get("proxy_user", ""), data.get("proxy_pass", "")
     )
@@ -458,6 +483,7 @@ def get_history():
     conn.close()
     return jsonify([dict(r) for r in rows])
 
+
 @app.route("/history", methods=["DELETE"])
 @require_auth
 def clear_history():
@@ -468,30 +494,42 @@ def clear_history():
     return jsonify({"ok": True})
 
 # ═══════════════════════════════════════
-# SCHEDULER EXECUTOR
+# DATABASE-BASED SCHEDULER
 # ═══════════════════════════════════════
 
-def execute_job(job_id):
+# Set of job IDs currently being executed (to prevent parallel duplicate runs)
+_running_jobs: set = set()
+_running_lock        = threading.Lock()
+
+
+def execute_job(job_id: int) -> None:
+    """Execute a single scheduled job and update its last_run / last_status."""
+    with _running_lock:
+        if job_id in _running_jobs:
+            return          # already running; skip
+        _running_jobs.add(job_id)
+
     conn = get_db()
     try:
         job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
         if not job or not job["enabled"]:
             return
+
         user = conn.execute("SELECT * FROM users WHERE id=?", (job["user_id"],)).fetchone()
         if user:
             ok, err = check_access(dict(user))
             if not ok:
-                _upd(conn, job_id, "error", f"Access denied: {err}")
+                _update_job_status(conn, job_id, "error", f"Access denied: {err}")
                 conn.commit()
                 return
 
-        events = json.loads(job["events"] or "[]")
+        events  = json.loads(job["events"] or "[]")
         proxies = build_proxies(
             job["proxy_host"] or "", job["proxy_port"] or "",
             job["proxy_user"] or "", job["proxy_pass"] or ""
         )
         output_log = ""
-        all_ok = True
+        all_ok     = True
         prev_delay = 0
 
         for ev in events:
@@ -502,14 +540,14 @@ def execute_job(job_id):
             prev_delay = delay_min
 
             payload = {
-                "appsflyer_id": job["afid"] or "",
-                "advertising_id": job["gaid"] or "",
-                "eventName": ev.get("name", ""),
-                "eventTime": datetime.now(timezone.utc).isoformat(),
-                "eventValue": "{}"
+                "appsflyer_id":   job["afid"]            or "",
+                "advertising_id": job["gaid"]            or "",
+                "eventName":      ev.get("name", ""),
+                "eventTime":      datetime.now(timezone.utc).isoformat(),
+                "eventValue":     "{}",
             }
             try:
-                r = requests.post(
+                r     = requests.post(
                     f"https://api2.appsflyer.com/inappevent/{job['package']}",
                     headers={"authentication": job["dev_key"] or ""},
                     json=payload, proxies=proxies, timeout=12
@@ -527,7 +565,7 @@ def execute_job(job_id):
                             ev.get("name", ""), 0, False, "scheduled")
 
         status = "success" if all_ok else "error"
-        _upd(conn, job_id, status, output_log[:2000])
+        _update_job_status(conn, job_id, status, output_log[:2000])
         conn.execute(
             "INSERT INTO job_logs (job_id,user_id,status,output) VALUES (?,?,?,?)",
             (job_id, job["user_id"], status, output_log[:2000])
@@ -541,58 +579,87 @@ def execute_job(job_id):
 
     except Exception as e:
         try:
-            _upd(conn, job_id, "error", str(e)[:200])
+            _update_job_status(conn, job_id, "error", str(e)[:200])
             conn.commit()
         except Exception:
             pass
     finally:
         conn.close()
+        with _running_lock:
+            _running_jobs.discard(job_id)
 
-def _upd(conn, job_id, status, output):
+
+def _update_job_status(conn, job_id: int, status: str, output: str) -> None:
     conn.execute(
-        "UPDATE scheduled_jobs SET last_status=?,last_output=?,last_run=datetime('now') WHERE id=?",
+        "UPDATE scheduled_jobs SET last_status=?, last_output=?, last_run=datetime('now') WHERE id=?",
         (status, output, job_id)
     )
 
-def register_job(job_id, schedule_str, enabled):
-    if job_id in scheduled_jobs:
-        try:
-            scheduled_jobs[job_id].remove()
-        except Exception:
-            pass
-        del scheduled_jobs[job_id]
-    if not enabled:
-        return
-    try:
-        if schedule_str.startswith("interval:"):
-            secs = max(10, int(schedule_str.split(":")[1]))
-            scheduled_jobs[job_id] = scheduler.add_job(
-                execute_job, "interval", seconds=secs, args=[job_id])
-        elif schedule_str.startswith("daily:"):
-            parts = schedule_str.split(":")
-            scheduled_jobs[job_id] = scheduler.add_job(
-                execute_job, "cron", hour=int(parts[1]), minute=int(parts[2]), args=[job_id])
-        elif schedule_str.startswith("cron:"):
-            expr = schedule_str[5:].strip().split()
-            if len(expr) == 5:
-                scheduled_jobs[job_id] = scheduler.add_job(
-                    execute_job, "cron",
-                    minute=expr[0], hour=expr[1], day=expr[2],
-                    month=expr[3], day_of_week=expr[4], args=[job_id])
-    except Exception as e:
-        print(f"[Scheduler] Job {job_id} error: {e}")
 
-def load_all_jobs():
-    conn = get_db()
-    jobs = conn.execute("SELECT id,schedule,enabled FROM scheduled_jobs").fetchall()
-    conn.close()
-    for j in jobs:
-        register_job(j["id"], j["schedule"], j["enabled"])
-    print(f"[Scheduler] {len(jobs)} jobs loaded.")
+def _watcher_loop() -> None:
+    """
+    Background thread: wakes every 60 s, queries the DB for enabled jobs
+    whose run_at datetime has arrived, and fires each one in its own thread.
+    """
+    print("[Watcher] Database-based scheduler started.")
+    while True:
+        try:
+            now  = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            conn = get_db()
+            due_jobs = conn.execute("""
+                SELECT id FROM scheduled_jobs
+                WHERE enabled = 1
+                  AND run_at  != ''
+                  AND run_at  <= ?
+            """, (now,)).fetchall()
+            conn.close()
+
+            for row in due_jobs:
+                jid = row["id"]
+                threading.Thread(target=execute_job, args=(jid,), daemon=True).start()
+
+        except Exception as e:
+            print(f"[Watcher] Error: {e}")
+
+        time.sleep(60)
+
+
+def start_watcher() -> None:
+    """Start the background watcher thread (called once at startup)."""
+    t = threading.Thread(target=_watcher_loop, daemon=True, name="db-watcher")
+    t.start()
 
 # ═══════════════════════════════════════
 # JOB ROUTES
 # ═══════════════════════════════════════
+
+def _parse_run_at(value: str) -> str:
+    """
+    Validate and normalise the run_at string supplied by the client.
+    Accepts ISO-8601 formats such as:
+      • "2025-12-31T22:00:00"
+      • "2025-12-31 22:00:00"
+      • "2025-12-31T22:00:00Z"
+      • "2025-12-31T22:00:00+03:00"
+    Returns a UTC datetime string "YYYY-MM-DD HH:MM:SS" for DB storage,
+    or raises ValueError if the input cannot be parsed.
+    """
+    value = value.strip().replace("T", " ")
+    # Remove trailing Z / timezone offset for fromisoformat compatibility
+    # then store as plain UTC string (the watcher compares against UTC now)
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            dt = datetime.strptime(value[:len(fmt.replace("%Y", "XXXX").replace("%m", "XX")
+                                            .replace("%d", "XX").replace("%H", "XX")
+                                            .replace("%M", "XX").replace("%S", "XX"))],
+                                   fmt)
+            return dt.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            continue
+    # Fallback: fromisoformat (Python 3.7+)
+    dt = datetime.fromisoformat(value.split("+")[0].split("Z")[0].strip())
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
 
 @app.route("/jobs", methods=["GET"])
 @require_auth
@@ -609,107 +676,146 @@ def list_jobs():
     conn.close()
     return jsonify([dict(j) for j in jobs])
 
+
 @app.route("/jobs", methods=["POST"])
 @require_auth
 def create_job():
-    data = request.json or {}
-    name     = data.get("name", "").strip()
-    events   = data.get("events", [])
-    schedule = data.get("schedule", "").strip()
-    if not name or not events or not schedule:
-        return jsonify({"error": "name, events, schedule required"}), 400
+    data   = request.json or {}
+    name   = data.get("name",   "").strip()
+    events = data.get("events", [])
+    run_at = data.get("run_at", "").strip()
+
+    if not name:
+        return jsonify({"error": "name is required"}), 400
+    if not events:
+        return jsonify({"error": "events is required"}), 400
+    if not run_at:
+        return jsonify({"error": "run_at is required (e.g. '2025-12-31 22:00:00')"}), 400
+
+    try:
+        run_at_norm = _parse_run_at(run_at)
+    except Exception:
+        return jsonify({"error": "Invalid run_at format. Use YYYY-MM-DD HH:MM:SS"}), 400
+
     conn = get_db()
-    cur = conn.execute("""
+    cur  = conn.execute("""
         INSERT INTO scheduled_jobs
-        (user_id,name,events,schedule,proxy_host,proxy_port,proxy_user,proxy_pass,
-         package,dev_key,gaid,afid,enabled)
+            (user_id, name, events, run_at,
+             proxy_host, proxy_port, proxy_user, proxy_pass,
+             package, dev_key, gaid, afid, enabled)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,1)
-    """, (request.current_user["id"], name, json.dumps(events), schedule,
-          data.get("proxy_host",""), data.get("proxy_port",""),
-          data.get("proxy_user",""), data.get("proxy_pass",""),
-          data.get("package",""), data.get("dev_key",""),
-          data.get("gaid",""), data.get("afid","")))
+    """, (
+        request.current_user["id"],
+        name,
+        json.dumps(events),
+        run_at_norm,
+        data.get("proxy_host", ""), data.get("proxy_port", ""),
+        data.get("proxy_user", ""), data.get("proxy_pass", ""),
+        data.get("package",    ""), data.get("dev_key",    ""),
+        data.get("gaid",       ""), data.get("afid",       ""),
+    ))
     jid = cur.lastrowid
     conn.commit()
     conn.close()
-    register_job(jid, schedule, True)
     return jsonify({"ok": True, "id": jid})
+
 
 @app.route("/jobs/<int:job_id>", methods=["PUT"])
 @require_auth
 def update_job(job_id):
     data = request.json or {}
     conn = get_db()
-    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    job  = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
     if not job:
-        conn.close(); return jsonify({"error": "Not found"}), 404
+        conn.close()
+        return jsonify({"error": "Not found"}), 404
     if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-        conn.close(); return jsonify({"error": "Forbidden"}), 403
-    schedule = data.get("schedule", job["schedule"])
-    enabled  = int(data.get("enabled", job["enabled"]))
-    events   = data.get("events", json.loads(job["events"] or "[]"))
+        conn.close()
+        return jsonify({"error": "Forbidden"}), 403
+
+    # run_at: use new value if provided, else keep existing
+    raw_run_at = data.get("run_at", "").strip()
+    if raw_run_at:
+        try:
+            run_at = _parse_run_at(raw_run_at)
+        except Exception:
+            conn.close()
+            return jsonify({"error": "Invalid run_at format. Use YYYY-MM-DD HH:MM:SS"}), 400
+    else:
+        run_at = job["run_at"]
+
+    enabled = int(data.get("enabled", job["enabled"]))
+    events  = data.get("events", json.loads(job["events"] or "[]"))
+
     conn.execute("""
         UPDATE scheduled_jobs SET
-        name=?,events=?,schedule=?,enabled=?,
-        proxy_host=?,proxy_port=?,proxy_user=?,proxy_pass=?,
-        package=?,dev_key=?,gaid=?,afid=?
+            name=?, events=?, run_at=?, enabled=?,
+            proxy_host=?, proxy_port=?, proxy_user=?, proxy_pass=?,
+            package=?,   dev_key=?,   gaid=?,   afid=?
         WHERE id=?
-    """, (data.get("name", job["name"]), json.dumps(events), schedule, enabled,
-          data.get("proxy_host", job["proxy_host"] or ""),
-          data.get("proxy_port", job["proxy_port"] or ""),
-          data.get("proxy_user", job["proxy_user"] or ""),
-          data.get("proxy_pass", job["proxy_pass"] or ""),
-          data.get("package",   job["package"]  or ""),
-          data.get("dev_key",   job["dev_key"]  or ""),
-          data.get("gaid",      job["gaid"]     or ""),
-          data.get("afid",      job["afid"]     or ""),
-          job_id))
+    """, (
+        data.get("name", job["name"]),
+        json.dumps(events),
+        run_at,
+        enabled,
+        data.get("proxy_host", job["proxy_host"] or ""),
+        data.get("proxy_port", job["proxy_port"] or ""),
+        data.get("proxy_user", job["proxy_user"] or ""),
+        data.get("proxy_pass", job["proxy_pass"] or ""),
+        data.get("package",    job["package"]    or ""),
+        data.get("dev_key",    job["dev_key"]    or ""),
+        data.get("gaid",       job["gaid"]       or ""),
+        data.get("afid",       job["afid"]       or ""),
+        job_id,
+    ))
     conn.commit()
     conn.close()
-    register_job(job_id, schedule, enabled)
     return jsonify({"ok": True})
+
 
 @app.route("/jobs/<int:job_id>", methods=["DELETE"])
 @require_auth
 def delete_job(job_id):
     conn = get_db()
-    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    job  = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
     if not job:
-        conn.close(); return jsonify({"error": "Not found"}), 404
+        conn.close()
+        return jsonify({"error": "Not found"}), 404
     if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-        conn.close(); return jsonify({"error": "Forbidden"}), 403
-    conn.execute("DELETE FROM scheduled_jobs WHERE id=?", (job_id,))
-    conn.execute("DELETE FROM job_logs WHERE job_id=?", (job_id,))
+        conn.close()
+        return jsonify({"error": "Forbidden"}), 403
+    conn.execute("DELETE FROM scheduled_jobs WHERE id=?",  (job_id,))
+    conn.execute("DELETE FROM job_logs WHERE job_id=?",    (job_id,))
     conn.commit()
     conn.close()
-    inst = scheduled_jobs.pop(job_id, None)
-    if inst:
-        try: inst.remove()
-        except Exception: pass
     return jsonify({"ok": True})
+
 
 @app.route("/jobs/<int:job_id>/run", methods=["POST"])
 @require_auth
 def run_job_now(job_id):
     conn = get_db()
-    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    job  = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
     conn.close()
-    if not job: return jsonify({"error": "Not found"}), 404
+    if not job:
+        return jsonify({"error": "Not found"}), 404
     if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
         return jsonify({"error": "Forbidden"}), 403
-    scheduler.add_job(execute_job, "date",
-                      run_date=datetime.now(timezone.utc), args=[job_id])
+    threading.Thread(target=execute_job, args=(job_id,), daemon=True).start()
     return jsonify({"ok": True})
+
 
 @app.route("/jobs/<int:job_id>/logs", methods=["GET"])
 @require_auth
 def job_logs_route(job_id):
     conn = get_db()
-    job = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
+    job  = conn.execute("SELECT * FROM scheduled_jobs WHERE id=?", (job_id,)).fetchone()
     if not job:
-        conn.close(); return jsonify({"error": "Not found"}), 404
+        conn.close()
+        return jsonify({"error": "Not found"}), 404
     if request.current_user["role"] != "admin" and job["user_id"] != request.current_user["id"]:
-        conn.close(); return jsonify({"error": "Forbidden"}), 403
+        conn.close()
+        return jsonify({"error": "Forbidden"}), 403
     logs = conn.execute(
         "SELECT * FROM job_logs WHERE job_id=? ORDER BY id DESC LIMIT 20", (job_id,)
     ).fetchall()
@@ -723,21 +829,22 @@ def job_logs_route(job_id):
 @app.route("/admin/users", methods=["GET"])
 @require_admin
 def admin_list_users():
-    conn = get_db()
+    conn  = get_db()
     users = conn.execute(
         "SELECT id,username,role,max_uses,uses_left,expire_at,created,active,tg_token,tg_chat_id FROM users"
     ).fetchall()
     conn.close()
     return jsonify([dict(u) for u in users])
 
+
 @app.route("/admin/users", methods=["POST"])
 @require_admin
 def admin_create_user():
-    data = request.json or {}
-    username = data.get("username", "").strip()
-    password = data.get("password", "").strip()
-    role     = data.get("role", "user")
-    max_uses = int(data.get("max_uses", 100))
+    data      = request.json or {}
+    username  = data.get("username", "").strip()
+    password  = data.get("password", "").strip()
+    role      = data.get("role", "user")
+    max_uses  = int(data.get("max_uses", 100))
     expire_at = data.get("expire_at") or None
     if not username or not password:
         return jsonify({"error": "username and password required"}), 400
@@ -756,23 +863,27 @@ def admin_create_user():
     conn.close()
     return jsonify({"ok": True})
 
+
 @app.route("/admin/users/<int:uid>", methods=["PUT"])
 @require_admin
 def admin_update_user(uid):
-    data = request.json or {}
-    conn = get_db()
-    user = conn.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    data  = request.json or {}
+    conn  = get_db()
+    user  = conn.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
     if not user:
-        conn.close(); return jsonify({"error": "Not found"}), 404
+        conn.close()
+        return jsonify({"error": "Not found"}), 404
     pw        = hash_pw(data["password"]) if data.get("password") else user["password"]
     max_uses  = int(data.get("max_uses",  user["max_uses"]))
     uses_left = int(data.get("uses_left", user["uses_left"]))
     active    = int(data.get("active",    user["active"]))
     role      = data.get("role", user["role"])
     expire_at = data.get("expire_at", user["expire_at"])
-    if expire_at == "": expire_at = None
+    if expire_at == "":
+        expire_at = None
     if role not in ("user", "admin"):
-        conn.close(); return jsonify({"error": "Invalid role"}), 400
+        conn.close()
+        return jsonify({"error": "Invalid role"}), 400
     conn.execute(
         "UPDATE users SET password=?,max_uses=?,uses_left=?,active=?,role=?,expire_at=? WHERE id=?",
         (pw, max_uses, uses_left, active, role, expire_at, uid)
@@ -781,23 +892,20 @@ def admin_update_user(uid):
     conn.close()
     return jsonify({"ok": True})
 
+
 @app.route("/admin/users/<int:uid>", methods=["DELETE"])
 @require_admin
 def admin_delete_user(uid):
     if uid == request.current_user["id"]:
         return jsonify({"error": "Cannot delete yourself"}), 400
     conn = get_db()
-    conn.execute("DELETE FROM users WHERE id=?", (uid,))
-    conn.execute("DELETE FROM sessions WHERE user_id=?", (uid,))
-    conn.execute("DELETE FROM user_data WHERE user_id=?", (uid,))
+    conn.execute("DELETE FROM users         WHERE id=?",      (uid,))
+    conn.execute("DELETE FROM sessions      WHERE user_id=?", (uid,))
+    conn.execute("DELETE FROM user_data     WHERE user_id=?", (uid,))
     conn.execute("DELETE FROM event_history WHERE user_id=?", (uid,))
     jobs = conn.execute("SELECT id FROM scheduled_jobs WHERE user_id=?", (uid,)).fetchall()
     for j in jobs:
-        conn.execute("DELETE FROM job_logs WHERE job_id=?", (j["id"],))
-        inst = scheduled_jobs.pop(j["id"], None)
-        if inst:
-            try: inst.remove()
-            except Exception: pass
+        conn.execute("DELETE FROM job_logs        WHERE job_id=?",  (j["id"],))
     conn.execute("DELETE FROM scheduled_jobs WHERE user_id=?", (uid,))
     conn.commit()
     conn.close()
@@ -808,15 +916,14 @@ def admin_delete_user(uid):
 # ═══════════════════════════════════════
 
 init_db()
-try:
-    load_all_jobs()
-except Exception as e:
-    print(f"[Scheduler] Load error: {e}")
+start_watcher()
+
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f"Unhandled: {e}")
     return jsonify({"error": "Internal Server Error"}), 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
