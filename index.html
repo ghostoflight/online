@@ -2134,12 +2134,34 @@ async function saveJob(){
   if(!name||!schedule){toast('error','⚠','Fill required fields','');return;}
   if(!events.length){toast('error','⚠','Add at least one event','');return;}
   const game=activeGame||{package:'',dev_key:''};
-  const payload={name,events,schedule,proxy_host:document.getElementById('px-host').value.trim(),proxy_port:document.getElementById('px-port').value.trim(),proxy_user:document.getElementById('px-user').value.trim(),proxy_pass:document.getElementById('px-pass').value.trim(),package:game.package,dev_key:game.dev_key,gaid,afid};
-  try{
+  const payload={
+    name,
+    events,
+    run_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    proxy_host:document.getElementById('px-host').value.trim(),
+    proxy_port:document.getElementById('px-port').value.trim(),
+    proxy_user:document.getElementById('px-user').value.trim(),
+    proxy_pass:document.getElementById('px-pass').value.trim(),
+    package:game.package,
+    dev_key:game.dev_key,
+    gaid,
+    afid
+  };
+  
+  try {
     const r=id?await af('/jobs/'+id,'PUT',payload):await af('/jobs','POST',payload);
-    if(r.ok){closeM('job-modal');toast('success','✅',id?'Task updated':'Task created',name);loadJobs();if(activeGame)loadGameJobs();}
-    else{const d=await r.json();toast('error','❌','Failed',d.error||'');}
-  }catch{toast('error','🔌','Network error','');}
+    if(r.ok){
+      closeM('job-modal');
+      toast('success','✅',id?'Task updated':'Task created',name);
+      loadJobs();
+      if(activeGame)loadGameJobs();
+    } else {
+      const d=await r.json();
+      toast('error','❌','Failed',d.error||'');
+    }
+  } catch {
+    toast('error','🔌','Network error','');
+  }
 }
 async function runJNow(id){
   toast('loading',null,'Running task...','');
@@ -2269,18 +2291,33 @@ async function saveQuota(){
 /* ════ TELEGRAM LINK CODE ════ */
 let _tgLinkCode='',_tgBotUrl='';
 async function getTgLinkCode(){
-  const btn=document.getElementById('btn-tglink');const box=document.getElementById('tgcode-box');
-  btn.disabled=true;btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> Generating...';
+  const btn=document.getElementById('btn-tglink');
+  const box=document.getElementById('tgcode-box');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> Generating...';
+  
   try{
-    const r=await af('/api/telegram/link-code','POST',{});const d=await r.json();
+    const r=await af('/api/telegram/link-code','POST',{});
+    const d=await r.json();
     if(r.ok&&d.code){
-      _tgLinkCode=d.code;_tgBotUrl=d.bot_url||'';
+      // الدالة بعد التعديل لضمان عمل الرابط 100%
+      _tgLinkCode = d.code;
+      _tgBotUrl = 'https://t.me/work2online_bot?start=' + d.code;
+      
       document.getElementById('tgcode-val').textContent=d.code;
-      if(d.expires_in)document.getElementById('tgcode-exp').textContent='⏰ Expires in '+Math.round(d.expires_in/60)+' minutes';
-      box.classList.add('show');toast('success','🔗','Code generated','Send it to your bot');
-    }else toast('error','❌','Failed',d.error||'');
-  }catch(e){toast('error','🔌','Network error',e.message);}
-  finally{btn.disabled=false;btn.innerHTML='🔗 Get Link Code';}
+      if(d.expires_in) document.getElementById('tgcode-exp').textContent='⏰ Expires in '+Math.round(d.expires_in/60)+' minutes';
+      
+      box.classList.add('show');
+      toast('success','🔗','Code generated','Send it to your bot');
+    } else {
+      toast('error','❌','Failed',d.error||'');
+    }
+  } catch(e) {
+    toast('error','🔌','Network error',e.message);
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML='🔗 Get Link Code';
+  }
 }
 function copyTgCode(){
   if(!_tgLinkCode)return;
