@@ -887,7 +887,6 @@ body {
 </head>
 <body>
 
-<!-- ══════ LOGIN ══════ -->
 <div id="ls">
   <div class="lcard">
     <div class="lbrand">
@@ -916,10 +915,8 @@ body {
   </div>
 </div>
 
-<!-- ══════ APP ══════ -->
 <div id="app">
 
-  <!-- MOBILE TOP BAR -->
   <div class="mob-topbar">
     <div class="mob-menu" onclick="toggleSidebar()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -932,7 +929,6 @@ body {
   </div>
   <div class="mob-overlay" id="mob-overlay" onclick="toggleSidebar()"></div>
 
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand">
       <div class="sb-icon">
@@ -998,9 +994,7 @@ body {
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
-    <!-- Desktop topbar -->
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Games</div>
       <div class="topbar-right">
@@ -1011,10 +1005,8 @@ body {
 
     <div class="content">
 
-      <!-- PAGE: GAMES -->
       <div class="page on" id="page-games">
         <div id="view-main" style="display:block">
-          <!-- ID chips -->
           <div class="ids-row">
             <div class="id-chip" onclick="openIdModal()">
               <div class="id-ico">📱</div>
@@ -1032,7 +1024,6 @@ body {
             </div>
           </div>
 
-          <!-- Filter + Search -->
           <div class="mb12">
             <div class="filter-tabs mb12">
               <button class="ftab on" onclick="filterG('all',this)">All</button>
@@ -1054,7 +1045,6 @@ body {
           </div>
         </div>
 
-        <!-- Game Detail -->
         <div id="view-detail" style="display:none">
           <div class="detail-back" onclick="goBack()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -1091,6 +1081,18 @@ body {
               <div class="card-body">
                 <input class="level-input" id="linp" type="number" min="1" placeholder="0" oninput="updatePreview()">
                 <div class="pline" id="pline"></div>
+              </div>
+            </div>
+
+            <div class="card detail-wide">
+              <div class="card-body" style="padding: 14px 16px;">
+                <div class="sec-label mb8">🌐 Direct Proxy Settings <span style="color:var(--slate);font-size:10px;font-weight:400">(optional - for direct send)</span></div>
+                <div class="proxy-grid">
+                  <div class="proxy-full field" style="margin-bottom:8px"><label class="label">Host / IP</label><input class="input input-mono" id="dir-px-host" dir="ltr" placeholder="192.168.1.1 or proxy.example.com"></div>
+                  <div class="field" style="margin-bottom:8px"><label class="label">Port</label><input class="input input-mono" id="dir-px-port" dir="ltr" placeholder="8080" type="number"></div>
+                  <div class="field" style="margin-bottom:8px"><label class="label">Username</label><input class="input" id="dir-px-user" dir="ltr" placeholder="optional"></div>
+                  <div class="field proxy-full" style="margin-bottom:8px"><label class="label">Password</label><input class="input" id="dir-px-pass" type="password" dir="ltr" placeholder="optional"></div>
+                </div>
               </div>
             </div>
 
@@ -1134,7 +1136,6 @@ body {
         </div>
       </div>
 
-      <!-- PAGE: HISTORY -->
       <div class="page" id="page-history">
         <div class="sec-hdr mb16">
           <div class="sec-title">Event History</div>
@@ -1149,7 +1150,6 @@ body {
         <div id="hist-list"><div class="empty"><div class="empty-ico">📭</div><div class="empty-txt">No history yet</div></div></div>
       </div>
 
-      <!-- PAGE: PYTHON -->
       <div class="page" id="page-python">
         <div class="term-top">
           <span class="pyst ld" id="pyst">Loading Python...</span>
@@ -1179,7 +1179,6 @@ body {
         <div class="out-wrap" id="out-area"><span class="o-sys">// Waiting for code...</span></div>
       </div>
 
-      <!-- PAGE: SNIPPETS -->
       <div class="page" id="page-snippets">
         <div class="sec-hdr mb16">
           <div class="sec-title">Code Snippets</div>
@@ -1188,7 +1187,6 @@ body {
         <div class="snips-grid" id="snip-list"></div>
       </div>
 
-      <!-- PAGE: SCHEDULER -->
       <div class="page" id="page-scheduler">
         <div class="sec-hdr mb16">
           <div class="sec-title">Scheduled Tasks</div>
@@ -1200,13 +1198,11 @@ body {
         <div id="jobs-list"><div class="empty"><div class="empty-ico">⏱</div><div class="empty-txt">No scheduled tasks yet</div></div></div>
       </div>
 
-      <!-- PAGE: SETTINGS -->
       <div class="page" id="page-settings">
         <div class="sec-hdr mb16">
           <div class="sec-title">Settings</div>
         </div>
         <div class="settings-grid">
-          <!-- Account Card -->
           <div class="card settings-wide">
             <div class="card-header">
               <div class="card-ico ico-green">👤</div>
@@ -1233,7 +1229,6 @@ body {
             </div>
           </div>
 
-          <!-- Server Card -->
           <div class="card">
             <div class="card-header">
               <div class="card-ico ico-blue">🌐</div>
@@ -1245,7 +1240,6 @@ body {
             </div>
           </div>
 
-          <!-- Device IDs Card -->
           <div class="card">
             <div class="card-header">
               <div class="card-ico ico-slate">📱</div>
@@ -1263,7 +1257,6 @@ body {
             </div>
           </div>
 
-          <!-- Telegram Card -->
           <div class="card settings-wide">
             <div class="card-header">
               <div class="card-ico" style="background:#E3F2FD;color:#0088CC;font-size:16px;">✈️</div>
@@ -1304,7 +1297,6 @@ body {
             </div>
           </div>
 
-          <!-- Sync Card -->
           <div class="card">
             <div class="card-header">
               <div class="card-ico ico-amber">🔄</div>
@@ -1316,7 +1308,6 @@ body {
             </div>
           </div>
 
-          <!-- App Info Card -->
           <div class="card">
             <div class="card-header">
               <div class="card-ico ico-slate">ℹ️</div>
@@ -1334,7 +1325,6 @@ body {
         </div>
       </div>
 
-      <!-- PAGE: ADMIN -->
       <div class="page" id="page-admin">
         <div class="sec-hdr mb16">
           <div class="sec-title">User Management</div>
@@ -1348,12 +1338,8 @@ body {
         </div>
       </div>
 
-    </div><!-- /content -->
-  </main>
-</div><!-- /app -->
-
-<!-- ══════ MODAL: IDs ══════ -->
-<div class="oly center" id="id-modal">
+    </div></main>
+</div><div class="oly center" id="id-modal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">✏️ Edit Device IDs</div>
@@ -1366,30 +1352,28 @@ body {
   </div>
 </div>
 
-<!-- ══════ MODAL: Job ══════ -->
 <div class="oly" id="job-modal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="job-mtitle">New Task</div>
     <input type="hidden" id="job-mid">
     <div class="field"><label class="label">Task Name</label><input class="input" id="job-name" placeholder="e.g. Daily Level Events"></div>
-    <div class="field">
+    
+    <div class="field" style="display:none">
       <label class="label">Schedule</label>
       <select class="select" id="job-stype" onchange="updSched()">
-        <option value="interval">Every X Seconds</option>
-        <option value="daily">Daily at Specific Time</option>
-        <option value="cron">Custom Cron Expression</option>
+        <option value="absolute" selected>Absolute Plan</option>
       </select>
     </div>
-    <div id="sh-interval" class="field"><label class="label">Interval (seconds)</label><input class="input input-mono" id="sh-secs" type="number" min="10" value="3600" dir="ltr"></div>
-    <div id="sh-daily" class="field" style="display:none"><label class="label">Time (UTC)</label><input class="input" id="sh-time" type="time" dir="ltr" value="08:00"></div>
-    <div id="sh-cron" class="field" style="display:none"><label class="label">Cron Expression</label><input class="input input-mono" id="sh-cronval" dir="ltr" placeholder="0 8 * * *"></div>
+    <div id="sh-interval" class="field" style="display:none"><input id="sh-secs" value="0"></div>
+    <div id="sh-daily" class="field" style="display:none"><input id="sh-time" value="00:00"></div>
+    <div id="sh-cron" class="field" style="display:none"><input id="sh-cronval" value=""></div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <label class="label" style="margin:0">Event Sequence</label>
-      <span style="font-size:10px;color:var(--slate)">name + delay (minutes)</span>
+      <label class="label" style="margin:0">مخطط الأهداف (Time-based Milestones)</label>
+      <span style="font-size:10px;color:var(--slate)">Days : Hours : Minutes</span>
     </div>
-    <div id="ev-list"></div>
+    <div id="ev-list" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
     <button class="ev-add-btn" onclick="addEvRow()">＋ Add Event</button>
 
     <div class="proxy-section">
@@ -1409,7 +1393,6 @@ body {
   </div>
 </div>
 
-<!-- ══════ MODAL: Logs ══════ -->
 <div class="oly" id="logs-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1419,7 +1402,6 @@ body {
   </div>
 </div>
 
-<!-- ══════ MODAL: User ══════ -->
 <div class="oly" id="user-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1440,7 +1422,6 @@ body {
   </div>
 </div>
 
-<!-- ══════ MODAL: Quota ══════ -->
 <div class="oly center" id="quota-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1471,7 +1452,6 @@ body {
   </div>
 </div>
 
-<!-- ══════ MODAL: Game Image ══════ -->
 <div class="oly center" id="img-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1494,7 +1474,6 @@ body {
   </div>
 </div>
 
-<!-- ══════ TOAST ══════ -->
 <div class="toast" id="toast">
   <div class="t-ico" id="t-ico"></div>
   <div class="t-info">
@@ -1809,9 +1788,17 @@ async function sendEv(type,evName){
   if(!activeGame)return;
   if(!srvOk){toast('error','🌐','Not connected','Connect to Railway first');addLog(evName,'NO SRV',false);return;}
   toast('loading',null,'Sending...',evName);
+  
+  // دمج بيانات البروكسي مباشرة من الواجهة للأحداث المباشرة
   const body={package:activeGame.package,dev_key:activeGame.dev_key,game_name:activeGame.name,
+    proxy_host:document.getElementById('dir-px-host').value.trim(),
+    proxy_port:document.getElementById('dir-px-port').value.trim(),
+    proxy_user:document.getElementById('dir-px-user').value.trim(),
+    proxy_pass:document.getElementById('dir-px-pass').value.trim(),
     body:{appsflyer_id:afid,advertising_id:gaid,eventName:evName,
       eventTime:new Date().toISOString(),eventValue:type==='purchase'?JSON.stringify({af_revenue:"4.99",af_currency:"USD"}):"{}"}};
+      
+  // تمت هيكلة البيانات لتكون جاهزة لاحقاً للربط مع قواعد بيانات مثل Supabase بكل يسر
   try{
     const r=await af('/api/send-event','POST',body);const d=await r.json();
     if(r.ok&&d.success){addLog(evName,`${d.status_code}`,true);toast('success','✅',`Sent (${d.status_code})`,evName);}
@@ -2057,46 +2044,70 @@ async function loadJobs(){
 }
 function fmtSched(s){
   if(!s)return'—';
-  if(s.startsWith('interval:'))return'Every '+s.split(':')[1]+'s';
-  if(s.startsWith('daily:')){const p=s.split(':');return'Daily '+p[1]+':'+p[2]+' UTC';}
-  if(s.startsWith('cron:'))return'Cron: '+s.substring(5);
+  if(s === 'absolute') return 'Absolute Time Plan';
   return s;
 }
 function updSched(){
-  const t=document.getElementById('job-stype').value;
-  document.getElementById('sh-interval').style.display=t==='interval'?'block':'none';
-  document.getElementById('sh-daily').style.display=t==='daily'?'block':'none';
-  document.getElementById('sh-cron').style.display=t==='cron'?'block':'none';
+  // المبسط الجديد
 }
 function getSchedStr(){
-  const t=document.getElementById('job-stype').value;
-  if(t==='interval'){const s=parseInt(document.getElementById('sh-secs').value);if(!s||s<10){toast('error','⚠','Min 10 seconds','');return null;}return'interval:'+s;}
-  if(t==='daily'){const[h,m]=document.getElementById('sh-time').value.split(':');return'daily:'+h+':'+m;}
-  if(t==='cron'){const ex=document.getElementById('sh-cronval').value.trim();if(!ex){toast('error','⚠','Enter cron expression','');return null;}return'cron:'+ex;}
-  return null;
+  return 'absolute';
 }
-function addEvRow(name='',delay=0){
-  const c=document.getElementById('ev-list');
-  const row=document.createElement('div');row.className='ev-row';
-  const ni=document.createElement('input');ni.className='input input-mono event-name';ni.value=name;ni.placeholder='Event name (e.g. level_5_complete)';ni.dir='ltr';ni.style.marginBottom='0';
-  const di=document.createElement('input');di.className='input input-mono event-delay dl';di.type='number';di.value=delay;di.placeholder='min';di.dir='ltr';di.style.marginBottom='0';
-  const db=document.createElement('button');db.className='ev-del';db.innerHTML='✕';db.onclick=()=>row.remove();
-  row.appendChild(ni);row.appendChild(di);row.appendChild(db);
+function addEvRow(name='', d=0, h=0, m=0){
+  const c = document.getElementById('ev-list');
+  const row = document.createElement('div');
+  row.className = 'ev-row';
+  
+  // تصميم البطاقة لكل هدف
+  row.style.cssText = 'background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; position:relative; display:flex; flex-direction:column; gap:8px; margin-bottom:8px;';
+
+  row.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <input class="input input-mono event-name" value="${name}" placeholder="Event name (e.g. village_2_complete)" dir="ltr" style="margin:0; flex:1;">
+      <button class="ev-del" style="margin-left:8px; width:28px; height:28px; font-size:12px;" onclick="this.parentElement.parentElement.remove()">✕</button>
+    </div>
+    
+    <div style="display:flex; gap:8px; align-items:center; background:var(--bg); padding:8px; border-radius:6px; border:1px solid var(--border2);">
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:10px; color:var(--slate); font-weight:600;">Days</span>
+        <input class="input input-mono ev-d" type="number" min="0" value="${d}" placeholder="0" style="margin:0; text-align:center; padding:6px;">
+      </div>
+      <span style="color:var(--border2);">:</span>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:10px; color:var(--slate); font-weight:600;">Hours</span>
+        <input class="input input-mono ev-h" type="number" min="0" max="23" value="${h}" placeholder="0" style="margin:0; text-align:center; padding:6px;">
+      </div>
+      <span style="color:var(--border2);">:</span>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-size:10px; color:var(--slate); font-weight:600;">Mins</span>
+        <input class="input input-mono ev-m" type="number" min="0" max="59" value="${m}" placeholder="0" style="margin:0; text-align:center; padding:6px;">
+      </div>
+    </div>
+  `;
   c.appendChild(row);
 }
-function getEvSeq(){return Array.from(document.querySelectorAll('#ev-list .ev-row')).map(r=>({name:r.querySelector('.event-name').value.trim(),delay:parseInt(r.querySelector('.event-delay').value)||0})).filter(e=>e.name);}
+function getEvSeq(){
+  return Array.from(document.querySelectorAll('#ev-list .ev-row')).map(r => {
+    const d = parseInt(r.querySelector('.ev-d').value) || 0;
+    const h = parseInt(r.querySelector('.ev-h').value) || 0;
+    const m = parseInt(r.querySelector('.ev-m').value) || 0;
+    
+    const totalMinutes = (d * 24 * 60) + (h * 60) + m;
+
+    return {
+      name: r.querySelector('.event-name').value.trim(),
+      delay: totalMinutes,
+      ui_d: d, ui_h: h, ui_m: m
+    };
+  }).filter(e => e.name);
+}
 function resetJobModal(){
   document.getElementById('job-mtitle').textContent='New Task';
   document.getElementById('job-mid').value='';
   document.getElementById('job-name').value='';
-  document.getElementById('job-stype').value='interval';
-  document.getElementById('sh-secs').value='3600';
-  document.getElementById('sh-time').value='08:00';
-  document.getElementById('sh-cronval').value='';
   document.getElementById('job-code').value='';
   document.getElementById('ev-list').innerHTML='';
   ['px-host','px-port','px-user','px-pass'].forEach(id=>document.getElementById(id).value='');
-  updSched();
 }
 async function openNewJob(){resetJobModal();addEvRow();document.getElementById('job-modal').classList.add('on');}
 function openJobFromGame(){
@@ -2104,7 +2115,7 @@ function openJobFromGame(){
   resetJobModal();
   document.getElementById('job-mtitle').textContent='Schedule: '+activeGame.name;
   document.getElementById('job-name').value='Auto: '+activeGame.name;
-  addEvRow(activeGame.level_events[0].template,0);
+  addEvRow(activeGame.level_events[0].template,0,0,1); // 1 minute default
   document.getElementById('job-modal').classList.add('on');
 }
 async function openEditJob(id){
@@ -2118,12 +2129,17 @@ async function openEditJob(id){
     document.getElementById('px-port').value=j.proxy_port||'';
     document.getElementById('px-user').value=j.proxy_user||'';
     const evs=JSON.parse(j.events||'[]');
-    evs.forEach(e=>addEvRow(e.name,e.delay));
+    evs.forEach(e=>{
+      let d = e.ui_d || 0, h = e.ui_h || 0, m = e.ui_m || 0;
+      if(e.ui_d === undefined) { 
+        d = Math.floor(e.delay / 1440);
+        h = Math.floor((e.delay % 1440) / 60);
+        m = e.delay % 60;
+      }
+      addEvRow(e.name, d, h, m);
+    });
     if(!evs.length)addEvRow();
-    if(j.schedule.startsWith('interval:')){document.getElementById('job-stype').value='interval';document.getElementById('sh-secs').value=j.schedule.split(':')[1];}
-    else if(j.schedule.startsWith('daily:')){document.getElementById('job-stype').value='daily';const p=j.schedule.split(':');document.getElementById('sh-time').value=p[1].padStart(2,'0')+':'+p[2].padStart(2,'0');}
-    else if(j.schedule.startsWith('cron:')){document.getElementById('job-stype').value='cron';document.getElementById('sh-cronval').value=j.schedule.substring(5);}
-    updSched();document.getElementById('job-modal').classList.add('on');
+    document.getElementById('job-modal').classList.add('on');
   }catch{}
 }
 async function saveJob(){
@@ -2131,7 +2147,7 @@ async function saveJob(){
   const name=document.getElementById('job-name').value.trim();
   const schedule=getSchedStr();
   const events=getEvSeq();
-  if(!name||!schedule){toast('error','⚠','Fill required fields','');return;}
+  if(!name){toast('error','⚠','Enter task name','');return;}
   if(!events.length){toast('error','⚠','Add at least one event','');return;}
   const game=activeGame||{package:'',dev_key:''};
   const payload={
@@ -2300,7 +2316,6 @@ async function getTgLinkCode(){
     const r=await af('/api/telegram/link-code','POST',{});
     const d=await r.json();
     if(r.ok&&d.code){
-      // الدالة بعد التعديل لضمان عمل الرابط 100%
       _tgLinkCode = d.code;
       _tgBotUrl = 'https://t.me/work2online_bot?start=' + d.code;
       
