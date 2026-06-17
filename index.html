@@ -2053,33 +2053,33 @@ function updSched(){
 function getSchedStr(){
   return 'absolute';
 }
-function addEvRow(name='', d=0, h=0, m=0){
+function addEvRow(name='', level='', d=0, h=0, m=0){
   const c = document.getElementById('ev-list');
   const row = document.createElement('div');
   row.className = 'ev-row';
   
-  // تصميم البطاقة لكل هدف
   row.style.cssText = 'background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; position:relative; display:flex; flex-direction:column; gap:8px; margin-bottom:8px;';
 
   row.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <input class="input input-mono event-name" value="${name}" placeholder="Event name (e.g. village_2_complete)" dir="ltr" style="margin:0; flex:1;">
-      <button class="ev-del" style="margin-left:8px; width:28px; height:28px; font-size:12px;" onclick="this.parentElement.parentElement.remove()">✕</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+      <input class="input input-mono event-name" value="${name}" placeholder="القالب (مثال: level_{}_completed)" dir="ltr" style="margin:0; flex:2;">
+      <input class="input input-mono event-level" type="number" min="1" value="${level}" placeholder="رقم المرحلة" dir="ltr" style="margin:0; flex:1; text-align:center;">
+      <button class="ev-del" style="width:28px; height:28px; font-size:12px; flex-shrink:0;" onclick="this.parentElement.parentElement.remove()">✕</button>
     </div>
     
     <div style="display:flex; gap:8px; align-items:center; background:var(--bg); padding:8px; border-radius:6px; border:1px solid var(--border2);">
       <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-        <span style="font-size:10px; color:var(--slate); font-weight:600;">Days</span>
+        <span style="font-size:10px; color:var(--slate); font-weight:600;">اليوم</span>
         <input class="input input-mono ev-d" type="number" min="0" value="${d}" placeholder="0" style="margin:0; text-align:center; padding:6px;">
       </div>
       <span style="color:var(--border2);">:</span>
       <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-        <span style="font-size:10px; color:var(--slate); font-weight:600;">Hours</span>
+        <span style="font-size:10px; color:var(--slate); font-weight:600;">الساعة</span>
         <input class="input input-mono ev-h" type="number" min="0" max="23" value="${h}" placeholder="0" style="margin:0; text-align:center; padding:6px;">
       </div>
       <span style="color:var(--border2);">:</span>
       <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-        <span style="font-size:10px; color:var(--slate); font-weight:600;">Mins</span>
+        <span style="font-size:10px; color:var(--slate); font-weight:600;">الدقيقة</span>
         <input class="input input-mono ev-m" type="number" min="0" max="59" value="${m}" placeholder="0" style="margin:0; text-align:center; padding:6px;">
       </div>
     </div>
@@ -2088,14 +2088,21 @@ function addEvRow(name='', d=0, h=0, m=0){
 }
 function getEvSeq(){
   return Array.from(document.querySelectorAll('#ev-list .ev-row')).map(r => {
+    const rawName = r.querySelector('.event-name').value.trim();
+    const lvl = r.querySelector('.event-level').value.trim();
     const d = parseInt(r.querySelector('.ev-d').value) || 0;
     const h = parseInt(r.querySelector('.ev-h').value) || 0;
     const m = parseInt(r.querySelector('.ev-m').value) || 0;
     
     const totalMinutes = (d * 24 * 60) + (h * 60) + m;
+    
+    // الدمج الذكي: إذا كان القالب يحتوي على {} وتم إدخال رقم مرحلة، ادمجهما
+    const finalName = (rawName.includes('{}') && lvl) ? rawName.replace('{}', lvl) : rawName;
 
     return {
-      name: r.querySelector('.event-name').value.trim(),
+      name: finalName,      // الاسم النهائي الجاهز للسيرفر
+      template: rawName,    // القالب (للوجهة)
+      level: lvl,           // رقم المرحلة (للوجهة)
       delay: totalMinutes,
       ui_d: d, ui_h: h, ui_m: m
     };
@@ -2115,7 +2122,7 @@ function openJobFromGame(){
   resetJobModal();
   document.getElementById('job-mtitle').textContent='Schedule: '+activeGame.name;
   document.getElementById('job-name').value='Auto: '+activeGame.name;
-  addEvRow(activeGame.level_events[0].template,0,0,1); // 1 minute default
+  addEvRow(activeGame.level_events[0].template, '', 0, 0, 1);
   document.getElementById('job-modal').classList.add('on');
 }
 async function openEditJob(id){
@@ -2129,14 +2136,15 @@ async function openEditJob(id){
     document.getElementById('px-port').value=j.proxy_port||'';
     document.getElementById('px-user').value=j.proxy_user||'';
     const evs=JSON.parse(j.events||'[]');
-    evs.forEach(e=>{
+    evs.forEach(e => {
       let d = e.ui_d || 0, h = e.ui_h || 0, m = e.ui_m || 0;
       if(e.ui_d === undefined) { 
         d = Math.floor(e.delay / 1440);
         h = Math.floor((e.delay % 1440) / 60);
         m = e.delay % 60;
       }
-      addEvRow(e.name, d, h, m);
+      // تمرير القالب والرقم بشكل منفصل إذا كانا موجودين
+      addEvRow(e.template || e.name, e.level || '', d, h, m);
     });
     if(!evs.length)addEvRow();
     document.getElementById('job-modal').classList.add('on');
