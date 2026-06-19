@@ -1814,9 +1814,6 @@ async function loadGameJobs(){
     c.innerHTML=mine.map(j=>`<div class="log-entry"><div class="ldot ${j.enabled?'ok':'err'}"></div><div class="ltxt">${escH(j.name)}</div><div class="lstat">${escH(fmtSched(j.schedule))}</div></div>`).join('');
   }catch{c.innerHTML='<div class="lempty">Failed to load</div>';}
 }
-/* ════ FIXED sendEv FUNCTION ════ */
-<script>
-/* ════ FIXED sendEv FUNCTION ════ */
 async function sendEv(type, evName) {
     if (!activeGame) return;
     if (!srvOk) {
