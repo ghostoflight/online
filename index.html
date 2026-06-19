@@ -1814,49 +1814,60 @@ async function loadGameJobs(){
     c.innerHTML=mine.map(j=>`<div class="log-entry"><div class="ldot ${j.enabled?'ok':'err'}"></div><div class="ltxt">${escH(j.name)}</div><div class="lstat">${escH(fmtSched(j.schedule))}</div></div>`).join('');
   }catch{c.innerHTML='<div class="lempty">Failed to load</div>';}
 }
-async function sendEv(type,evName){
-  if(!activeGame)return;
-  if(!srvOk){toast('error','🌐','Not connected','Connect to Railway first');addLog(evName,'NO SRV',false);return;}
-  toast('loading',null,'Sending...',evName);
-  
-  // 🎯 التعديل الذكي: تحديد نوع الجهاز لتشكيل البيانات الصحيحة
-  const isIos = (activeGame.os === 'ios');
-  const eventBody = {
-    appsflyer_id: afid,
-    eventName: evName,
-    eventTime: new Date().toISOString(),
-    eventValue: type === 'purchase' ? JSON.stringify({af_revenue:"4.99",af_currency:"USD"}) : "{}"
-  };
-  
-  if (isIos) {
-      eventBody.idfa = gaid; // آيفون يرسل IDFA
-  } else {
-      eventBody.advertising_id = gaid; // أندرويد يرسل GAID
-  }
+/* ════ FIXED sendEv FUNCTION ════ */
+async function sendEv(type, evName) {
+    if (!activeGame) return;
+    if (!srvOk) {
+        toast('error', '🌐', 'Not connected', 'Connect to Railway first');
+        addLog(evName, 'NO SRV', false);
+        return;
+    }
+    toast('loading', null, 'Sending...', evName);
 
-  const body={
-    package:activeGame.package,
-    dev_key:activeGame.dev_key,
-    game_name:activeGame.name,
-    proxy_host:document.getElementById('dir-px-host').value.trim(),
-    proxy_port:document.getElementById('dir-px-port').value.trim(),
-    proxy_user:document.getElementById('dir-px-user').value.trim(),
-    proxy_pass:document.getElementById('dir-px-pass').value.trim(),
-    body: eventBody
-  };
-      
-  try{
-    const r=await af('/api/send-event','POST',body);const d=await r.json();
-    if(r.ok&&d.success){addLog(evName,`${d.status_code}`,true);toast('success','✅',`Sent (${d.status_code})`,evName);}
-    else{addLog(evName,`ERR ${r.status}`,false);toast('error','❌',`Failed: ${d.error||r.status}`,evName);}
-  }catch(e){addLog(evName,'NET ERR',false);toast('error','🔌','Network error',e.message);}
+    // تحديد نوع النظام بناءً على إعدادات اللعبة المختارة
+    const isIos = (activeGame.os === 'ios');
+    
+    // بناء هيكل الحدث مع التمييز بين Android و iOS
+    const eventBody = {
+        appsflyer_id: afid,
+        eventName: evName,
+        eventTime: new Date().toISOString(),
+        eventValue: type === 'purchase' ? JSON.stringify({af_revenue: "4.99", af_currency: "USD"}) : "{}"
+    };
+
+    if (isIos) {
+        eventBody.idfa = gaid; // آيفون يستخدم IDFA
+    } else {
+        eventBody.advertising_id = gaid; // أندرويد يستخدم GAID
+    }
+
+    const body = {
+        package: activeGame.package,
+        dev_key: activeGame.dev_key,
+        game_name: activeGame.name,
+        proxy_host: document.getElementById('dir-px-host').value.trim(),
+        proxy_port: document.getElementById('dir-px-port').value.trim(),
+        proxy_user: document.getElementById('dir-px-user').value.trim(),
+        proxy_pass: document.getElementById('dir-px-pass').value.trim(),
+        body: eventBody
+    };
+
+    try {
+        const r = await af('/api/send-event', 'POST', body);
+        const d = await r.json();
+        if (r.ok && d.success) {
+            addLog(evName, `${d.status_code}`, true);
+            toast('success', '✅', `Sent (${d.status_code})`, evName);
+        } else {
+            addLog(evName, `ERR ${r.status}`, false);
+            toast('error', '❌', `Failed: ${d.error || r.status}`, evName);
+        }
+    } catch (e) {
+        addLog(evName, 'NET ERR', false);
+        toast('error', '🔌', 'Network error', e.message);
+    }
 }
 async function sendPurchase(){await sendEv('purchase','af_purchase');}
-async function sendEv(type,evName){
-  if(!activeGame)return;
-  if(!srvOk){toast('error','🌐','Not connected','Connect to Railway first');addLog(evName,'NO SRV',false);return;}
-  toast('loading',null,'Sending...',evName);
-  
   const body={package:activeGame.package,dev_key:activeGame.dev_key,game_name:activeGame.name,
     proxy_host:document.getElementById('dir-px-host').value.trim(),
     proxy_port:document.getElementById('dir-px-port').value.trim(),
