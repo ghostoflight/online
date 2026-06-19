@@ -2153,15 +2153,13 @@ async function openEditJob(id){
 async function saveJob(){
   const id=document.getElementById('job-mid').value;
   const name=document.getElementById('job-name').value.trim();
-  const schedule=getSchedStr();
   const events=getEvSeq();
+
   if(!name){toast('error','⚠','Enter task name','');return;}
   if(!events.length){toast('error','⚠','Add at least one event','');return;}
+
   const game=activeGame||{package:'',dev_key:''};
-  const payload={
-    name,
-    events,
-    run_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+  const basePayload={
     proxy_host:document.getElementById('px-host').value.trim(),
     proxy_port:document.getElementById('px-port').value.trim(),
     proxy_user:document.getElementById('px-user').value.trim(),
@@ -2171,20 +2169,71 @@ async function saveJob(){
     gaid,
     afid
   };
-  
+
   try {
-    const r=id?await af('/jobs/'+id,'PUT',payload):await af('/jobs','POST',payload);
-    if(r.ok){
+    let successCount = 0;
+    let errorMsg = '';
+    const now = new Date(); // الوقت الحالي لحظة الحفظ
+
+    // في حالة تعديل مهمة واحدة موجودة مسبقاً
+    if (id && events.length === 1) {
+        let ev = events[0];
+        // حساب الوقت: الوقت الحالي + (التأخير بالدقائق * 60000 للتحويل لميلي ثانية)
+        let runTime = new Date(now.getTime() + (ev.delay * 60000));
+        let payload = {
+            ...basePayload,
+            name: name,
+            events: [ev],
+            run_at: runTime.toISOString().replace('T', ' ').substring(0, 19)
+        };
+        const r = await af('/jobs/'+id, 'PUT', payload);
+        if(r.ok) {
+            closeM('job-modal');
+            toast('success','✅','Task updated',name);
+            loadJobs();
+            if(activeGame)loadGameJobs();
+            return;
+        } else {
+            const d = await r.json();
+            toast('error','❌','Failed',d.error||'');
+            return;
+        }
+    }
+
+    // في حالة إنشاء مهام جديدة (نقوم بتقسيمها برمجياً)
+    for (let i = 0; i < events.length; i++) {
+       let ev = events[i];
+       // حساب الوقت المستقبلي الدقيق لكل حدث بناءً على حقل الـ delay
+       let runTime = new Date(now.getTime() + (ev.delay * 60000));
+       
+       let payload = {
+          ...basePayload,
+          // إضافة اسم الحدث لاسم المهمة لكي تميزها في لوحة التحكم
+          name: events.length > 1 ? `${name} (${ev.name})` : name,
+          events: [ev], // نرسل الحدث منفرداً
+          run_at: runTime.toISOString().replace('T', ' ').substring(0, 19) // موعد التنفيذ المجدول
+       };
+
+       // إرسال كـ POST منفصل لكل حدث
+       let r = await af('/jobs', 'POST', payload);
+       if (r.ok) {
+           successCount++;
+       } else {
+           const d = await r.json();
+           errorMsg = d.error || 'Failed';
+       }
+    }
+
+    if(successCount > 0){
       closeM('job-modal');
-      toast('success','✅',id?'Task updated':'Task created',name);
+      toast('success','✅', 'Tasks scheduled', `${successCount} events scheduled accurately`);
       loadJobs();
       if(activeGame)loadGameJobs();
     } else {
-      const d=await r.json();
-      toast('error','❌','Failed',d.error||'');
+      toast('error','❌','Failed', errorMsg);
     }
-  } catch {
-    toast('error','🔌','Network error','');
+  } catch(e) {
+    toast('error','🔌','Network error',e.message);
   }
 }
 async function runJNow(id){
