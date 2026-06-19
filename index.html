@@ -1815,6 +1815,8 @@ async function loadGameJobs(){
   }catch{c.innerHTML='<div class="lempty">Failed to load</div>';}
 }
 /* ════ FIXED sendEv FUNCTION ════ */
+<script>
+/* ════ FIXED sendEv FUNCTION ════ */
 async function sendEv(type, evName) {
     if (!activeGame) return;
     if (!srvOk) {
@@ -1824,10 +1826,7 @@ async function sendEv(type, evName) {
     }
     toast('loading', null, 'Sending...', evName);
 
-    // تحديد نوع النظام بناءً على إعدادات اللعبة المختارة
     const isIos = (activeGame.os === 'ios');
-    
-    // بناء هيكل الحدث مع التمييز بين Android و iOS
     const eventBody = {
         appsflyer_id: afid,
         eventName: evName,
@@ -1836,9 +1835,9 @@ async function sendEv(type, evName) {
     };
 
     if (isIos) {
-        eventBody.idfa = gaid; // آيفون يستخدم IDFA
+        eventBody.idfa = gaid;
     } else {
-        eventBody.advertising_id = gaid; // أندرويد يستخدم GAID
+        eventBody.advertising_id = gaid;
     }
 
     const body = {
@@ -1851,7 +1850,7 @@ async function sendEv(type, evName) {
         proxy_pass: document.getElementById('dir-px-pass').value.trim(),
         body: eventBody
     };
-
+      
     try {
         const r = await af('/api/send-event', 'POST', body);
         const d = await r.json();
@@ -1862,7 +1861,7 @@ async function sendEv(type, evName) {
             addLog(evName, `ERR ${r.status}`, false);
             toast('error', '❌', `Failed: ${d.error || r.status}`, evName);
         }
-    } catch (e) {
+    } catch(e) {
         addLog(evName, 'NET ERR', false);
         toast('error', '🔌', 'Network error', e.message);
     }
