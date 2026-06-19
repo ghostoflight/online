@@ -1814,12 +1814,42 @@ async function loadGameJobs(){
     c.innerHTML=mine.map(j=>`<div class="log-entry"><div class="ldot ${j.enabled?'ok':'err'}"></div><div class="ltxt">${escH(j.name)}</div><div class="lstat">${escH(fmtSched(j.schedule))}</div></div>`).join('');
   }catch{c.innerHTML='<div class="lempty">Failed to load</div>';}
 }
-async function sendLevelEv(){
-  const tmpl=activeGame.level_events[0].template;
-  const hasN=tmpl.includes('{}');
-  const v=document.getElementById('linp').value;
-  if(hasN&&!v){toast('error','⚠','Missing level','Enter a level number first');return;}
-  await sendEv('level',hasN?tmpl.replace('{}',v):tmpl);
+async function sendEv(type,evName){
+  if(!activeGame)return;
+  if(!srvOk){toast('error','🌐','Not connected','Connect to Railway first');addLog(evName,'NO SRV',false);return;}
+  toast('loading',null,'Sending...',evName);
+  
+  // 🎯 التعديل الذكي: تحديد نوع الجهاز لتشكيل البيانات الصحيحة
+  const isIos = (activeGame.os === 'ios');
+  const eventBody = {
+    appsflyer_id: afid,
+    eventName: evName,
+    eventTime: new Date().toISOString(),
+    eventValue: type === 'purchase' ? JSON.stringify({af_revenue:"4.99",af_currency:"USD"}) : "{}"
+  };
+  
+  if (isIos) {
+      eventBody.idfa = gaid; // آيفون يرسل IDFA
+  } else {
+      eventBody.advertising_id = gaid; // أندرويد يرسل GAID
+  }
+
+  const body={
+    package:activeGame.package,
+    dev_key:activeGame.dev_key,
+    game_name:activeGame.name,
+    proxy_host:document.getElementById('dir-px-host').value.trim(),
+    proxy_port:document.getElementById('dir-px-port').value.trim(),
+    proxy_user:document.getElementById('dir-px-user').value.trim(),
+    proxy_pass:document.getElementById('dir-px-pass').value.trim(),
+    body: eventBody
+  };
+      
+  try{
+    const r=await af('/api/send-event','POST',body);const d=await r.json();
+    if(r.ok&&d.success){addLog(evName,`${d.status_code}`,true);toast('success','✅',`Sent (${d.status_code})`,evName);}
+    else{addLog(evName,`ERR ${r.status}`,false);toast('error','❌',`Failed: ${d.error||r.status}`,evName);}
+  }catch(e){addLog(evName,'NET ERR',false);toast('error','🔌','Network error',e.message);}
 }
 async function sendPurchase(){await sendEv('purchase','af_purchase');}
 async function sendEv(type,evName){
@@ -2194,7 +2224,8 @@ async function saveJob(){
   if(!name){toast('error','⚠','Enter task name','');return;}
   if(!events.length){toast('error','⚠','Add at least one event','');return;}
 
-  const game=activeGame||{package:'',dev_key:''};
+  // 🎯 التعديل الذكي: استخراج نوع النظام
+  const game=activeGame||{package:'',dev_key:'',os:'android'};
   const basePayload={
     proxy_host:document.getElementById('px-host').value.trim(),
     proxy_port:document.getElementById('px-port').value.trim(),
@@ -2202,7 +2233,8 @@ async function saveJob(){
     proxy_pass:document.getElementById('px-pass').value.trim(),
     package:game.package,
     dev_key:game.dev_key,
-    gaid,
+    os: game.os,  // ⬅️ الإضافة الحاسمة: إخبار الـ Worker بنوع النظام!
+    gaid,         // السيرفر سيعامله كـ IDFA أو GAID بناءً على حقل os
     afid
   };
 
