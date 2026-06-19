@@ -1011,7 +1011,7 @@ body {
             <div class="id-chip" onclick="openIdModal()">
               <div class="id-ico">📱</div>
               <div>
-                <div class="id-lbl">GAID</div>
+                <div class="id-lbl">GAID / IDFA</div>
                 <div class="id-val" id="disp-gaid">...</div>
               </div>
             </div>
@@ -1025,8 +1025,13 @@ body {
           </div>
 
           <div class="mb12">
-            <div class="filter-tabs mb12">
-              <button class="ftab on" onclick="filterG('all',this)">All</button>
+            <div class="filter-tabs mb8" id="os-tabs">
+              <button class="ftab on" onclick="filterOS('all',this)">📱 All OS</button>
+              <button class="ftab" onclick="filterOS('android',this)">🤖 Android</button>
+              <button class="ftab" onclick="filterOS('ios',this)">🍎 iOS</button>
+            </div>
+            <div class="filter-tabs mb12" id="cat-tabs">
+              <button class="ftab on" onclick="filterG('all',this)">All Categories</button>
               <button class="ftab" onclick="filterG('puzzle',this)">Puzzle</button>
               <button class="ftab" onclick="filterG('farm',this)">Farm</button>
               <button class="ftab" onclick="filterG('merge',this)">Merge</button>
@@ -1247,7 +1252,7 @@ body {
             </div>
             <div class="card-body">
               <div class="field">
-                <label class="label">GAID</label>
+                <label class="label">GAID / IDFA</label>
                 <input class="input input-mono" id="cfg-gaid" dir="ltr" oninput="autoSaveId('gaid')">
               </div>
               <div class="field" style="margin-bottom:0">
@@ -1339,11 +1344,13 @@ body {
       </div>
 
     </div></main>
-</div><div class="oly center" id="id-modal">
+</div>
+
+<div class="oly center" id="id-modal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">✏️ Edit Device IDs</div>
-    <div class="field"><label class="label">GAID — Google Advertising ID</label><input class="input input-mono" id="m-gaid" dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+    <div class="field"><label class="label">GAID / IDFA</label><input class="input input-mono" id="m-gaid" dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
     <div class="field"><label class="label">AppsFlyer ID</label><input class="input input-mono" id="m-afid" dir="ltr" placeholder="1234567890-0987654321"></div>
     <div class="modal-row">
       <button class="btn btn-primary" onclick="saveIds()">💾 Save</button>
@@ -1487,37 +1494,59 @@ body {
    DATA
 ════════════════════════════════════════ */
 const GAMES_DATA=[
-  {name:"Color Sort Woody Puzzle",package:"games.burny.color.sort.woody.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed"}],cat:"puzzle"},
-  {name:"Wooden Word Puzzle",package:"games.burny.wooden.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"puzzle"},
-  {name:"Associations Word Puzzle",package:"games.burny.associations.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"puzzle"},
-  {name:"Coin Master",package:"com.moonactive.coinmaster",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],cat:"other"},
-  {name:"Domino Dreams",package:"com.screenshake.dominodreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],cat:"other"},
-  {name:"Solitaire Grand Harvest",package:"net.supertreat.solitaire",dev_key:"X8aGgdWELNb5L96fCy44oL",level_events:[{display:"Level up",template:"level_up_{}"}],cat:"other"},
-  {name:"Cuisine Master",package:"com.FortuneMine.CuisineMaster",dev_key:"im6mgZbZJsHKGVowkkxkGm",level_events:[{display:"Level completed",template:"level{}_completed"}],cat:"other"},
-  {name:"Match Factory",package:"net.peakgames.match",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],cat:"puzzle"},
-  {name:"Toon Blast",package:"net.peakgames.toonblast",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],cat:"other"},
-  {name:"Toy Blast",package:"net.peakgames.amy",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],cat:"other"},
-  {name:"Box Jam",package:"com.playoneer.boxjam",dev_key:"cSJjCEwX2cCtJrNH92xM7n",level_events:[{display:"Level completed",template:"level_completed"}],cat:"puzzle"},
-  {name:"Gardenscapes",package:"com.playrix.gardenscapes",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Level achieved",template:"AchievedLevel{}"}],cat:"other"},
-  {name:"Dice Dreams",package:"com.superplaystudios.dicedreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Kingdom restored",template:"af_kingdom_{}_restored"}],cat:"other"},
-  {name:"Taylor's Secret",package:"com.mergegames.taylorsecret",dev_key:"qbKVyawAiwNX3b4D3Frijm",level_events:[{display:"Level achieved",template:"level_{}"}],cat:"merge"},
-  {name:"Big Farm Homestead",package:"com.newmoonproduction.bigfarmhomestead",dev_key:"FtaT5WH9rMJjJkMd4LfBCT",level_events:[{display:"Level achieved",template:"af_level{}_achieved"}],cat:"farm"},
-  {name:"Sunshine Island",package:"com.newmoonproduction.sunshineisland",dev_key:"FtaT5WH9rMJjJkMd4LfBCT",level_events:[{display:"Level achieved",template:"af_level{}_achieved"}],cat:"farm"},
-  {name:"Idle Bank Tycoon",package:"com.luckyskeletonstudios.idlebanktycoon",dev_key:"DwzgMQDkEVMy3ntcgz7utV",level_events:[{display:"Bank started",template:"af_bank{}_started"}],cat:"other"},
-  {name:"FarmVille 3",package:"com.zynga.farmville3",dev_key:"KVJuxDJVXQRPoqUVdyWJtj",level_events:[{display:"Player level",template:"Player_Level{}"}],cat:"farm"},
-  {name:"Township",package:"com.playrix.township",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Achieved level",template:"achievedlevel{}"}],cat:"farm"},
-  {name:"Merge Match",package:"com.futureplay.mergematch",dev_key:"nr8SibwpFjcKGBQNpDdttd",level_events:[{display:"Incent Level Up",template:"Incent_Player_Level_Up_{}"}],cat:"merge"},
-  {name:"FarmVille 2",package:"com.zynga.FarmVille2CountryEscape",dev_key:"438VCPmX2ZLYvsDPfGLZXb",level_events:[{display:"Level complete",template:"Level{}Complete"}],cat:"farm"},
-  {name:"Merge Studio",package:"com.paxiegames.mergestudio",dev_key:"mFaiXvTWy8votzp3UpsSfS",level_events:[{display:"Level completed",template:"level_completed_{}"}],cat:"merge"},
-  {name:"Goods Master 3D",package:"com.goods.master3d.triple.puzzle",dev_key:"oUYXWsx5SVDbJwtSCCymUD",level_events:[{display:"Level achieved",template:"af_Level_{}"}],cat:"puzzle"},
-  {name:"Tiles Mosaic",package:"com.tripledot.tiles.mosaic",dev_key:"j7J8eEwxvuQbDDFo3agC9X",level_events:[{display:"Game complete",template:"GameComplete_{}"}],cat:"puzzle"},
-  {name:"Travel Town",package:"io.randomco.travel",dev_key:"wizhvjciCuaDbAaR8KpZLn",level_events:[{display:"Level achieved",template:"reachedLevel{}"}],cat:"other"},
-  {name:"Disney Solitaire Dreams",package:"com.superplaystudios.disneysolitairedreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],cat:"other"},
-  {name:"Match Masters",package:"com.funtomic.matchmasters",dev_key:"EJcrH2pxmBbsWKHJHdrs3c",level_events:[{display:"Trophies reached",template:"trophies_{}"}],cat:"other"},
-  {name:"Coin Master Board",package:"com.moonactive.cmboard",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],cat:"other"},
-  {name:"Empires & Puzzles",package:"com.smallgiantgames.empires",dev_key:"wStj8eCCuE84shUTkh7ZGc",level_events:[{display:"XP Level reached",template:"xp_level_{}"}],cat:"other"},
-  {name:"Merge Dragons",package:"com.gramgames.mergedragons",dev_key:"fyKVEgAYzuD6jBZocaq3yh",level_events:[{display:"Dragon Power reached",template:"event_{}_dragon_power"}],cat:"merge"},
-  {name:"Yarn Loop",package:"com.combo.yarnflow",dev_key:"TGm97uKTJF7qFCvREggWtf",level_events:[{display:"Level completed",template:"level_complete_{}"}],cat:"other"}
+  {name:"Color Sort Woody Puzzle",package:"games.burny.color.sort.woody.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed"}],os:"android",cat:"puzzle"},
+  {name:"Wooden Word Puzzle",package:"games.burny.wooden.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],os:"android",cat:"puzzle"},
+  {name:"Associations Word Puzzle",package:"games.burny.associations.word.puzzle",dev_key:"CkyYk6ThNSr9MPEvmCNZRN",level_events:[{display:"Level completed",template:"level_completed_{}"}],os:"android",cat:"puzzle"},
+  {name:"Coin Master",package:"com.moonactive.coinmaster",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],os:"android",cat:"other"},
+  {name:"Domino Dreams",package:"com.screenshake.dominodreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],os:"android",cat:"other"},
+  {name:"Solitaire Grand Harvest",package:"net.supertreat.solitaire",dev_key:"X8aGgdWELNb5L96fCy44oL",level_events:[{display:"Level up",template:"level_up_{}"}],os:"android",cat:"other"},
+  {name:"Cuisine Master",package:"com.FortuneMine.CuisineMaster",dev_key:"im6mgZbZJsHKGVowkkxkGm",level_events:[{display:"Level completed",template:"level{}_completed"}],os:"android",cat:"other"},
+  {name:"Match Factory",package:"net.peakgames.match",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],os:"android",cat:"puzzle"},
+  {name:"Toon Blast",package:"net.peakgames.toonblast",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],os:"android",cat:"other"},
+  {name:"Toy Blast",package:"net.peakgames.amy",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],os:"android",cat:"other"},
+  {name:"Box Jam",package:"com.playoneer.boxjam",dev_key:"cSJjCEwX2cCtJrNH92xM7n",level_events:[{display:"Level completed",template:"level_completed"}],os:"android",cat:"puzzle"},
+  {name:"Gardenscapes",package:"com.playrix.gardenscapes",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Level achieved",template:"AchievedLevel{}"}],os:"android",cat:"other"},
+  {name:"Dice Dreams",package:"com.superplaystudios.dicedreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Kingdom restored",template:"af_kingdom_{}_restored"}],os:"android",cat:"other"},
+  {name:"Taylor's Secret",package:"com.mergegames.taylorsecret",dev_key:"qbKVyawAiwNX3b4D3Frijm",level_events:[{display:"Level achieved",template:"level_{}"}],os:"android",cat:"merge"},
+  {name:"Big Farm Homestead",package:"com.newmoonproduction.bigfarmhomestead",dev_key:"FtaT5WH9rMJjJkMd4LfBCT",level_events:[{display:"Level achieved",template:"af_level{}_achieved"}],os:"android",cat:"farm"},
+  {name:"Sunshine Island",package:"com.newmoonproduction.sunshineisland",dev_key:"FtaT5WH9rMJjJkMd4LfBCT",level_events:[{display:"Level achieved",template:"af_level{}_achieved"}],os:"android",cat:"farm"},
+  {name:"Idle Bank Tycoon",package:"com.luckyskeletonstudios.idlebanktycoon",dev_key:"DwzgMQDkEVMy3ntcgz7utV",level_events:[{display:"Bank started",template:"af_bank{}_started"}],os:"android",cat:"other"},
+  {name:"FarmVille 2 Country Escape",package:"com.zynga.FarmVille2CountryEscape",dev_key:"438VCPmX2ZLYvsDPfGLZXb",level_events:[{display:"Level complete",template:"Level{}Complete"}],os:"android",cat:"farm"},
+  {name:"Township",package:"com.playrix.township",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Achieved level",template:"achievedlevel{}"}],os:"android",cat:"farm"},
+  {name:"Merge Match",package:"com.futureplay.mergematch",dev_key:"nr8SibwpFjcKGBQNpDdttd",level_events:[{display:"Incent Level Up",template:"Incent_Player_Level_Up_{}"}],os:"android",cat:"merge"},
+  {name:"FarmVille 2",package:"com.zynga.FarmVille2CountryEscape",dev_key:"438VCPmX2ZLYvsDPfGLZXb",level_events:[{display:"Level complete",template:"Level{}Complete"}],os:"android",cat:"farm"},
+  {name:"Merge Studio",package:"com.paxiegames.mergestudio",dev_key:"mFaiXvTWy8votzp3UpsSfS",level_events:[{display:"Level completed",template:"level_completed_{}"}],os:"android",cat:"merge"},
+  {name:"Goods Master 3D",package:"com.goods.master3d.triple.puzzle",dev_key:"oUYXWsx5SVDbJwtSCCymUD",level_events:[{display:"Level achieved",template:"af_Level_{}"}],os:"android",cat:"puzzle"},
+  {name:"Tiles Mosaic",package:"com.tripledot.tiles.mosaic",dev_key:"j7J8eEwxvuQbDDFo3agC9X",level_events:[{display:"Game complete",template:"GameComplete_{}"}],os:"android",cat:"puzzle"},
+  {name:"Travel Town",package:"io.randomco.travel",dev_key:"wizhvjciCuaDbAaR8KpZLn",level_events:[{display:"Level achieved",template:"reachedLevel{}"}],os:"android",cat:"other"},
+  {name:"Disney Solitaire Dreams",package:"com.superplaystudios.disneysolitairedreams",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],os:"android",cat:"other"},
+  {name:"Match Masters",package:"com.funtomic.matchmasters",dev_key:"EJcrH2pxmBbsWKHJHdrs3c",level_events:[{display:"Trophies reached",template:"trophies_{}"}],os:"android",cat:"other"},
+  {name:"Coin Master Board",package:"com.moonactive.cmboard",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],os:"android",cat:"other"},
+  {name:"Empires & Puzzles",package:"com.smallgiantgames.empires",dev_key:"wStj8eCCuE84shUTkh7ZGc",level_events:[{display:"XP Level reached",template:"xp_level_{}"}],os:"android",cat:"other"},
+  {name:"Merge Dragons",package:"com.gramgames.mergedragons",dev_key:"fyKVEgAYzuD6jBZocaq3yh",level_events:[{display:"Dragon Power reached",template:"event_{}_dragon_power"}],os:"android",cat:"merge"},
+  {name:"Yarn Loop",package:"com.combo.yarnflow",dev_key:"TGm97uKTJF7qFCvREggWtf",level_events:[{display:"Level completed",template:"level_complete_{}"}],os:"android",cat:"other"},
+  
+  {name:"Domino Dreams (iOS)",package:"id6444043291",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],os:"ios",cat:"other"},
+  {name:"Disney Solitaire (iOS)",package:"id6475757306",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Area completed",template:"af_area_{}_completed"}],os:"ios",cat:"other"},
+  {name:"Coin Master (iOS)",package:"id406889139",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],os:"ios",cat:"other"},
+  {name:"Board Adventure (iOS)",package:"id6745761596",dev_key:"H3KjoCRVTiVgA5mWSAHtCe",level_events:[{display:"Village complete",template:"village_{}_complete"}],os:"ios",cat:"other"},
+  {name:"Dice Dreams (iOS)",package:"id1484468651",dev_key:"Hn5qYjVAaRNJYDcwF4LaWF",level_events:[{display:"Kingdom restored",template:"af_kingdom_{}_restored"}],os:"ios",cat:"other"},
+  {name:"Toon Blast (iOS)",package:"id1176027022",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],os:"ios",cat:"other"},
+  {name:"Match Factory (iOS)",package:"id6444094229",dev_key:"F9M4SkdtH8WHcAt86ESrF3",level_events:[{display:"Level completed",template:"level_{}_completed"}],os:"ios",cat:"puzzle"},
+  {name:"Gardenscapes (iOS)",package:"id1105855019",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Achieved level",template:"AchievedLevel{}"}],os:"ios",cat:"other"},
+  {name:"Homescapes (iOS)",package:"id1195621598",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Achieved level",template:"AchievedLevel{}"}],os:"ios",cat:"other"},
+  {name:"Fishdom (iOS)",package:"id664575829",dev_key:"ixMH7WQi4SqLAmPWuyAtkH",level_events:[{display:"Achieved level",template:"acheivedlevel{}"}],os:"ios",cat:"other"},
+  {name:"Township (iOS)",package:"id63868907",dev_key:"nr8SibwpFjcKGBQNpDdttd",level_events:[{display:"Achieved level",template:"achievedlevel{}"}],os:"ios",cat:"farm"},
+  {name:"Travel Town (iOS)",package:"id1521236603",dev_key:"wizhvjciCuaDbAaR8KpZLn",level_events:[{display:"Reached level",template:"reachedLevel{}"}],os:"ios",cat:"other"},
+  {name:"Merge Studio (iOS)",package:"id1615964753",dev_key:"mFaiXvTWy8votzp3UpsSfS",level_events:[{display:"Level completed",template:"level_completed_{}"}],os:"ios",cat:"merge"},
+  {name:"Taylor's Secret (iOS)",package:"id1659615328",dev_key:"qbKVyawAiwNX3b4D3Frijm",level_events:[{display:"Level achieved",template:"level_{}"}],os:"ios",cat:"merge"},
+  {name:"Yarn Loop! (iOS)",package:"id6755183085",dev_key:"TGm97uKTJF7qFCvREggWtf",level_events:[{display:"Level complete",template:"level_complete_{}"}],os:"ios",cat:"other"},
+  {name:"Klondike (iOS)",package:"id1127240206",dev_key:"oTiS8cJmQRTDXbixob6wQL",level_events:[{display:"Level achieved",template:"level {}"}],os:"ios",cat:"other"},
+  {name:"screw guru (iOS)",package:"id6737529244",dev_key:"nYwfftoacbopmuszWBPGnd",level_events:[{display:"Level achieved",template:"af_level_achieved{}"}],os:"ios",cat:"puzzle"},
+  {name:"Solitaire Smash (iOS)",package:"id6446482475",dev_key:"PuaMuZXWm4zYzfDQNwW9Nf",level_events:[{display:"Deposit and win",template:"deposit_0_and_win_{}"}],os:"ios",cat:"other"},
+  {name:"Solitaire Cash (iOS)",package:"id1446254576",dev_key:"HwQpkdp5VP6pSvK3Cd486g",level_events:[{display:"Reached level",template:"ReachedLevel{}"}],os:"ios",cat:"other"},
+  {name:"haunted merge (iOS)",package:"id6752369665",dev_key:"6mUaoEXrUfgJUnRCue6ZeM",level_events:[{display:"HR level",template:"hr_level_{}"}],os:"ios",cat:"merge"},
+  {name:"Merge Gardens (iOS)",package:"id1464675244",dev_key:"nr8SibwpFjcKGBQNpDdttd",level_events:[{display:"Incent player level up",template:"Incent_Player_Level_Up_{}"}],os:"ios",cat:"merge"}
 ];
 
 /* ════ STATE ════ */
@@ -1529,7 +1558,7 @@ let srvOk=false,pyReady=false,pyodide=null,running=false;
 let pkgs=[];try{pkgs=JSON.parse(localStorage.getItem('pp_pkgs')||'[]');}catch{pkgs=[];}
 let gaid=localStorage.getItem('pp_gaid')||'70ebe327-e224-4b1e-adb0-b09a27f78a0f';
 let afid=localStorage.getItem('pp_afid')||'1779417828531-7129893952045055065';
-let activeGame=null,evLog=[],gFilter='all',hFilter='all',toastTmr=null;
+let activeGame=null,evLog=[],gFilter='all',osFilter='all',hFilter='all',toastTmr=null;
 let gImgs={};try{gImgs=JSON.parse(localStorage.getItem('pp_imgs')||'{}');}catch{gImgs={};}
 let activeImgIdx=null,qTab='uses';
 
@@ -1734,14 +1763,23 @@ function renderGames(list){
     </div>`;
   }).join('');
 }
+function filterOS(os, el){
+  document.querySelectorAll('#os-tabs .ftab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  osFilter=os;
+  applyGFilter();
+}
 function filterG(cat,el){
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');gFilter=cat;applyGFilter();
+  document.querySelectorAll('#cat-tabs .ftab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  gFilter=cat;
+  applyGFilter();
 }
 function searchG(q){applyGFilter(q);}
 function applyGFilter(q){
   q=q!==undefined?q:document.querySelector('.search-box')?.value||'';
   let list=GAMES_DATA;
+  if(osFilter!=='all')list=list.filter(g=>g.os===osFilter);
   if(gFilter!=='all')list=list.filter(g=>g.cat===gFilter);
   if(q)list=list.filter(g=>g.name.toLowerCase().includes(q.toLowerCase())||g.package.toLowerCase().includes(q.toLowerCase()));
   renderGames(list);
@@ -1789,7 +1827,6 @@ async function sendEv(type,evName){
   if(!srvOk){toast('error','🌐','Not connected','Connect to Railway first');addLog(evName,'NO SRV',false);return;}
   toast('loading',null,'Sending...',evName);
   
-  // دمج بيانات البروكسي مباشرة من الواجهة للأحداث المباشرة
   const body={package:activeGame.package,dev_key:activeGame.dev_key,game_name:activeGame.name,
     proxy_host:document.getElementById('dir-px-host').value.trim(),
     proxy_port:document.getElementById('dir-px-port').value.trim(),
@@ -1798,7 +1835,6 @@ async function sendEv(type,evName){
     body:{appsflyer_id:afid,advertising_id:gaid,eventName:evName,
       eventTime:new Date().toISOString(),eventValue:type==='purchase'?JSON.stringify({af_revenue:"4.99",af_currency:"USD"}):"{}"}};
       
-  // تمت هيكلة البيانات لتكون جاهزة لاحقاً للربط مع قواعد بيانات مثل Supabase بكل يسر
   try{
     const r=await af('/api/send-event','POST',body);const d=await r.json();
     if(r.ok&&d.success){addLog(evName,`${d.status_code}`,true);toast('success','✅',`Sent (${d.status_code})`,evName);}
@@ -2171,50 +2207,47 @@ async function saveJob(){
   };
 
   try {
-    let successCount = 0;
-    let errorMsg = '';
-    const now = new Date(); // الوقت الحالي لحظة الحفظ
+    const now = new Date(); 
 
-    // في حالة تعديل مهمة واحدة موجودة مسبقاً
-    if (id && events.length === 1) {
-        let ev = events[0];
-        // حساب الوقت: الوقت الحالي + (التأخير بالدقائق * 60000 للتحويل لميلي ثانية)
-        let runTime = new Date(now.getTime() + (ev.delay * 60000));
-        let payload = {
-            ...basePayload,
-            name: name,
-            events: [ev],
-            run_at: runTime.toISOString().replace('T', ' ').substring(0, 19)
-        };
-        const r = await af('/jobs/'+id, 'PUT', payload);
-        if(r.ok) {
-            closeM('job-modal');
-            toast('success','✅','Task updated',name);
-            loadJobs();
-            if(activeGame)loadGameJobs();
-            return;
-        } else {
-            const d = await r.json();
-            toast('error','❌','Failed',d.error||'');
-            return;
-        }
+    if (id) {
+      let ev = events[0];
+      let runTime = new Date(now.getTime() + (ev.delay * 60000));
+      let payload = {
+        ...basePayload,
+        name: name,
+        events: events,
+        run_at: runTime.toISOString().replace('T', ' ').substring(0, 19)
+      };
+      const r = await af('/jobs/'+id, 'PUT', payload);
+      if(r.ok) {
+        closeM('job-modal');
+        toast('success','✅','Task updated',name);
+        loadJobs();
+        if(activeGame)loadGameJobs();
+      } else {
+        const d = await r.json();
+        toast('error','❌','Failed',d.error||'');
+      }
+      return;
     }
 
-    // في حالة إنشاء مهام جديدة (نقوم بتقسيمها برمجياً)
+    let successCount = 0;
+    let errorMsg = '';
+    
+    closeM('job-modal');
+    toast('loading',null,'Scheduling...','Please wait');
+
     for (let i = 0; i < events.length; i++) {
        let ev = events[i];
-       // حساب الوقت المستقبلي الدقيق لكل حدث بناءً على حقل الـ delay
        let runTime = new Date(now.getTime() + (ev.delay * 60000));
        
        let payload = {
           ...basePayload,
-          // إضافة اسم الحدث لاسم المهمة لكي تميزها في لوحة التحكم
-          name: events.length > 1 ? `${name} (${ev.name})` : name,
-          events: [ev], // نرسل الحدث منفرداً
-          run_at: runTime.toISOString().replace('T', ' ').substring(0, 19) // موعد التنفيذ المجدول
+          name: events.length > 1 ? `${name} - ${ev.name}` : name,
+          events: [ev], 
+          run_at: runTime.toISOString().replace('T', ' ').substring(0, 19)
        };
 
-       // إرسال كـ POST منفصل لكل حدث
        let r = await af('/jobs', 'POST', payload);
        if (r.ok) {
            successCount++;
@@ -2225,7 +2258,6 @@ async function saveJob(){
     }
 
     if(successCount > 0){
-      closeM('job-modal');
       toast('success','✅', 'Tasks scheduled', `${successCount} events scheduled accurately`);
       loadJobs();
       if(activeGame)loadGameJobs();
